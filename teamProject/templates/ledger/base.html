@@ -1,0 +1,26 @@
+<!Doctype html>
+{% load staticfiles %}
+
+<html>
+	<head lang="en">
+		<meta charset="utf-8" />
+		<title>
+			Ledger - 
+			{% block title_block %}
+				Track Habits
+			{% endblock %}
+		</title>
+	</head>
+	<body>
+		<div>
+			<a href="{% url 'ledger:index' %}">Home</a>
+			<a href="{% url 'ledger:myhabits' %}">MyHabits</a>
+			<a href="{% url 'ledger:leaderboards' %}">Leaderboards</a>
+			<a href="{% url 'ledger:social' %}">Social</a>
+		</div>
+		<div>
+		{% block body_block %}
+		{% endblock %}
+		</div>
+	</body>
+</html>
