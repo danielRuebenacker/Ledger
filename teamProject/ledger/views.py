@@ -22,3 +22,4 @@ def social(request):
     context_dict = {}
 
     return render(request, 'ledger/social.html', context=context_dict)
+
