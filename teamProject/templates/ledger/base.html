@@ -12,13 +12,19 @@
 		</title>
 	</head>
 	<body>
-		<div>
-			<a href="{% url 'ledger:index' %}">Home</a>
-			<a href="{% url 'ledger:myhabits' %}">MyHabits</a>
-			<a href="{% url 'ledger:leaderboards' %}">Leaderboards</a>
-			<a href="{% url 'ledger:social' %}">Social</a>
-		</div>
-		<div>
+		<ul>
+			<li><a href="{% url 'ledger:index' %}">Home</a></li>
+			{% if user.is_authenticated %}
+				<li><a href="{% url 'ledger:myhabits' %}">MyHabits</a></li>
+				<li><a href="{% url 'ledger:leaderboards' %}">Leaderboards</a></li>
+				<li><a href="{% url 'ledger:social' %}">Social</a></li>
+				<!-- have profile link here too  -->
+				<li><a href="{% url 'auth_logout' %}?next={% url 'ledger:index' %}">Logout</a></li>
+			{% else %}
+				<li><a href="{% url 'auth_login' %}">Log In</a></li>
+				<li><a href="{% url 'registration_register' %}">Sign Up</a></li>
+			{% endif %}
+		</ul>
 		{% block body_block %}
 		{% endblock %}
 		</div>

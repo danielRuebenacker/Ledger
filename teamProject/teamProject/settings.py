@@ -26,6 +26,18 @@ MEDIA_DIR = os.path.join(BASE_DIR, 'media')
 MEDIA_ROOT = MEDIA_DIR
 MEDIA_URL = '/media/'
 
+# ---------- Registration Related ---------
+
+# can register
+REGISTRATION_OPEN = True
+
+# auto login after register
+REGISTRATION_AUTO_LOGIN = True
+
+# url redirect after register
+LOGIN_REDIRECT_URL = 'ledger:index'
+
+LOGIN_URL = 'auth_login'
 
 
 # Quick-start development settings - unsuitable for production
@@ -50,6 +62,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'ledger',
+    'registration',
 ]
 
 MIDDLEWARE = [
