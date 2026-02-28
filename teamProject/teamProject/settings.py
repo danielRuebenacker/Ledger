@@ -35,7 +35,7 @@ REGISTRATION_OPEN = True
 REGISTRATION_AUTO_LOGIN = True
 
 # url redirect after register
-REGISTRATION_REDIRECT_URL = 'rango:index'
+LOGIN_REDIRECT_URL = 'ledger:index'
 
 LOGIN_URL = 'auth_login'
 
