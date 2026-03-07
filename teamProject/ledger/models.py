@@ -49,3 +49,22 @@ class Nudge(models.Model):
 
     def __str__(self):
         return f"User: {self.nudger} nudged User: {self.nudged} notified {self.notified}"
+      
+class Friendship(models.Model):
+    PENDING = "PENDING"
+    ACCEPTED = "ACCEPTED"
+    REJECTED = "REJECTED"
+    STATUS_CHOICES = ((PENDING, "PENDING"), 
+                      (ACCEPTED, "ACCEPTED"), 
+                      (REJECTED, "REJECTED"), )
+    
+    requester = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name="sent_friend_request")
+
+    requested = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name="received_friend_request")
+
+    status = models.CharField(max_length=64, choices=STATUS_CHOICES, default=PENDING)
+
+    date_accepted = models.DateField(blank=True, null=True)
+
+    def __str__(self):
+        return f"User: {self.requester} requested User: {self.requested} currently {self.status}"
