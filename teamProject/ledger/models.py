@@ -68,3 +68,13 @@ class Friendship(models.Model):
 
     def __str__(self):
         return f"User: {self.requester} requested User: {self.requested} currently {self.status}"
+
+class JournalEntry(models.Model):
+    user = models.ForeignKey(UserProfile,on_delete=models.CASCADE)
+
+    journal_text = models.TextField(blank=True, null=True)
+
+    date = models.DateField(auto_now_add=True)
+
+    def __str__(self):
+        return f"User: {self.user} journal for date: {self.date}"
