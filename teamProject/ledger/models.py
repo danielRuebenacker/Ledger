@@ -39,10 +39,10 @@ class Habit(models.Model):
         return self.name
     
 class Friendship(models.Model):
-    PENDING = 'PENDING'
+    PENDING = "PENDING"
     ACCEPTED = "ACCEPTED"
     REJECTED = "REJECTED"
-    STATUS_CHOICES = ((PENDING, 'PENDING'), 
+    STATUS_CHOICES = ((PENDING, "PENDING"), 
                       (ACCEPTED, "ACCEPTED"), 
                       (REJECTED, "REJECTED"), )
     
