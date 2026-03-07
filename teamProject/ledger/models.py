@@ -52,8 +52,7 @@ class Friendship(models.Model):
 
     status = models.CharField(max_length=64, choices=STATUS_CHOICES, default=PENDING)
 
-    date_of_request = models.DateField(auto_now_add=True)
-    date_of_decision = models.DateField(blank=True, null=True)
+    date_accepted = models.DateField(blank=True, null=True)
 
     def __str__(self):
         return f"User: {self.requester} requested User: {self.requested} currently {self.status}"
