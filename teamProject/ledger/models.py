@@ -11,4 +11,30 @@ class UserProfile(models.Model):
     def __str__(self):
         return self.user.username
 
-# Create your models here.
+
+class Habit(models.Model):
+    # say max length 25 chars (should be enough)
+    name = models.CharField(max_length=25, blank=False)
+
+    is_community = models.BooleanField(default=False, blank=False)
+
+    # choices tuple (stand-in for enum)
+    # Django 3.* has support for textChoices (enum) but since we are using 2.2.28
+    TYPE_DO = "do"
+    TYPE_DONT = "dont"
+    TYPE_EASY_WIN = "easy_win"
+    TYPE_NUMERIC = "numeric"
+    HABIT_TYPE_CHOICES = (
+            (TYPE_DO , "DO"),
+            (TYPE_DONT , "DONT"),
+            (TYPE_EASY_WIN , "EASY_WIN"),
+            (TYPE_NUMERIC, "NUMERIC"),
+    )
+    type = models.CharField(max_length=10, choices=HABIT_TYPE_CHOICES)
+    # allows for easy habit creation with Habit.objects.create(..., type=Habit.TYPE_DO, ...)
+
+    points = models.IntegerField(default=0)
+
+    def __str__(self):
+        return self.name
+    
