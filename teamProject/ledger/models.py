@@ -42,7 +42,7 @@ class Category(models.Model):
     name = models.CharField(max_length=128, blank=False, unique=True)
 
     class Meta:
-        verbose_name_pluarl = 'Categories'
+        verbose_name_plural = 'Categories'
 
     def __str__(self):
         return self.name
