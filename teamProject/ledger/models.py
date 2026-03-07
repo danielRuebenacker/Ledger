@@ -37,4 +37,13 @@ class Habit(models.Model):
 
     def __str__(self):
         return self.name
+
+class Category(models.Model):
+    name = models.CharField(max_length=128, blank=False, unique=True)
+
+    class Meta:
+        verbose_name_pluarl = 'Categories'
+
+    def __str__(self):
+        return self.name
     
