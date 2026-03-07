@@ -14,7 +14,7 @@ class UserProfile(models.Model):
 
 class Habit(models.Model):
     # say max length 25 chars (should be enough)
-    name = models.CharField(max_length=25, blank=False)
+    name = models.CharField(max_length=25, blank=False, unique=True)
 
     is_community = models.BooleanField(default=False, blank=False)
 
@@ -29,13 +29,14 @@ class Habit(models.Model):
             (TYPE_EASY_WIN , "EASY_WIN"),
             (TYPE_NUMERIC, "NUMERIC"),
     )
-    type = models.CharField(max_length=10, choices=HABIT_TYPE_CHOICES)
+    habit_type = models.CharField(max_length=10, choices=HABIT_TYPE_CHOICES)
     # allows for easy habit creation with Habit.objects.create(..., type=Habit.TYPE_DO, ...)
 
     points = models.IntegerField(default=0)
 
     def __str__(self):
         return self.name
+
 
 class HabitTracker(models.Model):
     # belongs to one user
@@ -47,7 +48,10 @@ class HabitTracker(models.Model):
 
     class Meta:
         # tells django this combination must be unique
-        unique_together = ("profile", "month")
+        unique_together = ("user", "month")
+
+    def __str__(self):
+        return self.user.user.username + self.month.strftime("%m-%Y")
 
 class DayTracker(models.Model): 
     tracker = models.ForeignKey(HabitTracker, on_delete=models.CASCADE)
@@ -65,5 +69,3 @@ class BoolHabitEntry(models.Model):
     habit = models.ForeignKey(Habit, on_delete=models.CASCADE)
 
     done = models.BooleanField(default=False);
-
-
