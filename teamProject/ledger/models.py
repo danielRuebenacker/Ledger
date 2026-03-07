@@ -38,6 +38,18 @@ class Habit(models.Model):
     def __str__(self):
         return self.name
     
+class Nudge(models.Model):
+    nudger = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name="sent_nudge")
+
+    nudged = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name="received_nudge")
+
+    date_of_nudge = models.DateTimeField(auto_now_add=True)
+
+    notified = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"User: {self.nudger} nudged User: {self.nudged} notified {self.notified}"
+      
 class Friendship(models.Model):
     PENDING = "PENDING"
     ACCEPTED = "ACCEPTED"
