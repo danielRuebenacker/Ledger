@@ -14,12 +14,11 @@ class UserProfile(models.Model):
 
 class Habit(models.Model):
     # say max length 25 chars (should be enough)
-    name = models.CharField(max_length=25, blank=False)
+    name = models.CharField(max_length=25, blank=False, unique=True)
 
     is_community = models.BooleanField(default=False, blank=False)
 
-    # choices tuple (stand-in for enum)
-    # Django 3.* has support for textChoices (enum) but since we are using 2.2.28
+    # enum choices
     TYPE_DO = "do"
     TYPE_DONT = "dont"
     TYPE_EASY_WIN = "easy_win"
@@ -30,7 +29,7 @@ class Habit(models.Model):
             (TYPE_EASY_WIN , "EASY_WIN"),
             (TYPE_NUMERIC, "NUMERIC"),
     )
-    type = models.CharField(max_length=10, choices=HABIT_TYPE_CHOICES)
+    habit_type = models.CharField(max_length=10, choices=HABIT_TYPE_CHOICES)
     # allows for easy habit creation with Habit.objects.create(..., type=Habit.TYPE_DO, ...)
 
     points = models.IntegerField(default=0)
@@ -69,12 +68,41 @@ class Friendship(models.Model):
     def __str__(self):
         return f"User: {self.requester} requested User: {self.requested} currently {self.status}"
 
-class JournalEntry(models.Model):
-    user = models.ForeignKey(UserProfile,on_delete=models.CASCADE)
+class HabitTracker(models.Model):
+    # belongs to one user
+    user = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
+    # this will be a MONTH field (set to 1st of month)
+    month = models.DateField();
+    # associated habits (M-N relationship)
+    habits = models.ManyToManyField(Habit)
 
-    journal_text = models.TextField(blank=True, null=True)
-
-    date = models.DateField(auto_now_add=True)
+    class Meta:
+        # tells django this combination must be unique
+        unique_together = ("user", "month")
 
     def __str__(self):
-        return f"User: {self.user} journal for date: {self.date}"
+        return self.user.user.username + self.month.strftime("%m-%Y")
+
+class DayTracker(models.Model): 
+    tracker = models.ForeignKey(HabitTracker, on_delete=models.CASCADE)
+    # specific day
+    date = models.DateField()
+
+    completed_on_day = models.BooleanField(default=False)
+
+    class Meta:
+        # tells django this combination must be unique
+        unique_together = ("tracker", "date")
+
+class BoolHabitEntry(models.Model):
+    day_tracker = models.ForeignKey(DayTracker, on_delete=models.CASCADE)
+    habit = models.ForeignKey(Habit, on_delete=models.CASCADE)
+
+    done = models.BooleanField(default=False);
+
+class JournalEntry(models.Model):
+    day_tracker = models.ForeignKey(DayTracker, on_delete=models.CASCADE)
+    journal_text = models.TextField(blank=False)
+
+    def __str__(self):
+        return self.journal_text 
