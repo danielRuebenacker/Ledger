@@ -5,6 +5,8 @@ class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
 
     picture = models.ImageField(upload_to='profile_images', blank=True)
+
+    about = models.TextField(blank=True)
     # other data to store defined here 
     # ...
 
