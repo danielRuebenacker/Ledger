@@ -8,4 +8,5 @@ urlpatterns = [
         path('myhabits', views.myhabits, name='myhabits'),
         path('leaderboards', views.leaderboards, name='leaderboards'),
         path('social', views.social, name='social'),
+        path('profile', views.profile, name='profile'),
 ]
