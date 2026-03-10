@@ -99,3 +99,10 @@ class BoolHabitEntry(models.Model):
     habit = models.ForeignKey(Habit, on_delete=models.CASCADE)
 
     done = models.BooleanField(default=False);
+
+class JournalEntry(models.Model):
+    day_tracker = models.ForeignKey(DayTracker, on_delete=models.CASCADE)
+    journal_text = models.TextField(blank=False)
+
+    def __str__(self):
+        return self.journal_text 
