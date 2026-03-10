@@ -1,0 +1,25 @@
+{% extends 'ledger/base.html' %}
+{% load static %} 
+{% block body_block %}
+<link rel="stylesheet" href="{% static 'css/profile.css' %}">
+
+<div class="banner">
+    <div class="profile-header">
+        <img src="/media/guest.jpg" class="profile-img">
+        
+        <div class="user-info">
+            <h1>william</h1>
+            <div class="stats-container">
+                <div class="stat-pill">🔥10</div>
+                <div class="stat-pill">10 Friends</div>
+            </div>
+        </div>
+    </div>
+
+    <div>
+        <h3>About</h3>
+        <p>Man i love css please someone send help</p>
+    </div>
+</div>
+
+{% endblock %}
