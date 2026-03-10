@@ -6,7 +6,8 @@ from datetime import datetime
 
 # helper
 def get_first_of_month():
-    return datetime.today().replace(day=1)
+    # see https://www.django-antipatterns.com/pattern/date-time-field-s-that-store-a-week-or-month.html
+    return datetime.today().replace(day = 1, second = 0, microsecond = 0)
 
 # factory for base user model (not used directly)
 class UserFactory(factory.django.DjangoModelFactory):
