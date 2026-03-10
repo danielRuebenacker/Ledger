@@ -1,6 +1,6 @@
 import factory
 from django.contrib.auth.models import User
-from ledger.models import Habit, HabitTracker, DayTracker
+from ledger.models import BoolHabitEntry, Habit, HabitTracker, DayTracker
 from ledger.models import UserProfile
 from datetime import datetime
 
@@ -43,5 +43,10 @@ class DayTrackerFactory(factory.django.DjangoModelFactory):
     date = factory.LazyFunction(datetime.today)
     completed_on_day = True
 
-# class BoolHabitEntryFactory(factory.django.DjangoModelFactory):
-#     class Meta
+class BoolHabitEntryFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = BoolHabitEntry
+    day_tracker = factory.SubFactory(DayTrackerFactory)
+    habit = factory.SubFactory(HabitFactory)
+    done = True
+    

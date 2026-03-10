@@ -34,11 +34,24 @@ class DayTrackerTests(TestCase):
         ht = HabitTrackerFactory()
         day = DayTrackerFactory(tracker=ht)
         # use _set syntax to test
-        self.assertEqual(ht.daytracker_set.all()[0], day)
+        self.assertEqual(ht.daytracker_set.first(), day)
 
     def test_get_habit_tracker_days_filter(self):
         ht = HabitTrackerFactory()
         day = DayTrackerFactory(tracker=ht)
         # get first filtered object
         self.assertEqual(DayTracker.objects.filter(tracker=ht)[0], day)
+
+class BoolHabitEntryTests(TestCase):
+    def test_create_bool_habit_entry(self):
+        _ = BoolHabitEntryFactory()
+        self.assertTrue(BoolHabitEntry.objects.exists())
+
+    def test_add_habit_entries_to_days_then_get_habit_entries_for_day(self):
+        day = DayTrackerFactory()
+        habit_entry = BoolHabitEntryFactory(day_tracker=day)
+        self.assertEquals(day.boolhabitentry_set.first(), habit_entry)
+
+        
+
 
