@@ -90,11 +90,30 @@ def search_users(request):
     return render(request, 'ledger/search.html', context=context_dict)
 
 def nudge_page(request):
+    friends_list = [
+        {'name': 'Alice'},
+        {'name': 'Ben'},
+        {'name': 'Chloe'},
+    ]
+
+    sent_to = request.GET.get('sent_to', '').strip()
+    message_text = request.GET.get('message', '').strip()
+
+    success_message = ''
+    error_message = ''
+
+    if 'sent_to' in request.GET or 'message' in request.GET:
+        if not sent_to:
+            error_message = 'Please select a friend before sending a nudge.'
+        else:
+            success_message = f'Nudge sent to {sent_to}.'
+            message_text = ''
+
     context_dict = {
-        'friends_list': [
-            {'name': 'Alice'},
-            {'name': 'Ben'},
-            {'name': 'Chloe'},
-        ]
+        'friends_list': friends_list,
+        'sent_to': sent_to,
+        'message_text': message_text,
+        'success_message': success_message,
+        'error_message': error_message,
     }
     return render(request, 'ledger/nudge.html', context=context_dict)
