@@ -57,3 +57,13 @@ def search_users(request):
         ]
     }
     return render(request, 'ledger/search.html', context=context_dict)
+
+def nudge_page(request):
+    context_dict = {
+        'friends_list': [
+            {'name': 'Alice'},
+            {'name': 'Ben'},
+            {'name': 'Chloe'},
+        ]
+    }
+    return render(request, 'ledger/nudge.html', context=context_dict)
