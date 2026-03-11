@@ -46,3 +46,14 @@ def requests_page(request):
         ]
     }
     return render(request, 'ledger/requests.html', context=context_dict)
+
+def search_users(request):
+    context_dict = {
+        'search_results': [
+            {'name': 'Liam'},
+            {'name': 'Sophia'},
+            {'name': 'Mason'},
+            {'name': 'Isabella'},
+        ]
+    }
+    return render(request, 'ledger/search.html', context=context_dict)

@@ -10,4 +10,5 @@ urlpatterns = [
     path('social', views.social, name='social'),
     path('friends', views.friends, name='friends'),
     path('requests', views.requests_page, name='requests'),
+    path('search', views.search_users, name='search'),
 ]

@@ -1,0 +1,38 @@
+{% extends 'ledger/base.html' %}
+
+{% block body_block %}
+<div style="padding: 40px; max-width: 1000px; margin: 0 auto;">
+    <h1 style="font-size: 48px; margin-bottom: 10px;">Search Users</h1>
+    <p style="font-size: 20px; color: #555; margin-bottom: 40px;">
+        Find other users and add them as friends.
+    </p>
+
+    <div style="border: 1px solid #ddd; border-radius: 16px; padding: 25px; background-color: #fafafa; margin-bottom: 30px;">
+        <form method="get" action="#" style="display: flex; gap: 15px; align-items: center;">
+            <input
+                type="text"
+                name="q"
+                placeholder="Search for a user..."
+                style="flex: 1; padding: 12px 16px; border: 1px solid #ccc; border-radius: 8px; font-size: 16px;"
+            >
+            <button
+                type="submit"
+                style="padding: 12px 20px; background-color: #222; color: white; border: none; border-radius: 8px; font-size: 16px; cursor: pointer;"
+            >
+                Search
+            </button>
+        </form>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 25px;">
+        {% for user in search_results %}
+        <div style="border: 1px solid #ddd; border-radius: 16px; padding: 25px; background-color: #fafafa;">
+            <h2 style="margin-bottom: 16px;">{{ user.name }}</h2>
+            <a href="#" style="display: inline-block; padding: 10px 18px; background-color: #222; color: white; text-decoration: none; border-radius: 8px;">
+                Add Friend
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
