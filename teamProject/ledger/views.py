@@ -35,26 +35,57 @@ def friends(request):
     return render(request, 'ledger/friends.html', context=context_dict)
 
 def requests_page(request):
+    incoming_requests = [
+        {'name': 'Emma'},
+        {'name': 'Jack'},
+    ]
+
+    sent_requests = [
+        {'name': 'Olivia'},
+        {'name': 'Noah'},
+    ]
+
+    action = request.GET.get('action', '').strip()
+    user = request.GET.get('user', '').strip()
+
+    message = ''
+    if action == 'accept' and user:
+        message = f'Friend request from {user} accepted.'
+        incoming_requests = [req for req in incoming_requests if req['name'] != user]
+    elif action == 'reject' and user:
+        message = f'Friend request from {user} rejected.'
+        incoming_requests = [req for req in incoming_requests if req['name'] != user]
+
     context_dict = {
-        'incoming_requests': [
-            {'name': 'Emma'},
-            {'name': 'Jack'},
-        ],
-        'sent_requests': [
-            {'name': 'Olivia'},
-            {'name': 'Noah'},
-        ]
+        'incoming_requests': incoming_requests,
+        'sent_requests': sent_requests,
+        'message': message,
     }
     return render(request, 'ledger/requests.html', context=context_dict)
 
 def search_users(request):
-    context_dict = {
-        'search_results': [
-            {'name': 'Liam'},
-            {'name': 'Sophia'},
-            {'name': 'Mason'},
-            {'name': 'Isabella'},
+    all_users = [
+        {'name': 'Liam'},
+        {'name': 'Sophia'},
+        {'name': 'Mason'},
+        {'name': 'Isabella'},
+    ]
+
+    query = request.GET.get('q', '').strip()
+    added_user = request.GET.get('added', '').strip()
+
+    if query:
+        search_results = [
+            user for user in all_users
+            if query.lower() in user['name'].lower()
         ]
+    else:
+        search_results = all_users
+
+    context_dict = {
+        'search_results': search_results,
+        'query': query,
+        'added_user': added_user,
     }
     return render(request, 'ledger/search.html', context=context_dict)
 

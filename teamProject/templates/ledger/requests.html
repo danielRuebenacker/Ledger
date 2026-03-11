@@ -7,24 +7,38 @@
         Manage your incoming and sent friend requests.
     </p>
 
+    {% if message %}
+    <div id="success-message" style="margin-bottom: 25px; padding: 16px 20px; background-color: #f2f2f2; border: 1px solid #ddd; border-radius: 12px; color: #222; opacity: 1; transition: opacity 0.8s ease;">
+        {{ message }}
+    </div>
+    {% endif %}
+
     <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 25px;">
 
         <div style="border: 1px solid #ddd; border-radius: 16px; padding: 25px; background-color: #fafafa;">
             <h2 style="margin-bottom: 20px;">Incoming Requests</h2>
 
-            {% for request in incoming_requests %}
-            <div style="border: 1px solid #e5e5e5; border-radius: 12px; padding: 18px; margin-bottom: 15px; background-color: white;">
-                <h3 style="margin-bottom: 12px;">{{ request.name }}</h3>
-                <div style="display: flex; gap: 12px;">
-                    <a href="#" style="display: inline-block; padding: 10px 16px; background-color: #222; color: white; text-decoration: none; border-radius: 8px;">
-                        Accept
-                    </a>
-                    <a href="#" style="display: inline-block; padding: 10px 16px; background-color: #ddd; color: #222; text-decoration: none; border-radius: 8px;">
-                        Reject
-                    </a>
+            {% if incoming_requests %}
+                {% for request in incoming_requests %}
+                <div style="border: 1px solid #e5e5e5; border-radius: 12px; padding: 18px; margin-bottom: 15px; background-color: white;">
+                    <h3 style="margin-bottom: 12px;">{{ request.name }}</h3>
+                    <div style="display: flex; gap: 12px;">
+                        <a href="{% url 'ledger:requests' %}?action=accept&user={{ request.name }}"
+                           style="display: inline-block; padding: 10px 16px; background-color: #222; color: white; text-decoration: none; border-radius: 8px;">
+                            Accept
+                        </a>
+                        <a href="{% url 'ledger:requests' %}?action=reject&user={{ request.name }}"
+                           style="display: inline-block; padding: 10px 16px; background-color: #ddd; color: #222; text-decoration: none; border-radius: 8px;">
+                            Reject
+                        </a>
+                    </div>
                 </div>
-            </div>
-            {% endfor %}
+                {% endfor %}
+            {% else %}
+                <div style="padding: 18px; border: 1px solid #e5e5e5; border-radius: 12px; background-color: white; color: #555;">
+                    No incoming requests.
+                </div>
+            {% endif %}
         </div>
 
         <div style="border: 1px solid #ddd; border-radius: 16px; padding: 25px; background-color: #fafafa;">
@@ -40,4 +54,16 @@
 
     </div>
 </div>
+
+<script>
+    setTimeout(function () {
+        const message = document.getElementById('success-message');
+        if (message) {
+            message.style.opacity = '0';
+            setTimeout(function () {
+                message.style.display = 'none';
+            }, 800);
+        }
+    }, 3000);
+</script>
 {% endblock %}
