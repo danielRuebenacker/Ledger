@@ -33,3 +33,16 @@ def friends(request):
         ]
     }
     return render(request, 'ledger/friends.html', context=context_dict)
+
+def requests_page(request):
+    context_dict = {
+        'incoming_requests': [
+            {'name': 'Emma'},
+            {'name': 'Jack'},
+        ],
+        'sent_requests': [
+            {'name': 'Olivia'},
+            {'name': 'Noah'},
+        ]
+    }
+    return render(request, 'ledger/requests.html', context=context_dict)

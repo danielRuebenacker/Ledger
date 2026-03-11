@@ -9,4 +9,5 @@ urlpatterns = [
     path('leaderboards', views.leaderboards, name='leaderboards'),
     path('social', views.social, name='social'),
     path('friends', views.friends, name='friends'),
+    path('requests', views.requests_page, name='requests'),
 ]
