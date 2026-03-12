@@ -26,7 +26,8 @@
     {% endif %}
 
     <div style="border: 1px solid #ddd; border-radius: 16px; padding: 30px; background-color: #fafafa;">
-        <form method="get" action="{% url 'ledger:nudge' %}">
+        <form method="post" action="{% url 'ledger:nudge' %}">
+            {% csrf_token %}
             <div style="margin-bottom: 25px;">
                 <label for="sent_to" style="display: block; font-size: 18px; margin-bottom: 10px;">Choose a friend</label>
                 <select id="sent_to" name="sent_to" style="width: 100%; padding: 12px 16px; border: 1px solid #ccc; border-radius: 8px; font-size: 16px;">

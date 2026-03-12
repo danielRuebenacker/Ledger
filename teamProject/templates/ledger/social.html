@@ -49,6 +49,16 @@
             </a>
         </div>
 
+        <div style="border: 1px solid #ddd; border-radius: 16px; padding: 25px; background-color: #fafafa; min-height: 220px; display: flex; flex-direction: column;">
+            <h2 style="margin-bottom: 10px;">Nudge Inbox</h2>
+            <p style="margin-bottom: 20px; color: #555;">
+                View nudges from friends and reply to them.
+            </p>
+            <a href="{% url 'ledger:nudge_inbox' %}" style="display: inline-block; padding: 10px 18px; background-color: #222; color: white; text-decoration: none; border-radius: 8px; margin-top: auto; width: fit-content;">
+                View Inbox
+            </a>
+        </div>
+
     </div>
 </div>
 {% endblock %}

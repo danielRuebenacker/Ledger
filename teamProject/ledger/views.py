@@ -7,7 +7,7 @@ from django.http import HttpResponse
 from django.shortcuts import render
 
 from django.shortcuts import render, get_object_or_404
-from .models import Friendship, UserProfile
+from .models import UserProfile, Friendship, Nudge
 from django.utils import timezone
 
 # Create your views here.
@@ -134,7 +134,17 @@ def search_users(request):
             ).first()
 
             if existing_friendship:
-                error_message = f'You already have a friendship record with {target_profile.user.username}.'
+                if existing_friendship.status == Friendship.PENDING:
+                    error_message = f'Friend request already sent to {target_profile.user.username}.'
+                elif existing_friendship.status == Friendship.ACCEPTED:
+                    error_message = f'You are already friends with {target_profile.user.username}.'
+                elif existing_friendship.status == Friendship.REJECTED:
+                    existing_friendship.requester = current_profile
+                    existing_friendship.requested = target_profile
+                    existing_friendship.status = Friendship.PENDING
+                    existing_friendship.date_accepted = None
+                    existing_friendship.save()
+                    added_user = target_profile.user.username
             else:
                 Friendship.objects.create(
                     requester=current_profile,
@@ -204,36 +214,49 @@ def nudge_page(request):
     for friendship in sent_accepted:
         friend_profile = friendship.requested
         friends_list.append({
+            'id': friend_profile.id,
             'username': friend_profile.user.username,
         })
 
     for friendship in received_accepted:
         friend_profile = friendship.requester
         friends_list.append({
+            'id': friend_profile.id,
             'username': friend_profile.user.username,
         })
 
     preselected_friend = request.GET.get('friend', '').strip()
-    sent_to = request.GET.get('sent_to', '').strip()
-    message_text = request.GET.get('message', '').strip()
-
-    selected_friend = sent_to if sent_to else preselected_friend
 
     success_message = ''
     error_message = ''
+    message_text = ''
+    selected_friend = preselected_friend
 
-    if 'sent_to' in request.GET or 'message' in request.GET:
+    if request.method == 'POST':
+        selected_friend = request.POST.get('sent_to', '').strip()
+        message_text = request.POST.get('message', '').strip()
+
         valid_friend_names = [friend['username'] for friend in friends_list]
 
-        if not sent_to:
+        if not friends_list:
+            error_message = 'You need at least one friend before sending a nudge.'
+        elif not selected_friend:
             error_message = 'Please select a friend before sending a nudge.'
-            selected_friend = ''
-        elif sent_to not in valid_friend_names:
+        elif selected_friend not in valid_friend_names:
             error_message = 'You can only send nudges to your friends.'
-            selected_friend = ''
+        elif not message_text:
+            error_message = 'Please write a message before sending a nudge.'
         else:
-            success_message = f'Nudge sent to {sent_to}.'
-            message_text = ''
+            target_profile = UserProfile.objects.filter(user__username=selected_friend).first()
+
+            if target_profile:
+                Nudge.objects.create(
+                    nudger=current_profile,
+                    nudged=target_profile,
+                    message=message_text
+                )
+                success_message = f'Nudge sent to {selected_friend}.'
+                message_text = ''
 
     context_dict = {
         'friends_list': friends_list,
@@ -243,3 +266,31 @@ def nudge_page(request):
         'error_message': error_message,
     }
     return render(request, 'ledger/nudge.html', context_dict)
+
+@login_required
+def nudge_inbox(request):
+    current_profile, created = UserProfile.objects.get_or_create(user=request.user)
+
+    success_message = ''
+
+    if request.method == 'POST':
+        nudge_id = request.POST.get('nudge_id', '').strip()
+        reply_message = request.POST.get('reply_message', '').strip()
+
+        nudge = Nudge.objects.filter(id=nudge_id, nudged=current_profile).first()
+
+        if nudge and reply_message:
+            nudge.reply_message = reply_message
+            nudge.date_of_reply = timezone.now()
+            nudge.save()
+            success_message = f'Reply sent to {nudge.nudger.user.username}.'
+
+    received_nudges = Nudge.objects.filter(
+        nudged=current_profile
+    ).order_by('date_of_reply', '-date_of_nudge')
+
+    context_dict = {
+        'received_nudges': received_nudges,
+        'success_message': success_message,
+    }
+    return render(request, 'ledger/nudge_inbox.html', context_dict)

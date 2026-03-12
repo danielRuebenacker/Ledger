@@ -40,15 +40,18 @@ class Habit(models.Model):
     
 class Nudge(models.Model):
     nudger = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name="sent_nudge")
-
     nudged = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name="received_nudge")
 
+    message = models.TextField(blank=True, null=True)
     date_of_nudge = models.DateTimeField(auto_now_add=True)
+
+    reply_message = models.TextField(blank=True, null=True)
+    date_of_reply = models.DateTimeField(blank=True, null=True)
 
     notified = models.BooleanField(default=False)
 
     def __str__(self):
-        return f"User: {self.nudger} nudged User: {self.nudged} notified {self.notified}"
+        return f"User: {self.nudger} nudged User: {self.nudged}"
       
 class Friendship(models.Model):
     PENDING = "PENDING"
