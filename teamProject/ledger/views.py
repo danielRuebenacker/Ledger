@@ -274,16 +274,31 @@ def nudge_inbox(request):
     success_message = ''
 
     if request.method == 'POST':
-        nudge_id = request.POST.get('nudge_id', '').strip()
-        reply_message = request.POST.get('reply_message', '').strip()
+        action = request.POST.get('action', '').strip()
 
-        nudge = Nudge.objects.filter(id=nudge_id, nudged=current_profile).first()
+        if action == 'reply':
+            nudge_id = request.POST.get('nudge_id', '').strip()
+            reply_message = request.POST.get('reply_message', '').strip()
 
-        if nudge and reply_message:
-            nudge.reply_message = reply_message
-            nudge.date_of_reply = timezone.now()
-            nudge.save()
-            success_message = f'Reply sent to {nudge.nudger.user.username}.'
+            nudge = Nudge.objects.filter(id=nudge_id, nudged=current_profile).first()
+
+            if nudge and reply_message:
+                nudge.reply_message = reply_message
+                nudge.date_of_reply = timezone.now()
+                nudge.save()
+                success_message = f'Reply sent to {nudge.nudger.user.username}.'
+
+        elif action == 'delete_one':
+            nudge_id = request.POST.get('nudge_id', '').strip()
+            nudge = Nudge.objects.filter(id=nudge_id, nudged=current_profile).first()
+
+            if nudge:
+                nudge.delete()
+                success_message = 'Nudge deleted.'
+
+        elif action == 'delete_all':
+            Nudge.objects.filter(nudged=current_profile).delete()
+            success_message = 'All received nudges deleted.'
 
     received_nudges = Nudge.objects.filter(
         nudged=current_profile
@@ -294,3 +309,34 @@ def nudge_inbox(request):
         'success_message': success_message,
     }
     return render(request, 'ledger/nudge_inbox.html', context_dict)
+
+@login_required
+def nudge_sent(request):
+    current_profile, created = UserProfile.objects.get_or_create(user=request.user)
+
+    success_message = ''
+
+    if request.method == 'POST':
+        action = request.POST.get('action', '').strip()
+
+        if action == 'delete_one':
+            nudge_id = request.POST.get('nudge_id', '').strip()
+            nudge = Nudge.objects.filter(id=nudge_id, nudger=current_profile).first()
+
+            if nudge:
+                nudge.delete()
+                success_message = 'Sent nudge deleted.'
+
+        elif action == 'delete_all':
+            Nudge.objects.filter(nudger=current_profile).delete()
+            success_message = 'All sent nudges deleted.'
+
+    sent_nudges = Nudge.objects.filter(
+        nudger=current_profile
+    ).order_by('-date_of_nudge')
+
+    context_dict = {
+        'sent_nudges': sent_nudges,
+        'success_message': success_message,
+    }
+    return render(request, 'ledger/nudge_sent.html', context_dict)

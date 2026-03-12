@@ -1,0 +1,74 @@
+{% extends 'ledger/base.html' %}
+
+{% block body_block %}
+<div style="padding: 40px; max-width: 900px; margin: 0 auto;">
+    <h1 style="font-size: 48px; margin-bottom: 10px;">Sent Nudges</h1>
+    <p style="font-size: 20px; color: #555; margin-bottom: 30px;">
+        View nudges you have sent and check whether your friends replied.
+    </p>
+
+    {% if success_message %}
+    <div style="margin-bottom: 25px; padding: 16px 20px; background-color: #f2f2f2; border: 1px solid #ddd; border-radius: 12px; color: #222;">
+        {{ success_message }}
+    </div>
+    {% endif %}
+
+    <div style="margin-bottom: 30px; display: flex; gap: 14px; flex-wrap: wrap; align-items: center;">
+        <a href="{% url 'ledger:nudge' %}"
+           style="display: inline-block; padding: 10px 18px; background-color: #222; color: white; text-decoration: none; border-radius: 8px; font-size: 16px;">
+            Send a Nudge
+        </a>
+
+        <a href="{% url 'ledger:nudge_inbox' %}"
+           style="display: inline-block; padding: 10px 18px; background-color: #222; color: white; text-decoration: none; border-radius: 8px; font-size: 16px;">
+            View Nudge Inbox
+        </a>
+
+        <form method="post" action="{% url 'ledger:nudge_sent' %}" style="margin: 0;">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="delete_all">
+            <button type="submit"
+                    style="padding: 10px 18px; background-color: #b71c1c; color: white; border: none; border-radius: 8px; font-size: 16px; cursor: pointer;">
+                Clear All
+            </button>
+        </form>
+    </div>
+
+    {% if sent_nudges %}
+        {% for nudge in sent_nudges %}
+        <div style="border: 1px solid #ddd; border-radius: 16px; padding: 25px; background-color: #fafafa; margin-bottom: 20px;">
+            <h2 style="margin-bottom: 12px;">To: {{ nudge.nudged.user.username }}</h2>
+            <p style="margin-bottom: 10px;"><strong>Message:</strong> {{ nudge.message }}</p>
+            <p style="margin-bottom: 20px; color: #555;">
+                <strong>Sent:</strong> {{ nudge.date_of_nudge|date:"d M Y, H:i" }}
+            </p>
+
+            {% if nudge.reply_message %}
+                <p style="margin-bottom: 10px;"><strong>Reply:</strong> {{ nudge.reply_message }}</p>
+                <p style="color: #555;">
+                    <strong>Replied:</strong> {{ nudge.date_of_reply|date:"d M Y, H:i" }}
+                </p>
+            {% else %}
+                <p style="color: #888;"><strong>Reply:</strong> No reply yet.</p>
+            {% endif %}
+
+            <form method="post" action="{% url 'ledger:nudge_sent' %}" style="margin-top: 15px;">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="delete_one">
+                <input type="hidden" name="nudge_id" value="{{ nudge.id }}">
+                <button
+                    type="submit"
+                    style="padding: 10px 18px; background-color: #b71c1c; color: white; border: none; border-radius: 8px; font-size: 16px; cursor: pointer;"
+                >
+                    Delete
+                </button>
+            </form>
+        </div>
+        {% endfor %}
+    {% else %}
+    <div style="padding: 20px; border: 1px solid #ddd; border-radius: 12px; background-color: #fafafa; color: #555;">
+        You have not sent any nudges yet.
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

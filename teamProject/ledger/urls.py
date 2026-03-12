@@ -13,4 +13,5 @@ urlpatterns = [
     path('search', views.search_users, name='search'),
     path('nudge', views.nudge_page, name='nudge'),
     path('nudge/inbox', views.nudge_inbox, name='nudge_inbox'),
+    path('nudge/sent', views.nudge_sent, name='nudge_sent'),
 ]
