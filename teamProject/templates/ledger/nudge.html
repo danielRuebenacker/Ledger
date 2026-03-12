@@ -7,6 +7,12 @@
         Encourage a friend to stay consistent with their habits.
     </p>
 
+    {% if not friends_list %}
+    <div style="margin-bottom: 25px; padding: 16px 20px; background-color: #f8f8f8; border: 1px solid #d9d9d9; border-radius: 12px; color: #222;">
+        You need at least one friend before sending a nudge.
+    </div>
+    {% endif %}
+
     {% if success_message %}
     <div id="success-message" style="margin-bottom: 25px; padding: 16px 20px; background-color: #f2f2f2; border: 1px solid #ddd; border-radius: 12px; color: #222; opacity: 1; transition: opacity 0.8s ease;">
         {{ success_message }}
@@ -46,7 +52,8 @@
 
             <button
                 type="submit"
-                style="padding: 12px 20px; background-color: #222; color: white; border: none; border-radius: 8px; font-size: 16px; cursor: pointer;"
+                {% if not friends_list %}disabled{% endif %}
+                style="padding: 12px 20px; background-color: #222; color: white; border: none; border-radius: 8px; font-size: 16px; cursor: pointer; {% if not friends_list %}opacity: 0.5; cursor: not-allowed;{% endif %}"
             >
                 Send Nudge
             </button>

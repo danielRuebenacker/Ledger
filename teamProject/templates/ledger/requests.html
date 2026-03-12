@@ -10,6 +10,11 @@
     {% if message %}
     <div id="success-message" style="margin-bottom: 25px; padding: 16px 20px; background-color: #f2f2f2; border: 1px solid #ddd; border-radius: 12px; color: #222; opacity: 1; transition: opacity 0.8s ease;">
         {{ message }}
+        {% if show_friends_link %}
+            <a href="{% url 'ledger:friends' %}" style="margin-left: 12px; color: #2e7d32; text-decoration: none; font-weight: 600;">
+                View in My Friends
+            </a>
+        {% endif %}
     </div>
     {% endif %}
 

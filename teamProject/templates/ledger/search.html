@@ -37,22 +37,35 @@
         </form>
     </div>
 
-    {% if search_results %}
-    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 25px;">
-        {% for user_profile in search_results %}
-        <div style="border: 1px solid #ddd; border-radius: 16px; padding: 25px; background-color: #fafafa;">
-            <h2 style="margin-bottom: 16px;">{{ user_profile.user.username }}</h2>
-            <a href="{% url 'ledger:search' %}?q={{ query }}&add_id={{ user_profile.id }}"
-               style="display: inline-block; padding: 10px 18px; background-color: #222; color: white; text-decoration: none; border-radius: 8px;">
-                Add Friend
-            </a>
+    {% if query %}
+        {% if search_results %}
+        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 25px;">
+            {% for user_profile in search_results %}
+            <div style="border: 1px solid #ddd; border-radius: 16px; padding: 25px; background-color: #fafafa;">
+                <h2 style="margin-bottom: 16px;">{{ user_profile.username }}</h2>
+
+                {% if user_profile.button_state == 'add' %}
+                    <a href="{% url 'ledger:search' %}?q={{ query }}&add_id={{ user_profile.id }}"
+                       style="display: inline-block; padding: 10px 18px; background-color: #222; color: white; text-decoration: none; border-radius: 8px;">
+                        Add Friend
+                    </a>
+                {% elif user_profile.button_state == 'pending' %}
+                    <span style="display: inline-block; padding: 10px 18px; background-color: #ddd; color: #555; border-radius: 8px;">
+                        Request Sent
+                    </span>
+                {% elif user_profile.button_state == 'friends' %}
+                    <span style="display: inline-block; padding: 10px 18px; background-color: #e8f5e9; color: #2e7d32; border-radius: 8px;">
+                        Already Friends
+                    </span>
+                {% endif %}
+            </div>
+            {% endfor %}
         </div>
-        {% endfor %}
-    </div>
-    {% else %}
-    <div style="padding: 20px; border: 1px solid #ddd; border-radius: 12px; background-color: #fafafa; color: #555;">
-        No users found.
-    </div>
+        {% else %}
+        <div style="padding: 20px; border: 1px solid #ddd; border-radius: 12px; background-color: #fafafa; color: #555;">
+            No users found.
+        </div>
+        {% endif %}
     {% endif %}
 </div>
 

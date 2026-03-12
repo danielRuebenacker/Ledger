@@ -72,6 +72,7 @@ def requests_page(request):
     friendship_id = request.GET.get('id', '').strip()
 
     message = ''
+    show_friends_link = False
 
     if action and friendship_id:
         friendship = Friendship.objects.filter(
@@ -86,6 +87,7 @@ def requests_page(request):
                 friendship.date_accepted = timezone.now().date()
                 friendship.save()
                 message = f'Friend request from {friendship.requester} accepted.'
+                show_friends_link = True
             elif action == 'reject':
                 friendship.status = Friendship.REJECTED
                 friendship.save()
@@ -105,10 +107,9 @@ def requests_page(request):
         'incoming_requests': incoming_requests,
         'sent_requests': sent_requests,
         'message': message,
+        'show_friends_link': show_friends_link,
     }
     return render(request, 'ledger/requests.html', context_dict)
-
-
 
 @login_required
 def search_users(request):
@@ -145,11 +146,35 @@ def search_users(request):
     search_results = []
 
     if query:
-        search_results = UserProfile.objects.exclude(
-            id=current_profile.id
-        ).filter(
+        profiles = UserProfile.objects.exclude(id=current_profile.id).filter(
             user__username__icontains=query
         )
+
+        search_results = []
+        for profile in profiles:
+            friendship = Friendship.objects.filter(
+                requester=current_profile,
+                requested=profile
+            ).first() or Friendship.objects.filter(
+                requester=profile,
+                requested=current_profile
+            ).first()
+
+            if friendship:
+                if friendship.status == Friendship.PENDING:
+                    button_state = 'pending'
+                elif friendship.status == Friendship.ACCEPTED:
+                    button_state = 'friends'
+                else:
+                    button_state = 'add'
+            else:
+                button_state = 'add'
+
+            search_results.append({
+                'id': profile.id,
+                'username': profile.user.username,
+                'button_state': button_state,
+            })
 
     context_dict = {
         'search_results': search_results,
@@ -157,7 +182,7 @@ def search_users(request):
         'added_user': added_user,
         'error_message': error_message,
     }
-    return render(request, 'ledger/search.html', context_dict)
+    return render(request, 'ledger/search.html', context=context_dict)
 
 
 @login_required
