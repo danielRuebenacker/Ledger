@@ -160,31 +160,61 @@ def search_users(request):
     return render(request, 'ledger/search.html', context_dict)
 
 
+@login_required
 def nudge_page(request):
-    friends_list = [
-        {'name': 'Alice'},
-        {'name': 'Ben'},
-        {'name': 'Chloe'},
-    ]
+    current_profile, created = UserProfile.objects.get_or_create(user=request.user)
 
+    sent_accepted = Friendship.objects.filter(
+        requester=current_profile,
+        status=Friendship.ACCEPTED
+    )
+
+    received_accepted = Friendship.objects.filter(
+        requested=current_profile,
+        status=Friendship.ACCEPTED
+    )
+
+    friends_list = []
+
+    for friendship in sent_accepted:
+        friend_profile = friendship.requested
+        friends_list.append({
+            'username': friend_profile.user.username,
+        })
+
+    for friendship in received_accepted:
+        friend_profile = friendship.requester
+        friends_list.append({
+            'username': friend_profile.user.username,
+        })
+
+    preselected_friend = request.GET.get('friend', '').strip()
     sent_to = request.GET.get('sent_to', '').strip()
     message_text = request.GET.get('message', '').strip()
+
+    selected_friend = sent_to if sent_to else preselected_friend
 
     success_message = ''
     error_message = ''
 
     if 'sent_to' in request.GET or 'message' in request.GET:
+        valid_friend_names = [friend['username'] for friend in friends_list]
+
         if not sent_to:
             error_message = 'Please select a friend before sending a nudge.'
+            selected_friend = ''
+        elif sent_to not in valid_friend_names:
+            error_message = 'You can only send nudges to your friends.'
+            selected_friend = ''
         else:
             success_message = f'Nudge sent to {sent_to}.'
             message_text = ''
 
     context_dict = {
         'friends_list': friends_list,
-        'sent_to': sent_to,
+        'sent_to': selected_friend,
         'message_text': message_text,
         'success_message': success_message,
         'error_message': error_message,
     }
-    return render(request, 'ledger/nudge.html', context=context_dict)
+    return render(request, 'ledger/nudge.html', context_dict)

@@ -12,8 +12,8 @@
         {% for friend in friends_list %}
         <div style="border: 1px solid #ddd; border-radius: 16px; padding: 25px; background-color: #fafafa;">
             <h2 style="margin-bottom: 16px;">{{ friend.username }}</h2>
-            <a href="{% url 'ledger:nudge' %}"
-               style="display: inline-block; padding: 10px 18px; background-color: #222; color: white; text-decoration: none; border-radius: 8px;">
+            <a href="{% url 'ledger:nudge' %}?friend={{ friend.username }}"
+                style="display: inline-block; padding: 10px 18px; background-color: #222; color: white; text-decoration: none; border-radius: 8px;">
                 Send Nudge
             </a>
         </div>

@@ -26,8 +26,8 @@
                 <select id="sent_to" name="sent_to" style="width: 100%; padding: 12px 16px; border: 1px solid #ccc; border-radius: 8px; font-size: 16px;">
                     <option value="" {% if not sent_to %}selected{% endif %}>Select a friend</option>
                     {% for friend in friends_list %}
-                    <option value="{{ friend.name }}" {% if friend.name == sent_to %}selected{% endif %}>
-                        {{ friend.name }}
+                    <option value="{{ friend.username }}" {% if friend.username == sent_to %}selected{% endif %}>
+                        {{ friend.username }}
                     </option>
                     {% endfor %}
                 </select>
