@@ -21,13 +21,13 @@
             {% if incoming_requests %}
                 {% for request in incoming_requests %}
                 <div style="border: 1px solid #e5e5e5; border-radius: 12px; padding: 18px; margin-bottom: 15px; background-color: white;">
-                    <h3 style="margin-bottom: 12px;">{{ request.name }}</h3>
+                    <h3 style="margin-bottom: 12px;">{{ request.requester }}</h3>
                     <div style="display: flex; gap: 12px;">
-                        <a href="{% url 'ledger:requests' %}?action=accept&user={{ request.name }}"
+                        <a href="{% url 'ledger:requests' %}?action=accept&id={{ request.id }}"
                            style="display: inline-block; padding: 10px 16px; background-color: #222; color: white; text-decoration: none; border-radius: 8px;">
                             Accept
                         </a>
-                        <a href="{% url 'ledger:requests' %}?action=reject&user={{ request.name }}"
+                        <a href="{% url 'ledger:requests' %}?action=reject&id={{ request.id }}"
                            style="display: inline-block; padding: 10px 16px; background-color: #ddd; color: #222; text-decoration: none; border-radius: 8px;">
                             Reject
                         </a>
@@ -44,12 +44,18 @@
         <div style="border: 1px solid #ddd; border-radius: 16px; padding: 25px; background-color: #fafafa;">
             <h2 style="margin-bottom: 20px;">Sent Requests</h2>
 
-            {% for request in sent_requests %}
-            <div style="border: 1px solid #e5e5e5; border-radius: 12px; padding: 18px; margin-bottom: 15px; background-color: white;">
-                <h3 style="margin-bottom: 12px;">{{ request.name }}</h3>
-                <p style="color: #555;">Pending</p>
-            </div>
-            {% endfor %}
+            {% if sent_requests %}
+                {% for request in sent_requests %}
+                <div style="border: 1px solid #e5e5e5; border-radius: 12px; padding: 18px; margin-bottom: 15px; background-color: white;">
+                    <h3 style="margin-bottom: 12px;">{{ request.requested }}</h3>
+                    <p style="color: #555;">Pending</p>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div style="padding: 18px; border: 1px solid #e5e5e5; border-radius: 12px; background-color: white; color: #555;">
+                    No sent requests.
+                </div>
+            {% endif %}
         </div>
 
     </div>

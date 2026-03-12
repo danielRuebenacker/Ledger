@@ -68,3 +68,4 @@ class Friendship(models.Model):
 
     def __str__(self):
         return f"User: {self.requester} requested User: {self.requested} currently {self.status}"
+
