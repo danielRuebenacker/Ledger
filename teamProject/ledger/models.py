@@ -71,8 +71,8 @@ class FriendRequest(models.Model):
         return f"User: {self.requester} requested User: {self.requested} currently {self.status}"
 
 class Friendship(models.Model):
-    user = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
-    friend = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
+    user = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name="friends")
+    friend = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name="friend_of")
 
     def __str__(self):
         return f"{user} is friends with {friend}"
@@ -80,11 +80,11 @@ class Friendship(models.Model):
 
 class HabitTracker(models.Model):
     # belongs to one user
-    user = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
+    user = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name="habit_trackers")
     # this will be a MONTH field (set to 1st of month)
     month = models.DateField();
     # associated habits (M-N relationship)
-    habits = models.ManyToManyField(Habit)
+    habits = models.ManyToManyField(Habit, related_name="habit_trackers")
 
     class Meta:
         # tells django this combination must be unique
@@ -94,7 +94,7 @@ class HabitTracker(models.Model):
         return self.user.user.username + self.month.strftime("%m-%Y")
 
 class DayTracker(models.Model): 
-    tracker = models.ForeignKey(HabitTracker, on_delete=models.CASCADE)
+    tracker = models.ForeignKey(HabitTracker, on_delete=models.CASCADE, related_name="day_trackers")
     # specific day
     date = models.DateField()
 
@@ -105,7 +105,7 @@ class DayTracker(models.Model):
         unique_together = ("tracker", "date")
 
 class BoolHabitEntry(models.Model):
-    day_tracker = models.ForeignKey(DayTracker, on_delete=models.CASCADE)
+    day_tracker = models.ForeignKey(DayTracker, on_delete=models.CASCADE, related_name="bool_habit_entries")
     habit = models.ForeignKey(Habit, on_delete=models.CASCADE)
 
     done = models.BooleanField(default=False);
