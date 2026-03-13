@@ -105,7 +105,7 @@ class DayTracker(models.Model):
         unique_together = ("tracker", "date")
 
 class BoolHabitEntry(models.Model):
-    day_tracker = models.ForeignKey(DayTracker, on_delete=models.CASCADE, related_name="habit_entries")
+    day_tracker = models.ForeignKey(DayTracker, on_delete=models.CASCADE, related_name="bool_habit_entries")
     habit = models.ForeignKey(Habit, on_delete=models.CASCADE)
 
     done = models.BooleanField(default=False);
