@@ -4,6 +4,9 @@ from django.test import TestCase
 from ledger.models import Habit, HabitTracker, DayTracker
 from .test_factories import *
 
+# utils
+from ledger.utils import date
+
 class HabitTests(TestCase):
     def test_create_habit(self):
         # check can create habit (use factory)
@@ -35,7 +38,7 @@ class HabitTrackerTests(TestCase):
 
     def test_habit_tracker_month_is_correct(self):
         tracker = HabitTrackerFactory()
-        self.assertEqual(tracker.month, get_first_of_month())
+        self.assertEqual(tracker.month, date.get_first_of_this_month())
 
 class DayTrackerTests(TestCase):
     def test_create_DayTracker(self):
