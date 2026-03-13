@@ -49,7 +49,7 @@ class Nudge(models.Model):
     def __str__(self):
         return f"User: {self.nudger} nudged User: {self.nudged} notified {self.notified}"
       
-class Friendship(models.Model):
+class FriendRequest(models.Model):
     PENDING = "PENDING"
     ACCEPTED = "ACCEPTED"
     REJECTED = "REJECTED"
@@ -67,6 +67,14 @@ class Friendship(models.Model):
 
     def __str__(self):
         return f"User: {self.requester} requested User: {self.requested} currently {self.status}"
+
+class Friendship(models.Model):
+    user = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
+    friend = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f"{user} is friends with {friend}"
+
 
 class HabitTracker(models.Model):
     # belongs to one user
