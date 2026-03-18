@@ -14,19 +14,31 @@ from django.utils import timezone
 
 def index(request):
     context_dict = {}
-    return render(request, 'ledger/index.html', context=context_dict)
+    return render(request, 'social/index.html', context=context_dict)
 
 def myhabits(request):
     context_dict = {}
-    return render(request, 'ledger/myhabits.html', context=context_dict)
+    return render(request, 'social/myhabits.html', context=context_dict)
 
 def leaderboards(request):
     context_dict = {}
-    return render(request, 'ledger/leaderboards.html', context=context_dict)
+    return render(request, 'social/leaderboards.html', context=context_dict)
 
 def social(request):
-    context_dict = {}
-    return render(request, 'ledger/social.html', context=context_dict)
+    current_profile, _ = UserProfile.objects.get_or_create(user=request.user)
+
+    sent = Friendship.objects.filter(requester=current_profile, status=Friendship.ACCEPTED)
+    received = Friendship.objects.filter(requested=current_profile, status=Friendship.ACCEPTED)
+
+    friends_list = []
+    for f in sent:
+        p = f.requested
+        friends_list.append({'username': p.user.username, 'streak': 0, 'points': 0})
+    for f in received:
+        p = f.requester
+        friends_list.append({'username': p.user.username, 'streak': 0, 'points': 0})
+    print(friends_list)
+    return render(request, 'social/social.html', {'friends_list': friends_list})
 
 
 @login_required
@@ -60,7 +72,7 @@ def friends(request):
     context_dict = {
         'friends_list': friends_list,
     }
-    return render(request, 'ledger/friends.html', context=context_dict)
+    return render(request, 'social/friends.html', context=context_dict)
 
 
 
@@ -109,7 +121,7 @@ def requests_page(request):
         'message': message,
         'show_friends_link': show_friends_link,
     }
-    return render(request, 'ledger/requests.html', context_dict)
+    return render(request, 'social/requests.html', context_dict)
 
 @login_required
 def search_users(request):
@@ -192,7 +204,7 @@ def search_users(request):
         'added_user': added_user,
         'error_message': error_message,
     }
-    return render(request, 'ledger/search.html', context=context_dict)
+    return render(request, 'social/search.html', context=context_dict)
 
 
 @login_required
@@ -265,7 +277,7 @@ def nudge_page(request):
         'success_message': success_message,
         'error_message': error_message,
     }
-    return render(request, 'ledger/nudge.html', context_dict)
+    return render(request, 'social/nudge.html', context_dict)
 
 @login_required
 def nudge_inbox(request):
@@ -308,7 +320,7 @@ def nudge_inbox(request):
         'received_nudges': received_nudges,
         'success_message': success_message,
     }
-    return render(request, 'ledger/nudge_inbox.html', context_dict)
+    return render(request, 'social/nudge_inbox.html', context_dict)
 
 @login_required
 def nudge_sent(request):
@@ -339,4 +351,4 @@ def nudge_sent(request):
         'sent_nudges': sent_nudges,
         'success_message': success_message,
     }
-    return render(request, 'ledger/nudge_sent.html', context_dict)
+    return render(request, 'social/nudge_sent.html', context_dict)
