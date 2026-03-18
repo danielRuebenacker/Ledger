@@ -1,12 +1,17 @@
 from ledger.models import UserProfile, HabitTracker, Habit, BoolHabitEntry
-import datetime
+from ledger.utils import date
 
 def get_user_habit_trackers(user):
-    return user.habit_trackers
+    return user.habit_trackers.all()
 
 def get_current_month_habit_tracker(user):
+    this_month = date.get_first_of_this_month()
     # get this months habit tracker
-    habit_tracker = 
+    try:
+        habit_tracker = HabitTracker.objects.get(month=this_month)
+        return habit_tracker
+    except HabitTracker.DoesNotExist:
+        return none
 
 def get_habit_tracker_habit_entries(habit_tracker):
     # this method takes a habit tracker and fetches all habit entries and organises them into a dict
@@ -19,9 +24,7 @@ def get_habit_tracker_habit_entries(habit_tracker):
         days[day_tracker] = boolean_habit_entries
     return days
 
-def get_user_day_tracker_today(user):
-    this_month_ht = 
 
 
-def log_boolean_habit(habit, user):
-    bool_habit_entry = BoolHabitEntry()
+def log_boolean_habit(habit, user, done):
+    bool_habit_entry = BoolHabitEntry.objects.create(user=user, habit=habit, done=done)
