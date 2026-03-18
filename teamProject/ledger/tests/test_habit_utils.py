@@ -10,12 +10,17 @@ class TestHabitTrackerGet(TestCase):
         util_habit_tracker = habit_utils.get_current_month_habit_tracker(user=user)
         self.assertEquals(habit_tracker, util_habit_tracker)
 
-    # def test_get_all_user_habit_trackers(self):
-    #     user = UserProfileFactory()
-    #     # feb = date.get_first_day_of_month(datetime.)
-    #     _ = HabitTrackerFactory(user=user)
-    #     _ = HabitTrackerFactory(user=user)
-    #     _ = HabitTrackerFactory(user=user)
-    #     _ = HabitTrackerFactory(user=user)
-    #     habit_trackers = habit_utils.get_user_habit_trackers(user=user)
-    #     self.assertEquals(habit_trackers, user.habit_trackers.all())
+    def test_get_all_user_habit_trackers(self):
+        user = UserProfileFactory()
+        feb = date.get_first_of_n_months_ago(1)
+        jan = date.get_first_of_n_months_ago(2)
+        dec = date.get_first_of_n_months_ago(3)
+        nov = date.get_first_of_n_months_ago(4)
+
+        _ = HabitTrackerFactory(user=user, month=feb)
+        _ = HabitTrackerFactory(user=user, month=jan)
+        _ = HabitTrackerFactory(user=user, month=dec)
+        _ = HabitTrackerFactory(user=user, month=nov)
+        habit_trackers = habit_utils.get_user_habit_trackers(user=user)
+        # self.assertEquals(habit_trackers, list(user.habit_trackers.all().order_by('month')))
+        self.assertEquals(len(habit_trackers), user.habit_trackers.all().count())

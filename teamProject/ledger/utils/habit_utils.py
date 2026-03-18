@@ -2,7 +2,7 @@ from ledger.models import UserProfile, HabitTracker, Habit, BoolHabitEntry
 from ledger.utils import date
 
 def get_user_habit_trackers(user):
-    return user.habit_trackers.all()
+    return list(user.habit_trackers.all().order_by('month'))
 
 def get_current_month_habit_tracker(user):
     this_month = date.get_first_of_this_month()
