@@ -1,0 +1,31 @@
+{% extends 'ledger/base.html' %}
+
+{% block body_block %}
+<div style="padding: 40px; max-width: 1000px; margin: 0 auto;">
+    <h1 style="font-size: 48px; margin-bottom: 10px;">Social</h1>
+    <p style="font-size: 20px; color: #555; margin-bottom: 40px;">
+        Stay connected with friends, manage requests, and keep each other motivated.
+    </p>
+
+    <p style="font-size: 18px; color: #555; margin-bottom: 10px;">
+        Logged in as: <strong>{{ user.username }}</strong>
+    </p>
+
+    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 25px;">
+
+            {% if friends_list %}
+        {% for friend in friends_list %}
+        <div style="border: 1px solid #ddd; border-radius: 16px; padding: 25px; background-color: #fafafa; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-size: 20px;">{{ friend.username }}</span>
+            <span style="font-size: 18px;">{{ friend.streak }} 🔥   {{ friend.points }}⭐</span>
+        </div>
+        {% endfor %}
+    {% else %}
+    <div style="padding: 20px; border: 1px solid #ddd; border-radius: 12px; background-color: #fafafa; color: #555;">
+        You have no friends yet.
+    </div>
+    {% endif %}
+
+    </div>
+</div>
+{% endblock %}
