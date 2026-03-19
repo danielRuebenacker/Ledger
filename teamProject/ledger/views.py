@@ -37,9 +37,41 @@ def social(request):
     for f in received:
         p = f.requester
         friends_list.append({'username': p.user.username, 'streak': 0, 'points': 0})
-    print(friends_list)
-    return render(request, 'social/social.html', {'friends_list': friends_list})
 
+    query = request.GET.get('q', '').strip()
+    search_results = []
+    if query:
+        profiles = UserProfile.objects.exclude(id=current_profile.id).filter(
+            user__username__icontains=query
+        )
+        for profile in profiles:
+            friendship = Friendship.objects.filter(
+                requester=current_profile, requested=profile
+            ).first() or Friendship.objects.filter(
+                requester=profile, requested=current_profile
+            ).first()
+
+            if friendship:
+                if friendship.status == Friendship.PENDING:
+                    button_state = 'pending'
+                elif friendship.status == Friendship.ACCEPTED:
+                    button_state = 'friends'
+                else:
+                    button_state = 'add'
+            else:
+                button_state = 'add'
+
+            search_results.append({
+                'id': profile.id,
+                'username': profile.user.username,
+                'button_state': button_state,
+            })
+
+    return render(request, 'social/social.html', {
+        'friends_list': friends_list,
+        'search_results': search_results,
+        'query': query,
+    })
 
 @login_required
 def friends(request):
