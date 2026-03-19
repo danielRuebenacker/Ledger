@@ -1,30 +1,50 @@
 {% extends 'ledger/base.html' %}
 
+{% block title_block %}Social{% endblock %}
+
 {% block body_block %}
-<div style="padding: 40px; max-width: 1000px; margin: 0 auto;">
-    <h1 style="font-size: 48px; margin-bottom: 10px;">Social</h1>
-    <p style="font-size: 20px; color: #555; margin-bottom: 40px;">
-        Stay connected with friends, manage requests, and keep each other motivated.
-    </p>
+<div style="padding: 40px; max-width: 1100px; margin: 0 auto;">
+    <div style="display: flex; gap: 30px; align-items: flex-start;">
 
-    <p style="font-size: 18px; color: #555; margin-bottom: 10px;">
-        Logged in as: <strong>{{ user.username }}</strong>
-    </p>
+        <div style="width: 180px; flex-shrink: 0; border: 1px solid #ccc; border-radius: 12px; padding: 20px; background-color: #fafafa;">
+            <a href="{% url 'ledger:friends' %}"
+               style="display: block; width: 100%; padding: 8px 12px; margin-bottom: 10px; background-color: #4a90d9; color: white; text-align: center; text-decoration: none; border-radius: 8px; font-size: 14px; box-sizing: border-box;">
+                Friends
+            </a>
+            <a href="{% url 'ledger:requests' %}"
+               style="display: block; width: 100%; padding: 8px 12px; background-color: white; color: #222; text-align: center; text-decoration: none; border-radius: 8px; border: 1px solid #ccc; font-size: 14px; box-sizing: border-box;">
+                Requests
+            </a>
+        </div>
 
-    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 25px;">
+        <div style="flex: 1; border: 1px solid #ccc; border-radius: 12px; padding: 25px; background-color: #fff; min-height: 300px;">
+
+            <div style="margin-bottom: 20px;">
+                <input
+                    type="text"
+                    placeholder="Search username..."
+                    id="sidebar-search"
+                    style="width: 100%; padding: 10px 14px; border: 1px solid #ccc; border-radius: 8px; font-size: 14px; box-sizing: border-box;"
+                    onkeydown="if(event.key==='Enter') window.location.href='{% url 'ledger:search' %}?q='+this.value"
+                >
+            </div>
 
             {% if friends_list %}
-        {% for friend in friends_list %}
-        <div style="border: 1px solid #ddd; border-radius: 16px; padding: 25px; background-color: #fafafa; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
-            <span style="font-size: 20px;">{{ friend.username }}</span>
-            <span style="font-size: 18px;">{{ friend.streak }} 🔥   {{ friend.points }}⭐</span>
+                {% for friend in friends_list %}
+                <div style="border: 1px solid #ddd; border-radius: 10px; padding: 16px 22px; margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center; background-color: #fafafa;">
+                    <span style="font-size: 16px;">
+                        {{ friend.username }}
+                        <span style="color: #aaa; font-size: 18px; margin-left: 6px;">&#9711;</span>
+                    </span>
+                    <span style="font-size: 15px; color: #444;">
+                        {{ friend.streak }}🔥 &nbsp;&nbsp; {{ friend.points }}⭐
+                    </span>
+                </div>
+                {% endfor %}
+            {% else %}
+                <p style="color: #888; font-size: 16px;">You have no friends yet. <a href="{% url 'ledger:search' %}">Search for users</a> to add friends.</p>
+            {% endif %}
         </div>
-        {% endfor %}
-    {% else %}
-    <div style="padding: 20px; border: 1px solid #ddd; border-radius: 12px; background-color: #fafafa; color: #555;">
-        You have no friends yet.
-    </div>
-    {% endif %}
 
     </div>
 </div>
