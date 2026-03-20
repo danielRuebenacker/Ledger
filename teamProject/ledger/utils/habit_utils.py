@@ -36,5 +36,7 @@ def get_day_tracker(habit_tracker, day):
 
 def log_boolean_habit(habit, user, done, day):
     habit_tracker = get_current_month_habit_tracker(user)
-    day_tracker = get_day_tracker(habit_tracker=habit_tracker)
+    if habit_tracker is None: return
+    day_tracker = get_day_tracker(habit_tracker=habit_tracker, day=day)
+    if day_tracker is None: return
     bool_habit_entry = BoolHabitEntry.objects.create(day_tracker=day_tracker, user=user, habit=habit, done=done)
