@@ -33,7 +33,7 @@ def accept_friend_request(sender, receiver):
     _ = Friendship.objects.create(user=receiver, friend=sender)
 
 def reject_friend_request(user, rejected_user):
-    friend_request = get_friend_request(sender, receiver)
+    friend_request = get_friend_request(user, rejected_user)
     if not friend_request:
         return
     friend_request.status = FriendRequest.REJECTED

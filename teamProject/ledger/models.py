@@ -94,7 +94,7 @@ class HabitTracker(models.Model):
         return self.user.user.username + self.month.strftime("%m-%Y")
 
 class DayTracker(models.Model): 
-    tracker = models.ForeignKey(HabitTracker, on_delete=models.CASCADE, related_name="day_trackers")
+    habit_tracker = models.ForeignKey(HabitTracker, on_delete=models.CASCADE, related_name="day_trackers")
     # specific day
     date = models.DateField()
 
@@ -102,7 +102,7 @@ class DayTracker(models.Model):
 
     class Meta:
         # tells django this combination must be unique
-        unique_together = ("tracker", "date")
+        unique_together = ("habit_tracker", "date")
 
 class BoolHabitEntry(models.Model):
     day_tracker = models.ForeignKey(DayTracker, on_delete=models.CASCADE, related_name="bool_habit_entries")

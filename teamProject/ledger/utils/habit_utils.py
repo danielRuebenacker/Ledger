@@ -25,18 +25,23 @@ def get_habit_tracker_habit_entries(habit_tracker):
     return days
 
 
-def get_day_tracker(habit_tracker, day):
-    # day is a datetime object
+def get_day_tracker(habit_tracker, date):
+    # date is a datetime object
     try: 
-        DayTracker.objects.get(tracker=habit_tracker)
+        day_tracker = DayTracker.objects.get(habit_tracker=habit_tracker, date=date)
+        return day_tracker
     except DayTracker.DoesNotExist:
         return None
 
 
 
-def log_boolean_habit(habit, user, done, day):
+def log_bool_habit(habit, user, done, date):
+    # bool habit entry needs: day_tracker, habit, and done
+    # date tracker is a datetime object
+    # if we are logging it's got to be this month
     habit_tracker = get_current_month_habit_tracker(user)
     if habit_tracker is None: return
-    day_tracker = get_day_tracker(habit_tracker=habit_tracker, day=day)
+    day_tracker = get_day_tracker(habit_tracker=habit_tracker, date=date)
     if habit_tracker is None: return
-    bool_habit_entry = BoolHabitEntry.objects.create(day_tracker=day_tracker, user=user, habit=habit, done=done)
+    bool_habit_entry = BoolHabitEntry.objects.create(day_tracker=day_tracker, habit=habit, done=done)
+    return bool_habit_entry

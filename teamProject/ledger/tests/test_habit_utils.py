@@ -32,3 +32,28 @@ class TestHabitTrackerGet(TestCase):
         util_habit_tracker = habit_utils.get_current_month_habit_tracker(user=user)
         self.assertEquals(habit_tracker, util_habit_tracker)
 
+    def test_get_day_tracker(self):
+        # given a day (datetime) and a habit tracker return day_tracker
+        today = date.today()
+        day_tracker = DayTrackerFactory(date=today)
+        # subfactory created habit_tracke
+        habit_tracker = day_tracker.habit_tracker
+        util_day_tracker = habit_utils.get_day_tracker(habit_tracker=habit_tracker, date=today)
+        self.assertEquals(day_tracker, util_day_tracker)
+
+    def test_log_entry(self):
+        # given habit, user, day, and done log habit
+        day_tracker = DayTrackerFactory()
+        date = day_tracker.date
+        habit = HabitFactory()
+
+        # these shenanigans are for getting the user
+        habit_tracker = day_tracker.habit_tracker
+        user = habit_tracker.user
+
+        # now test whether actual entry is the same as the one created by utils
+        util_bool_habit_entry = habit_utils.log_bool_habit(habit=habit, user=user, date=date, done=True)
+        bool_habit_entry = BoolHabitEntry.objects.get(day_tracker=day_tracker, habit=habit)
+        self.assertEquals(bool_habit_entry, util_bool_habit_entry)
+        
+

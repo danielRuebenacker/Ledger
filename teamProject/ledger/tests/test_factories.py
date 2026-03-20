@@ -40,7 +40,7 @@ class HabitTrackerFactory(factory.django.DjangoModelFactory):
 class DayTrackerFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = DayTracker
-    tracker = factory.SubFactory(HabitTrackerFactory)
+    habit_tracker = factory.SubFactory(HabitTrackerFactory)
     date = factory.LazyFunction(date.today)
     completed_on_day = True
 
