@@ -45,3 +45,14 @@ def log_bool_habit(habit, user, done, date):
     if habit_tracker is None: return
     bool_habit_entry = BoolHabitEntry.objects.create(day_tracker=day_tracker, habit=habit, done=done)
     return bool_habit_entry
+
+def calculate_streak(user):
+    habit_tracker = get_current_month_habit_tracker(user)
+    if habit_tracker is None: return
+    # reverse ordering by date
+    days = habit_tracker.day_trackers.order_by("-date")
+    streak = 0
+    for day in days:
+        if not day.completed_on_the_day:
+            return streak
+        streak += 1
