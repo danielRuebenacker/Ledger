@@ -8,7 +8,7 @@ def get_current_month_habit_tracker(user):
     this_month = date.get_first_of_this_month()
     # get this months habit tracker
     try:
-        habit_tracker = HabitTracker.objects.get(month=this_month)
+        habit_tracker = user.habit_trackers.get(month=this_month)
         return habit_tracker
     except HabitTracker.DoesNotExist:
         return None
@@ -38,5 +38,5 @@ def log_boolean_habit(habit, user, done, day):
     habit_tracker = get_current_month_habit_tracker(user)
     if habit_tracker is None: return
     day_tracker = get_day_tracker(habit_tracker=habit_tracker, day=day)
-    if day_tracker is None: return
+    if habit_tracker is None: return
     bool_habit_entry = BoolHabitEntry.objects.create(day_tracker=day_tracker, user=user, habit=habit, done=done)

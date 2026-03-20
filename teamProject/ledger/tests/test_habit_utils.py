@@ -24,3 +24,11 @@ class TestHabitTrackerGet(TestCase):
         habit_trackers = habit_utils.get_user_habit_trackers(user=user)
         # self.assertEquals(habit_trackers, list(user.habit_trackers.all().order_by('month')))
         self.assertEquals(len(habit_trackers), user.habit_trackers.all().count())
+
+    def test_get_this_month_user_habit_trackers(self):
+        user = UserProfileFactory()
+        this_month = date.get_first_of_this_month()
+        habit_tracker = HabitTrackerFactory(user=user, month=this_month)
+        util_habit_tracker = habit_utils.get_current_month_habit_tracker(user=user)
+        self.assertEquals(habit_tracker, util_habit_tracker)
+
