@@ -75,7 +75,7 @@ class Friendship(models.Model):
     friend = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name="friend_of")
 
     def __str__(self):
-        return f"{user} is friends with {friend}"
+        return f"{self.user} is friends with {self.friend}"
 
 
 class HabitTracker(models.Model):
