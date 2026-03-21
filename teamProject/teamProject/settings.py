@@ -63,6 +63,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'ledger',
     'registration',
+    'tagify',
 ]
 
 MIDDLEWARE = [
