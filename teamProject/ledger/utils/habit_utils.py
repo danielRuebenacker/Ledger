@@ -1,4 +1,4 @@
-from ledger.models import UserProfile, HabitTracker, DayTracker, Habit, BoolHabitEntry
+from ledger.models import UserProfile, HabitTracker, Day, Habit, BoolHabitEntry
 from ledger.utils import date
 
 def get_user_habit_trackers(user):
@@ -16,41 +16,41 @@ def get_current_month_habit_tracker(user):
 def get_habit_tracker_habit_entries(habit_tracker):
     # this method takes a habit tracker and fetches all habit entries and organises them into a dict
     # by days. i.e. days is a dict of day keys to habit entry list values
-    day_trackers = habit_tracker.day_trackers
+    days = habit_tracker.days
     # stores collection of habit entries
-    days = {}
-    for day_tracker in day_trackers:
-        boolean_habit_entries = day_tracker.bool_habit_entries
-        days[day_tracker] = boolean_habit_entries
-    return days
+    day_habits = {}
+    for day in days:
+        boolean_habit_entries = day.bool_habit_entries
+        day_habits[day] = boolean_habit_entries
+    return day_habits
 
 
-def get_day_tracker(habit_tracker, date):
+def get_day(habit_tracker, date):
     # date is a datetime object
     try: 
-        day_tracker = DayTracker.objects.get(habit_tracker=habit_tracker, date=date)
-        return day_tracker
-    except DayTracker.DoesNotExist:
+        day = Day.objects.get(habit_tracker=habit_tracker, date=date)
+        return day
+    except Day.DoesNotExist:
         return None
 
 
 
 def log_bool_habit(habit, user, done, date):
-    # bool habit entry needs: day_tracker, habit, and done
+    # bool habit entry needs: day, habit, and done
     # date tracker is a datetime object
     # if we are logging it's got to be this month
     habit_tracker = get_current_month_habit_tracker(user)
     if habit_tracker is None: return
-    day_tracker = get_day_tracker(habit_tracker=habit_tracker, date=date)
+    day = get_day(habit_tracker=habit_tracker, date=date)
     if habit_tracker is None: return
-    bool_habit_entry = BoolHabitEntry.objects.create(day_tracker=day_tracker, habit=habit, done=done)
+    bool_habit_entry = BoolHabitEntry.objects.create(day=day, habit=habit, done=done)
     return bool_habit_entry
 
 def calculate_streak(user):
     habit_tracker = get_current_month_habit_tracker(user)
     if habit_tracker is None: return
     # reverse ordering by date
-    days = habit_tracker.day_trackers.order_by("-date")
+    days = habit_tracker.days.order_by("-date")
     streak = 0
     for day in days:
         if not day.completed_on_the_day:
