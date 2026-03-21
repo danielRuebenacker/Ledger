@@ -37,17 +37,17 @@ class HabitTrackerFactory(factory.django.DjangoModelFactory):
     month = factory.LazyFunction(date.get_first_of_this_month)
     # add habits once initialised...
 
-class DayTrackerFactory(factory.django.DjangoModelFactory):
+class DayFactory(factory.django.DjangoModelFactory):
     class Meta:
-        model = DayTracker
-    tracker = factory.SubFactory(HabitTrackerFactory)
+        model = Day
+    day_tracker = factory.SubFactory(HabitTrackerFactory)
     date = factory.LazyFunction(date.today)
     completed_on_day = True
 
 class BoolHabitEntryFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = BoolHabitEntry
-    day_tracker = factory.SubFactory(DayTrackerFactory)
+    day = factory.SubFactory(DayFactory)
     habit = factory.SubFactory(HabitFactory)
     done = True
     
