@@ -3,7 +3,7 @@ import factory
 
 # ledger specific models 
 from django.contrib.auth.models import User
-from ledger.models import BoolHabitEntry, Habit, HabitTracker, DayTracker
+from ledger.models import BoolHabitEntry, Habit, HabitTracker, Day
 from ledger.models import UserProfile
 
 # our helper date utilities (e.g. provides get_first_of_this_month)
@@ -40,7 +40,7 @@ class HabitTrackerFactory(factory.django.DjangoModelFactory):
 class DayFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = Day
-    day_tracker = factory.SubFactory(HabitTrackerFactory)
+    habit_tracker = factory.SubFactory(HabitTrackerFactory)
     date = factory.LazyFunction(date.today)
     completed_on_day = True
 

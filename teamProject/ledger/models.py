@@ -105,13 +105,13 @@ class Day(models.Model):
         unique_together = ("habit_tracker", "date")
 
 class BoolHabitEntry(models.Model):
-    day_tracker = models.ForeignKey(Day, on_delete=models.CASCADE, related_name="bool_habit_entries")
+    day = models.ForeignKey(Day, on_delete=models.CASCADE, related_name="bool_habit_entries")
     habit = models.ForeignKey(Habit, on_delete=models.CASCADE)
 
     done = models.BooleanField(default=False);
 
 class JournalEntry(models.Model):
-    day_tracker = models.ForeignKey(Day, on_delete=models.CASCADE)
+    day = models.ForeignKey(Day, on_delete=models.CASCADE)
     journal_text = models.TextField(blank=False)
 
     def __str__(self):

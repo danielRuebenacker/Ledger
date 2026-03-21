@@ -37,8 +37,8 @@ class HabitTrackerTests(TestCase):
         self.assertEqual(user.habit_trackers.first(), habit_tracker)
 
     def test_habit_tracker_month_is_correct(self):
-        tracker = HabitTrackerFactory()
-        self.assertEqual(tracker.month, date.get_first_of_this_month())
+        habit_tracker = HabitTrackerFactory()
+        self.assertEqual(habit_tracker.month, date.get_first_of_this_month())
 
 class DayTests(TestCase):
     def test_create_Day(self):
@@ -47,13 +47,13 @@ class DayTests(TestCase):
 
     def test_get_habit_tracker_days_underscore_set(self):
         ht = HabitTrackerFactory()
-        day = DayFactory(tracker=ht)
+        day = DayFactory(habit_tracker=ht)
         # use _set syntax to test
         self.assertEqual(ht.days.first(), day)
 
     def test_get_habit_tracker_days_filter(self):
         ht = HabitTrackerFactory()
-        day = DayFactory(tracker=ht)
+        day = DayFactory(habit_tracker=ht)
         # get first filtered object
         self.assertEqual(ht.days.first(), day)
 
