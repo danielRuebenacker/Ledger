@@ -2,7 +2,6 @@ from django.http import HttpResponse
 from django.shortcuts import render
 from ledger.utils import habit_utils
 from ledger.forms import HabitTrackerForm
-from ledger.models import Habit
 
 # Create your views here.
 
@@ -28,11 +27,8 @@ def myhabits(request):
                 donts_strings = [h for h in form.cleaned_data.get('donts') if h]
                 easy_wins_strings = [h for h in form.cleaned_data.get('easy_wins') if h] 
 
-                # make these into habits
-                dos = habit_utils.get_or_create_habits_from_list(dos_strings, Habit.TYPE_DO)
-                donts = habit_utils.get_or_create_habits_from_list(donts_strings, Habit.TYPE_DONT)
-                easy_wins = habit_utils.get_or_create_habits_from_list(easy_wins_strings, Habit.TYPE_EASY_WIN)
-
+                # makes into habits/gets habit then adds to habit tracker
+                habit_utils.get_or_create_habits_then_register(dos_strings, donts_strings, easy_wins_strings, habit_tracker)
         else:
             form = HabitTrackerForm()
 
