@@ -34,17 +34,18 @@ def get_day(habit_tracker, date):
     except Day.DoesNotExist:
         return None
 
-def get_or_create_habits_from_list(habit_strings, type):
+def get_or_create_habits_from_list(habit_strings, habit_type):
     habits = []
     for habit_string in habit_strings:
         # by default: not community + zero points 
         # exactly what we want if habit not already created
-        habit, created = Habit.objects.get_or_create(name=habit_string, defaults = {'habit_type': type})
-        habits.append(habits)
+        habit, created = Habit.objects.get_or_create(name=habit_string, habit_type=habit_type)
+        habits.append(habit)
+    return habits
 
 def register_habits_with_habit_tracker(habits, habit_tracker):
-    for habit in habits:
-        habit_tracker.habits.add(habit)
+    habit_tracker.habits.add(*habits)
+    habit_tracker.save()
 
 def get_or_create_habits_then_register(dos_strings, donts_strings, easy_wins_strings, habit_tracker):
     dos = get_or_create_habits_from_list(dos_strings, Habit.TYPE_DO)
