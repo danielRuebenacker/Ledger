@@ -5,6 +5,7 @@ def get_user_habit_trackers(user):
     return list(user.habit_trackers.all().order_by('month'))
 
 def get_current_month_habit_tracker(user):
+    # here user is a user profile
     this_month = date.get_first_of_this_month()
     # get this months habit tracker
     try:
@@ -33,6 +34,13 @@ def get_day(habit_tracker, date):
     except Day.DoesNotExist:
         return None
 
+def create_or_get_habits_from_list(habit_strings, type):
+    habits = []
+    for habit_string in habit_strings:
+        # by default: not community + zero points 
+        # exactly what we want if habit not already created
+        habit, created = Habit.objects.get_or_create(name=habit_string, defaults = {'habit_type': type})
+        habits.append(habits)
 
 
 def log_bool_habit(habit, user, done, date):
