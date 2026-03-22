@@ -7,6 +7,12 @@ from .test_factories import *
 # utils
 from ledger.utils import date
 
+class UserProfileTests(TestCase):
+    def test_get_user_profile_from_userself(self):
+        user = UserFactory()
+        user_profile = UserProfileFactory(user=user)
+        self.assertEquals(user_profile, user.userprofile)
+
 class HabitTests(TestCase):
     def test_create_habit(self):
         # check can create habit (use factory)
