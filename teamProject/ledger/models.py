@@ -83,7 +83,7 @@ class HabitTracker(models.Model):
     # belongs to one user
     user = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name="habit_trackers")
     # this will be a MONTH field (set to 1st of month) (can only create habit trackers for THIS month (present))
-    month = models.DateField(default=date.get_first_of_this_month())
+    month = models.DateField(default=date.get_first_of_this_month)
     # associated habits (M-N relationship)
     habits = models.ManyToManyField(Habit, related_name="habit_trackers")
 
