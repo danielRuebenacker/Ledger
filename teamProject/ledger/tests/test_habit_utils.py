@@ -55,5 +55,16 @@ class TestHabitTrackerGet(TestCase):
         util_bool_habit_entry = habit_utils.log_bool_habit(habit=habit, user=user, date=date, done=True)
         bool_habit_entry = BoolHabitEntry.objects.get(day=day, habit=habit)
         self.assertEquals(bool_habit_entry, util_bool_habit_entry)
+
+    def test_register_habits_with_habit_tracker(self):
+        habit1 = HabitFactory()
+        habit2 = HabitFactory()
+        habit3 = HabitFactory()
+        habit_list = [habit1, habit2, habit3]
         
+
+        habit_tracker = HabitTrackerFactory()
+        habit_utils.register_habits_with_habit_tracker(habit_list, habit_tracker)
+        habit_list_query = list(habit_tracker.habits.all())
+        self.assertEquals(habit_list, habit_list_query)
 

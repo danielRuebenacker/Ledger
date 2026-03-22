@@ -25,6 +25,7 @@ class UserProfileFactory(factory.django.DjangoModelFactory):
 class HabitFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = Habit
+    name = factory.Sequence(lambda n: f"habit{n+1:02d}")  
     is_community = True
     habit_type = Habit.TYPE_DO
     points = 10
