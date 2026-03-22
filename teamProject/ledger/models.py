@@ -85,7 +85,7 @@ class HabitTracker(models.Model):
     # this will be a MONTH field (set to 1st of month) (can only create habit trackers for THIS month (present))
     month = models.DateField(default=date.get_first_of_this_month)
     # associated habits (M-N relationship)
-    habits = models.ManyToManyField(Habit, related_name="habit_trackers")
+    habits = models.ManyToManyField(Habit, related_name="habits")
 
     class Meta:
         # tells django this combination must be unique
