@@ -39,6 +39,9 @@ class Habit(models.Model):
 
     def __str__(self):
         return self.name
+
+    class Meta:
+        unique_together = ('name', 'habit_type')
     
 class Nudge(models.Model):
     nudger = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name="sent_nudge")
