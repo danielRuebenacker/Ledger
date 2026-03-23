@@ -1,8 +1,8 @@
-from ledger.models import UserProfile,Friendship
-from django.http import HttpResponse, JsonResponse
+from ledger.models import UserProfile
+from ledger.utils.friends import get_friends_for_user
+from django.http import JsonResponse
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
-from django.views.decorators.http import require_POST
 from django.contrib.auth.models import User
 import json
 import os
@@ -45,8 +45,7 @@ def profile(request, username=None):
 
     picture_url = user_profile.picture.url if user_profile.picture else '/media/guest.jpg'
 
-    friend_count = (Friendship.objects.filter(requester=user_profile, status='ACCEPTED').count() + 
-    Friendship.objects.filter(requested=user_profile, status='ACCEPTED').count())
+    friend_count = get_friends_for_user(user_profile).count()
 
     context_dict = {
         'profile_user': user,
