@@ -1,0 +1,100 @@
+.settings-container {
+    padding: 0 20vw;
+}
+
+.settings-title {
+    font-size: 2rem;
+    margin-bottom: 24px;
+    margin-top: 20px;
+}
+
+.settings-section-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-top: 32px;
+    margin-bottom: 8px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid #ccc;
+}
+
+.settings-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 12px 0;
+}
+
+.settings-row span {
+    font-weight: 500;
+}
+
+#aboutme {
+    width: 100%;
+    border-radius: 8px;
+    padding: 10px;
+    font-size: 0.95rem;
+    box-sizing: border-box;
+    resize: vertical;
+}
+
+#dark-light, #profile-pic-btn {
+    padding: 10px 24px;
+    border-radius: 999px;
+    border: 1px solid #555;
+    cursor: pointer;
+    font-size: 0.95rem;
+    min-width: 160px;
+}
+
+body:not(.dark-mode) #dark-light,
+body:not(.dark-mode) #profile-pic-btn {
+    background-color: white;
+    color: #333;
+}
+
+body.dark-mode #dark-light,
+body.dark-mode #profile-pic-btn {
+    background-color: transparent;
+    color: white;
+    border-color: #888;
+}
+
+body.dark-mode .settings-section-title {
+    border-bottom-color: #555;
+}
+
+.profile-pic-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.profile-preview-img {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #ccc;
+}
+
+.pill-btn {
+    padding: 10px 24px;
+    border-radius: 999px;
+    border: 1px solid #555;
+    cursor: pointer;
+    font-size: 0.95rem;
+    min-width: 160px;
+    text-align: center;
+}
+
+body:not(.dark-mode) .pill-btn {
+    background-color: white;
+    color: #333;
+}
+
+body.dark-mode .pill-btn {
+    background-color: transparent;
+    color: white;
+    border-color: #888;
+}

@@ -1,0 +1,38 @@
+{% extends 'ledger/base.html' %}
+{% load staticfiles %}
+
+{% block title_block %}
+    Settings
+{% endblock %}
+
+{% block body_block %}
+<link rel="stylesheet" href="{% static 'css/settings.css' %}">
+<div class="settings-container">
+
+    <h1 class="settings-title">Settings</h1>
+
+    <h2 class="settings-section-title">Browser Preference</h2>
+    <div class="settings-row">
+        <span>Theme</span>
+        <button id="dark-light">Switch to Dark Mode</button>
+    </div>
+
+    <h2 class="settings-section-title">User Account</h2>
+    <div class="settings-row">
+        <span>Profile Picture</span>
+        <div class="profile-pic-wrapper">
+            <img id="profile-preview" src="{{ picture_url }}" class="profile-preview-img">
+            <label for="profile-pic-input" class="pill-btn">Upload Picture</label>
+            <input type="file" id="profile-pic-input" accept="image/*" style="display:none">
+        </div>
+    </div>
+    <div class="settings-row">
+        <span>About Me</span>
+        <small id="aboutme-status" style="color: gray;"></small>
+    </div>
+    <textarea id="aboutme" rows="7" placeholder="Write your about me here">{{ about_me }}</textarea>
+
+</div>
+
+<script src="{% static 'js/settings.js' %}"></script>
+{% endblock %}

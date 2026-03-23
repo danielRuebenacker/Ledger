@@ -1,10 +1,20 @@
 from django.db import models
 from django.contrib.auth.models import User
 
+def user_profile_pic_path(instance, filename):
+    import time
+    ext = filename.split('.')[-1]
+    return f'profile_images/user_{instance.user.id}_{int(time.time())}.{ext}'
+
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
 
-    picture = models.ImageField(upload_to='profile_images', blank=True)
+    picture = models.ImageField(upload_to=user_profile_pic_path, blank=True)
+    about_me = models.TextField(blank=True, default='')
+    LIGHT = 'light'
+    DARK = 'dark'
+    THEME_CHOICES = ((LIGHT, 'Light'), (DARK, 'Dark'))
+    theme = models.CharField(max_length=10, choices=THEME_CHOICES, default=LIGHT)
     # other data to store defined here 
     # ...
 
