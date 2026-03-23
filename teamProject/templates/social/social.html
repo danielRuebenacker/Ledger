@@ -7,41 +7,148 @@
     <div style="display: flex; gap: 30px; align-items: flex-start;">
 
         <div style="width: 180px; flex-shrink: 0; border: 1px solid #ccc; border-radius: 12px; padding: 20px; background-color: #fafafa;">
-            <a href="{% url 'ledger:social' %}"
-               style="display: block; width: 100%; padding: 8px 12px; margin-bottom: 10px; background-color: #4a90d9; color: white; text-align: center; text-decoration: none; border-radius: 8px; font-size: 14px; box-sizing: border-box;">
+
+            <a href="{% url 'ledger:social' %}?tab=search"
+               style="display: block; width: 100%; padding: 8px 12px; margin-bottom: 10px;
+               {% if active_tab == 'search' %}
+                   background-color: #4a90d9; color: white; border: none;
+               {% else %}
+                   background-color: white; color: #222; border: 1px solid #ccc;
+               {% endif %}
+               text-align: center; text-decoration: none; border-radius: 8px; font-size: 14px; box-sizing: border-box;">
+                Find Users
+            </a>
+
+            <a href="{% url 'ledger:social' %}?tab=friends"
+               style="display: block; width: 100%; padding: 8px 12px; margin-bottom: 10px;
+               {% if active_tab == 'friends' %}
+                   background-color: #4a90d9; color: white; border: none;
+               {% else %}
+                   background-color: white; color: #222; border: 1px solid #ccc;
+               {% endif %}
+               text-align: center; text-decoration: none; border-radius: 8px; font-size: 14px; box-sizing: border-box;">
                 Friends
             </a>
-            <a href="#"
-               style="display: block; width: 100%; padding: 8px 12px; background-color: white; color: #222; text-align: center; text-decoration: none; border-radius: 8px; border: 1px solid #ccc; font-size: 14px; box-sizing: border-box;">
-                Requests
+
+            <a href="{% url 'ledger:social' %}?tab=requests"
+               style="display: block; width: 100%; padding: 8px 12px;
+               {% if active_tab == 'requests' %}
+                   background-color: #4a90d9; color: white; border: none;
+               {% else %}
+                   background-color: white; color: #222; border: 1px solid #ccc;
+               {% endif %}
+               text-align: center; text-decoration: none; border-radius: 8px; font-size: 14px; box-sizing: border-box;">
+                Friend Requests
             </a>
         </div>
 
         <div style="flex: 1; border: 1px solid #ccc; border-radius: 12px; padding: 25px; background-color: #fff; min-height: 300px;">
 
             <form method="get" action="" style="margin-bottom: 16px; display: flex; gap: 10px;">
-                <input type="text" name="q" value="{{ query }}" placeholder="Search username..."
-                    style="flex: 1; padding: 10px 14px; border: 1px solid #ccc; border-radius: 8px; font-size: 14px; box-sizing: border-box;">
-                <button type="submit" style="padding: 10px 16px; background-color: #222; color: white; border: none; border-radius: 8px; font-size: 14px; cursor: pointer;">Search</button>
+                <input type="hidden" name="tab" value="{{ active_tab }}">
+                <input
+                    type="text"
+                    name="q"
+                    value="{{ query }}"
+                    {% if active_tab == 'friends' %}
+                        placeholder="Search friends..."
+                    {% elif active_tab == 'requests' %}
+                        placeholder="Search requests..."
+                    {% else %}
+                        placeholder="Search users..."
+                    {% endif %}
+                    style="flex: 1; padding: 10px 14px; border: 1px solid #ccc; border-radius: 8px; font-size: 14px; box-sizing: border-box;"
+                >
+                <button
+                    type="submit"
+                    style="padding: 10px 16px; background-color: #222; color: white; border: none; border-radius: 8px; font-size: 14px; cursor: pointer;">
+                    Search
+                </button>
             </form>
 
-            {% if friends_list %}
-                {% for friend in friends_list %}
-                <div style="border: 1px solid #ddd; border-radius: 10px; padding: 16px 22px; margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center; background-color: #fafafa;">
-                    <span style="font-size: 16px;">
-                        {{ friend.username }}
-                        <span style="color: #aaa; font-size: 18px; margin-left: 6px;">&#9711;</span>
-                    </span>
-                    <span style="font-size: 15px; color: #444;">
-                        {{ friend.streak }}🔥 &nbsp;&nbsp; {{ friend.points }}⭐
-                    </span>
-                </div>
-                {% endfor %}
-            {% else %}
-                <p style="color: #888; font-size: 16px;">You have no friends yet. Use the search bar above to find users.</p>
-            {% endif %}
-        </div>
+            {% if active_tab == 'search' %}
+                {% if user_list %}
+                    {% for user_item in user_list %}
+                    <div style="border: 1px solid #ddd; border-radius: 10px; padding: 16px 22px; margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center; background-color: #fafafa;">
+                        <span style="font-size: 16px;">
+                            <a href="{% url 'ledger:profile' %}" style="text-decoration: none; color: inherit;">
+                                {{ user_item.username }}
+                            </a>
+                            <span style="color: #aaa; font-size: 18px; margin-left: 6px;">&#9711;</span>
+                        </span>
 
+                        <div style="display: flex; align-items: center; gap: 14px;">
+                            <span style="font-size: 15px; color: #444;">
+                                {{ user_item.streak }}🔥 &nbsp;&nbsp; {{ user_item.points }}⭐
+                            </span>
+
+                            {% if user_item.show_add_button %}
+                                <button
+                                    type="button"
+                                    style="padding: 8px 14px; background-color: #4a90d9; color: white; border: none; border-radius: 8px; font-size: 14px; cursor: pointer;">
+                                    Add Friend
+                                </button>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <p style="color: #888; font-size: 16px;">No users found.</p>
+                {% endif %}
+            {% endif %}
+
+            {% if active_tab == 'friends' %}
+                {% if user_list %}
+                    {% for user_item in user_list %}
+                    <div style="border: 1px solid #ddd; border-radius: 10px; padding: 16px 22px; margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center; background-color: #fafafa;">
+                        <span style="font-size: 16px;">
+                            <a href="{% url 'ledger:profile' %}" style="text-decoration: none; color: inherit;">
+                                {{ user_item.username }}
+                            </a>
+                            <span style="color: #aaa; font-size: 18px; margin-left: 6px;">&#9711;</span>
+                        </span>
+
+                        <span style="font-size: 15px; color: #444;">
+                            {{ user_item.streak }}🔥 &nbsp;&nbsp; {{ user_item.points }}⭐
+                        </span>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <p style="color: #888; font-size: 16px;">You have no friends yet.</p>
+                {% endif %}
+            {% endif %}
+
+            {% if active_tab == 'requests' %}
+                {% if user_list %}
+                    {% for user_item in user_list %}
+                    <div style="border: 1px solid #ddd; border-radius: 10px; padding: 16px 22px; margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center; background-color: #fafafa;">
+                        <span style="font-size: 16px;">
+                            <a href="{% url 'ledger:profile' %}" style="text-decoration: none; color: inherit;">
+                                {{ user_item.username }}
+                            </a>
+                            <span style="color: #aaa; font-size: 18px; margin-left: 6px;">&#9711;</span>
+                        </span>
+
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <button
+                                type="button"
+                                style="padding: 8px 14px; background-color: #4a90d9; color: white; border: none; border-radius: 8px; font-size: 14px; cursor: pointer;">
+                                Accept
+                            </button>
+                            <button
+                                type="button"
+                                style="padding: 8px 14px; background-color: white; color: #222; border: 1px solid #ccc; border-radius: 8px; font-size: 14px; cursor: pointer;">
+                                Decline
+                            </button>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <p style="color: #888; font-size: 16px;">No friend requests yet.</p>
+                {% endif %}
+            {% endif %}
+
+        </div>
     </div>
 </div>
 {% endblock %}

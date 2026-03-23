@@ -2,6 +2,9 @@ from django.http import HttpResponse
 from django.shortcuts import render
 from .models import UserProfile, Friendship, Nudge
 from django.contrib.auth.decorators import login_required
+from django.shortcuts import render, redirect
+from .models import UserProfile, Friendship, FriendRequest
+from django.contrib.auth.models import User
 
 # Create your views here.
 
@@ -21,66 +24,55 @@ def leaderboards(request):
     return render(request, 'ledger/myhabits.html', context=context_dict)
 
 
+
 @login_required
 def social(request):
-    if not request.user.is_authenticated:
-        return redirect('/login/')
-
-    current_profile, _ = UserProfile.objects.get_or_create(user=request.user)
-
-    friendships = Friendship.objects.filter(user=current_profile).select_related('friend__user')
-    friends_list = []
-    for friendship in friendships:
-        friend_profile = friendship.friend
-        friends_list.append({
-            'id': friend_profile.id,
-            'username': friend_profile.user.username,
-            'streak': 0,
-            'points': 0,
-        })
-
+    tab = request.GET.get('tab', 'search').strip()
     query = request.GET.get('q', '').strip()
-    search_results = []
-    if query:
-        profiles = UserProfile.objects.exclude(id=current_profile.id).filter(
-            user__username__icontains=query
-        ).select_related('user')
 
-        for profile in profiles:
-            is_friend = Friendship.objects.filter(
-                user=current_profile,
-                friend=profile
-            ).exists()
+    user_list = []
 
-            friend_request = (
-                FriendRequest.objects.filter(
-                    requester=current_profile,
-                    requested=profile
-                ).first()
-                or
-                FriendRequest.objects.filter(
-                    requester=profile,
-                    requested=current_profile
-                ).first()
-            )
+    if tab == 'friends':
+        current_profile, _ = UserProfile.objects.get_or_create(user=request.user)
+        friendships = Friendship.objects.filter(user=current_profile).select_related('friend__user')
 
-            if is_friend:
-                button_state = 'friends'
-            elif friend_request and friend_request.status == FriendRequest.PENDING:
-                button_state = 'pending'
-            else:
-                button_state = 'add'
+        if query:
+            friendships = friendships.filter(friend__user__username__icontains=query)
 
-            search_results.append({
-                'id': profile.id,
-                'username': profile.user.username,
-                'button_state': button_state,
+        for friendship in friendships:
+            friend_profile = friendship.friend
+            user_list.append({
+                'id': friend_profile.id,
+                'username': friend_profile.user.username,
+                'streak': 0,
+                'points': 0,
+                'show_add_button': False,
             })
 
+    elif tab == 'requests':
+        user_list = []
+
+    else:
+        users = User.objects.exclude(id=request.user.id)
+
+        if query:
+            users = users.filter(username__icontains=query)
+
+        for user in users:
+            user_list.append({
+                'id': user.id,
+                'username': user.username,
+                'streak': 0,
+                'points': 0,
+                'show_add_button': True,
+            })
+
+        tab = 'search'
+
     return render(request, 'social/social.html', {
-        'friends_list': friends_list,
-        'search_results': search_results,
+        'user_list': user_list,
         'query': query,
+        'active_tab': tab,
     })
 
 def profile(request):
