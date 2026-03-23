@@ -7,11 +7,11 @@
     <div style="display: flex; gap: 30px; align-items: flex-start;">
 
         <div style="width: 180px; flex-shrink: 0; border: 1px solid #ccc; border-radius: 12px; padding: 20px; background-color: #fafafa;">
-            <a href="{% url 'ledger:friends' %}"
+            <a href="{% url 'ledger:social' %}"
                style="display: block; width: 100%; padding: 8px 12px; margin-bottom: 10px; background-color: #4a90d9; color: white; text-align: center; text-decoration: none; border-radius: 8px; font-size: 14px; box-sizing: border-box;">
                 Friends
             </a>
-            <a href="{% url 'ledger:requests' %}"
+            <a href="#"
                style="display: block; width: 100%; padding: 8px 12px; background-color: white; color: #222; text-align: center; text-decoration: none; border-radius: 8px; border: 1px solid #ccc; font-size: 14px; box-sizing: border-box;">
                 Requests
             </a>
@@ -38,7 +38,7 @@
                 </div>
                 {% endfor %}
             {% else %}
-                <p style="color: #888; font-size: 16px;">You have no friends yet. <a href="{% url 'ledger:search' %}">Search for users</a> to add friends.</p>
+                <p style="color: #888; font-size: 16px;">You have no friends yet. Use the search bar above to find users.</p>
             {% endif %}
         </div>
 
