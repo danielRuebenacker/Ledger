@@ -1,7 +1,7 @@
-from django.http import HttpResponse
-from django.shortcuts import render
-from ledger.utils import habit_utils
+from django.shortcuts import redirect, render
+from ledger.utils import habit_utils, date
 from ledger.forms import HabitTrackerForm
+from ledger.models import HabitTracker
 
 # Create your views here.
 
@@ -14,10 +14,10 @@ def myhabits(request):
     context_dict = {}
     user_profile = request.user.userprofile
     # if habit tracker is not created present form view
-    habit_tracker = habit_utils.get_current_month_habit_tracker(user_profile)
+    habit_tracker, created = HabitTracker.objects.get_or_create(user=user_profile, month=date.get_first_of_this_month())
     
-    if not habit_tracker:
-        # create one
+    # newly created
+    if created:
         if request.method == 'POST':
             form = HabitTrackerForm(request.POST)
 
@@ -29,6 +29,8 @@ def myhabits(request):
 
                 # makes into habits/gets habit then adds to habit tracker
                 habit_utils.get_or_create_habits_then_register(dos_strings, donts_strings, easy_wins_strings, habit_tracker)
+
+                return redirect('myhabits.html')
         else:
             form = HabitTrackerForm()
 
