@@ -1,5 +1,5 @@
 from ledger.models import UserProfile, Friendship, FriendRequest
-from datetime import datetime
+from ledger.utils import date
 
 
 def get_friends_for_user(user):
@@ -25,7 +25,7 @@ def accept_friend_request(sender, receiver):
     if not friend_request:
         return
     friend_request.status = FriendRequest.ACCEPTED
-    friend_request.date_accepted = datetime.today
+    friend_request.date_accepted = date.today()
     friend_request.save()
     # make friendship entries in friendship table
     _ = Friendship.objects.create(user=sender, friend=receiver)
@@ -33,7 +33,7 @@ def accept_friend_request(sender, receiver):
     _ = Friendship.objects.create(user=receiver, friend=sender)
 
 def reject_friend_request(user, rejected_user):
-    friend_request = get_friend_request(sender, receiver)
+    friend_request = get_friend_request(user, rejected_user)
     if not friend_request:
         return
     friend_request.status = FriendRequest.REJECTED
