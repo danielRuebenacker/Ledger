@@ -26,7 +26,7 @@ def get_habit_tracker_habit_entries(habit_tracker):
 
 def get_day(habit_tracker, date):
     # date is a datetime object
-    day, _ = Day.objects.get_or_create(habit_tracker=habit_tracker, date=date)
+    day, _ = Day.objects.get_or_create(habit_tracker=habit_tracker, date=date, defaults = {'completed_on_day': False})
     return day
 
 def get_or_create_habits_from_list(habit_strings, habit_type):
@@ -52,11 +52,7 @@ def get_or_create_habits_then_register(dos_strings, donts_strings, easy_wins_str
          register_habits_with_habit_tracker(habit_type, habit_tracker)
 
 
-def log_bool_habit(habit_tracker, habit, done, date):
-    # bool habit entry needs: day, habit, and done
-    # date tracker is a datetime object
-    # if we are logging it's got to be this month
-    day = get_day(habit_tracker=habit_tracker, date=date)
+def log_bool_habit(habit, done, day):
     bool_habit_entry = BoolHabitEntry.objects.create(day=day, habit=habit, done=done)
     return bool_habit_entry
 
@@ -72,13 +68,14 @@ def calculate_streak(user):
         streak += 1
 
 def create_empty_habit_entries_for_day(habit_tracker, date, habits):
+    day = get_day(habit_tracker=habit_tracker, date=date)
     for habit in habits:
         # all false
-        log_bool_habit(habit_tracker=habit_tracker, habit=habit, done=False, date=date)
+        log_bool_habit(habit=habit, done=False, day=day)
 
 
 def create_empty_days_until_today(date, habit_tracker):
     # day: datetime object
-    habits = habit_tracker.habits
-    for single_date in date_utils.daterange(date, date.today()):
+    habits = habit_tracker.habits.all()
+    for single_date in date_utils.daterange(date, date_utils.today()):
         create_empty_habit_entries_for_day(habit_tracker, single_date, habits)

@@ -44,7 +44,6 @@ class TestHabitTrackerGet(TestCase):
     def test_log_entry(self):
         # given habit, user, day, and done log habit
         day = DayFactory()
-        date = day.date
         habit = HabitFactory()
 
         # these shenanigans are for getting the user
@@ -52,7 +51,7 @@ class TestHabitTrackerGet(TestCase):
         user = habit_tracker.user
 
         # now test whether actual entry is the same as the one created by utils
-        util_bool_habit_entry = habit_utils.log_bool_habit(habit_tracker=habit_tracker, habit=habit, date=date, done=True)
+        util_bool_habit_entry = habit_utils.log_bool_habit(habit=habit, day=day, done=True)
         bool_habit_entry = BoolHabitEntry.objects.get(day=day, habit=habit)
         self.assertEquals(bool_habit_entry, util_bool_habit_entry)
 
