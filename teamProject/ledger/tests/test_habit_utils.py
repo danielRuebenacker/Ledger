@@ -82,11 +82,14 @@ class TestHabitTrackerForm(TestCase):
     def test_full_habit_tracker_creation(self):
         url = reverse('ledger:myhabits')
 
-        response = self.client.post(url, {
+        habits_dict = {
             'dos': 'read, bed before 12',
             'donts': 'caffeine', 
             'easy_wins': 'go outside, drink water',
-        })
+            'numeric': 'screentime, hours of sleep',
+        }
+        NUM_HABITS = 7 
+        response = self.client.post(url, habits_dict)
 
         # 302: redirect
         self.assertEqual(response.status_code, 302)
@@ -94,11 +97,22 @@ class TestHabitTrackerForm(TestCase):
         habit_tracker = habit_utils.get_current_month_habit_tracker(self.profile)
 
         # 5 habits 
-        self.assertEqual(Habit.objects.count(), 5)
+        self.assertEqual(Habit.objects.count(), NUM_HABITS)
 
-        self.assertTrue(Habit.objects.filter(name='read').exists())
-        self.assertTrue(Habit.objects.filter(name='caffeine').exists())
+        # check exist
+        read = Habit.objects.filter(name='read')
+        caffeine = Habit.objects.filter(name='caffeine')
+        hours_of_sleep = Habit.objects.filter(name='hours of sleep')
+        self.assertTrue(read.exists())
+        self.assertTrue(caffeine.exists())
+        self.assertTrue(hours_of_sleep.exists())
+
+        # check correct type
+        self.assertEquals(read.first().habit_type, Habit.TYPE_DO)
+        self.assertEquals(caffeine.first().habit_type, Habit.TYPE_DONT)
+        self.assertEquals(hours_of_sleep.first().habit_type, Habit.TYPE_NUMERIC)
+
 
         # many to many habit count
-        self.assertEquals(habit_tracker.habits.count(), 5)
+        self.assertEquals(habit_tracker.habits.count(), NUM_HABITS)
 

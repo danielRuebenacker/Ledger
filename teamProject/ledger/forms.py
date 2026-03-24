@@ -13,3 +13,4 @@ class HabitTrackerForm(forms.Form):
     dos = TagField(label='Must DOs', place_holder='Habit you want to DO everyday..', delimiters=',', data_list=None)
     donts = TagField(label='Must NOT DOs', place_holder='Habit you want to NOT DO everyday..', delimiters=',', data_list=None)
     easy_wins = TagField(label='Easy Wins', place_holder='Habits that motivate you to keep going..', delimiters=',', data_list=None)
+    numeric = TagField(label='Numeric Habits', place_holder='E.g. Screentime', delimiters=',', data_list=None)
