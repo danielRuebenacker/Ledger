@@ -22,14 +22,13 @@ def index(request):
 
     return render(request, 'ledger/index.html', context=context_dict)
 
+@login_required
 def myhabits(request):
     context_dict = {}
     user_profile = request.user.userprofile
-    new_signup = True
     # if habit tracker is not created present form view
-    habit_tracker, created = HabitTracker.objects.get_or_create(user=user_profile, month=date_utils.get_first_of_this_month())
-    if not created:
-        new_signup = False
+    habit_tracker, _ = HabitTracker.objects.get_or_create(user=user_profile, month=date_utils.get_first_of_this_month())
+
     
     if request.method == 'POST':
         form = HabitTrackerForm(request.POST)
@@ -47,10 +46,9 @@ def myhabits(request):
             # makes into habits/gets habit then adds to habit tracker
             habit_utils.get_or_create_habits_then_register(*habit_string_lists, habit_tracker)
 
-            new_signup = False
             return redirect('ledger:myhabits')
     else:
-        if new_signup: 
+        if not habit_utils.check_if_any_habits_added(habit_tracker): 
             form = HabitTrackerForm()
 
             context_dict['form'] = form

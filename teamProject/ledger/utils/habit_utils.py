@@ -1,6 +1,9 @@
 from ledger.models import UserProfile, HabitTracker, Day, Habit, BoolHabitEntry
 from ledger.utils import date_utils
 
+def check_if_any_habits_added(habit_tracker):
+    return habit_tracker.habits.exists()
+
 def get_user_habit_trackers(user):
     return list(user.habit_trackers.all().order_by('month'))
 
