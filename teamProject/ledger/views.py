@@ -24,13 +24,16 @@ def myhabits(request):
 
         if form.is_valid():
             # ignore empty strings
-            dos_strings = [h.strip() for h in form.cleaned_data.get('dos') if h]
-            donts_strings = [h.strip() for h in form.cleaned_data.get('donts') if h]
-            easy_wins_strings = [h.strip() for h in form.cleaned_data.get('easy_wins') if h] 
-            numeric_strings = [h.strip() for h in form.cleaned_data.get('numeric') if h] 
+            clean = lambda x: x.strip().lower()
+
+            # get all cleaned data, and clean according to our clean
+            habit_string_lists = [
+                    [clean(h) for h in form.cleaned_data.get(f, []) if h] 
+                    for f in ('dos', 'donts', 'easy_wins', 'numeric')
+            ]
 
             # makes into habits/gets habit then adds to habit tracker
-            habit_utils.get_or_create_habits_then_register(dos_strings, donts_strings, easy_wins_strings, numeric_strings, habit_tracker)
+            habit_utils.get_or_create_habits_then_register(*habit_string_lists, habit_tracker)
 
             new_signup = False
             return redirect('ledger:myhabits')
