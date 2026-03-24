@@ -1,5 +1,5 @@
 from django.shortcuts import redirect, render
-from ledger.utils import habit_utils, date
+from ledger.utils import habit_utils, date_utils
 from ledger.forms import HabitTrackerForm
 from ledger.models import HabitTracker
 
@@ -15,7 +15,7 @@ def myhabits(request):
     user_profile = request.user.userprofile
     new_signup = True
     # if habit tracker is not created present form view
-    habit_tracker, created = HabitTracker.objects.get_or_create(user=user_profile, month=date.get_first_of_this_month())
+    habit_tracker, created = HabitTracker.objects.get_or_create(user=user_profile, month=date_utils.get_first_of_this_month())
     if not created:
         new_signup = False
     

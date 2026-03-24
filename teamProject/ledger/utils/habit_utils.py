@@ -5,10 +5,9 @@ def get_user_habit_trackers(user):
     return list(user.habit_trackers.all().order_by('month'))
 
 def get_current_month_habit_tracker(user):
-    # here user is a user profile
-    this_month = date_utils.get_first_of_this_month()
     # get this months habit tracker
-    habit_tracker = HabitTracker.objects.get_or_create(user=user)
+    habit_tracker, _ = HabitTracker.objects.get_or_create(user=user)
+    return habit_tracker
 
 def get_habit_tracker_habit_entries(habit_tracker):
     # this method takes a habit tracker and fetches all habit entries and organises them into a dict
@@ -24,7 +23,8 @@ def get_habit_tracker_habit_entries(habit_tracker):
 
 def get_day(habit_tracker, date):
     # date is a datetime object
-    return Day.objects.get_or_create(habit_tracker=habit_tracker, date=date)
+    day, _ = Day.objects.get_or_create(habit_tracker=habit_tracker, date=date)
+    return day
 
 def get_or_create_habits_from_list(habit_strings, habit_type):
     habits = []

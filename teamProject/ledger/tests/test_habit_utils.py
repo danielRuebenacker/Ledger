@@ -1,8 +1,7 @@
 from django.shortcuts import reverse
 from django.test import TestCase
-from ledger.utils import habit_utils, date
+from ledger.utils import habit_utils, date_utils
 from .test_factories import *
-from datetime import datetime
 
 class TestHabitTrackerGet(TestCase):
     def test_get_habit_tracker(self):
@@ -13,10 +12,10 @@ class TestHabitTrackerGet(TestCase):
 
     def test_get_all_user_habit_trackers(self):
         user = UserProfileFactory()
-        feb = date.get_first_of_n_months_ago(1)
-        jan = date.get_first_of_n_months_ago(2)
-        dec = date.get_first_of_n_months_ago(3)
-        nov = date.get_first_of_n_months_ago(4)
+        feb = date_utils.get_first_of_n_months_ago(1)
+        jan = date_utils.get_first_of_n_months_ago(2)
+        dec = date_utils.get_first_of_n_months_ago(3)
+        nov = date_utils.get_first_of_n_months_ago(4)
 
         _ = HabitTrackerFactory(user=user, month=feb)
         _ = HabitTrackerFactory(user=user, month=jan)
@@ -28,14 +27,14 @@ class TestHabitTrackerGet(TestCase):
 
     def test_get_this_month_user_habit_trackers(self):
         user = UserProfileFactory()
-        this_month = date.get_first_of_this_month()
+        this_month = date_utils.get_first_of_this_month()
         habit_tracker = HabitTrackerFactory(user=user, month=this_month)
         util_habit_tracker = habit_utils.get_current_month_habit_tracker(user=user)
         self.assertEquals(habit_tracker, util_habit_tracker)
 
     def test_get_day(self):
         # given a day (datetime) and a habit tracker return day
-        today = date.today()
+        today = date_utils.today()
         day = DayFactory(date=today)
         # subfactory created habit_tracke
         habit_tracker = day.habit_tracker
@@ -53,7 +52,7 @@ class TestHabitTrackerGet(TestCase):
         user = habit_tracker.user
 
         # now test whether actual entry is the same as the one created by utils
-        util_bool_habit_entry = habit_utils.log_bool_habit(habit=habit, user=user, date=date, done=True)
+        util_bool_habit_entry = habit_utils.log_bool_habit(habit_tracker=habit_tracker, habit=habit, date=date, done=True)
         bool_habit_entry = BoolHabitEntry.objects.get(day=day, habit=habit)
         self.assertEquals(bool_habit_entry, util_bool_habit_entry)
 
