@@ -80,3 +80,8 @@ def profile(request):
 
     return render(request, 'ledger/profile.html', context=context_dict)
 
+def profile(request):
+    context_dict = {}
+
+    return render(request, 'ledger/profile.html', context=context_dict)
+
