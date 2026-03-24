@@ -1,13 +1,13 @@
+# factory_boy 
 import factory
-from django.contrib.auth.models import User
-from ledger.models import BoolHabitEntry, Habit, HabitTracker, DayTracker
-from ledger.models import UserProfile
-from datetime import datetime
 
-# helper
-def get_first_of_month():
-    # see https://www.django-antipatterns.com/pattern/date-time-field-s-that-store-a-week-or-month.html
-    return datetime.today().replace(day = 1, second = 0, microsecond = 0)
+# ledger specific models 
+from django.contrib.auth.models import User
+from ledger.models import BoolHabitEntry, Habit, HabitTracker, Day
+from ledger.models import UserProfile
+
+# our helper date utilities (e.g. provides get_first_of_this_month)
+from ledger.utils import date
 
 # factory for base user model (not used directly)
 class UserFactory(factory.django.DjangoModelFactory):
@@ -34,20 +34,20 @@ class HabitTrackerFactory(factory.django.DjangoModelFactory):
         model = HabitTracker
     user = factory.SubFactory(UserProfileFactory)
     # lazy = only call when necessary
-    month = factory.LazyFunction(get_first_of_month)
+    month = factory.LazyFunction(date.get_first_of_this_month)
     # add habits once initialised...
 
-class DayTrackerFactory(factory.django.DjangoModelFactory):
+class DayFactory(factory.django.DjangoModelFactory):
     class Meta:
-        model = DayTracker
-    tracker = factory.SubFactory(HabitTrackerFactory)
-    date = factory.LazyFunction(datetime.today)
+        model = Day
+    habit_tracker = factory.SubFactory(HabitTrackerFactory)
+    date = factory.LazyFunction(date.today)
     completed_on_day = True
 
 class BoolHabitEntryFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = BoolHabitEntry
-    day_tracker = factory.SubFactory(DayTrackerFactory)
+    day = factory.SubFactory(DayFactory)
     habit = factory.SubFactory(HabitFactory)
     done = True
     

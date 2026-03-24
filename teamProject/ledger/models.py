@@ -5,6 +5,8 @@ class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
 
     picture = models.ImageField(upload_to='profile_images', blank=True)
+    
+    about = models.TextField(blank=True)
     # other data to store defined here 
     # ...
 
@@ -49,7 +51,7 @@ class Nudge(models.Model):
     def __str__(self):
         return f"User: {self.nudger} nudged User: {self.nudged} notified {self.notified}"
       
-class Friendship(models.Model):
+class FriendRequest(models.Model):
     PENDING = "PENDING"
     ACCEPTED = "ACCEPTED"
     REJECTED = "REJECTED"
@@ -68,13 +70,21 @@ class Friendship(models.Model):
     def __str__(self):
         return f"User: {self.requester} requested User: {self.requested} currently {self.status}"
 
+class Friendship(models.Model):
+    user = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name="friends")
+    friend = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name="friend_of")
+
+    def __str__(self):
+        return f"{self.user} is friends with {self.friend}"
+
+
 class HabitTracker(models.Model):
     # belongs to one user
-    user = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
+    user = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name="habit_trackers")
     # this will be a MONTH field (set to 1st of month)
     month = models.DateField();
     # associated habits (M-N relationship)
-    habits = models.ManyToManyField(Habit)
+    habits = models.ManyToManyField(Habit, related_name="habit_trackers")
 
     class Meta:
         # tells django this combination must be unique
@@ -83,8 +93,8 @@ class HabitTracker(models.Model):
     def __str__(self):
         return self.user.user.username + self.month.strftime("%m-%Y")
 
-class DayTracker(models.Model): 
-    tracker = models.ForeignKey(HabitTracker, on_delete=models.CASCADE)
+class Day(models.Model): 
+    habit_tracker = models.ForeignKey(HabitTracker, on_delete=models.CASCADE, related_name="days")
     # specific day
     date = models.DateField()
 
@@ -92,16 +102,16 @@ class DayTracker(models.Model):
 
     class Meta:
         # tells django this combination must be unique
-        unique_together = ("tracker", "date")
+        unique_together = ("habit_tracker", "date")
 
 class BoolHabitEntry(models.Model):
-    day_tracker = models.ForeignKey(DayTracker, on_delete=models.CASCADE)
+    day = models.ForeignKey(Day, on_delete=models.CASCADE, related_name="bool_habit_entries")
     habit = models.ForeignKey(Habit, on_delete=models.CASCADE)
 
     done = models.BooleanField(default=False);
 
 class JournalEntry(models.Model):
-    day_tracker = models.ForeignKey(DayTracker, on_delete=models.CASCADE)
+    day = models.ForeignKey(Day, on_delete=models.CASCADE)
     journal_text = models.TextField(blank=False)
 
     def __str__(self):
