@@ -4,12 +4,12 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'teamProject.settings')
 
 import django
 django.setup()
-from ledger.models import UserProfile, Habit, Nudge, Friendship, HabitTracker, DayTracker, BoolHabitEntry, JournalEntry
+from ledger.models import UserProfile, Habit, Nudge, Friendship, HabitTracker, Day, BoolHabitEntry, JournalEntry, FriendRequest
 from django.contrib.auth.models import User
 import random
 from datetime import datetime
 from datetime import timedelta
-from ledger.tests.test_factories import get_first_of_month
+from ledger.utils.date import get_first_of_this_month
 
 def populate_users():
     names = ["Jones", "Smith", "Miller", "Davis", "David", "Wilson", "Johnson", "Taylor", "Kelly", "Madison", "Parker"]
@@ -81,14 +81,15 @@ def populate_trackers():
         for habit in habits:
             p_habit = random.randint(0, 100)
             if p_habit < p_of_habit:
-                user_habits.append(habits)
-        tracker = add_habit_tracker(user, get_first_of_month(), user_habits)
+                user_habits.append(habit)
+        tracker = add_habit_tracker(user, get_first_of_this_month(), user_habits)
         range_random = random.randint(3, 7)
         day_trackers = []
         for time_delta in range(range_random):
             day_trackers.append(add_day_tracker(tracker, datetime.today() - timedelta(time_delta), True))
         for day_tracker in day_trackers:
-            bool_habit_entry(day_tracker, tracker , True)
+            for habit in day_tracker.habit_tracker.habits.all():
+                bool_habit_entry(day_tracker, habit, True)
             add_journal_entry(day_tracker)
         
 
@@ -109,7 +110,11 @@ def add_Nudge(nudger, nudged, date_of_nudge, notified):
     return nudge
 
 def add_Friendship(requester, requested, status, date_accepted):
-    friendship = Friendship.objects.get_or_create(requester=requester, requested=requested, status=status, date_accepted=date_accepted)[0]
+    friendship = FriendRequest.objects.get_or_create(requester=requester, requested=requested, status=status, date_accepted=date_accepted)[0]
+    friendship_confirmed_0 = Friendship.objects.get_or_create(user=requester,friend=requested)[0]
+    friendship_confirmed_1 = Friendship.objects.get_or_create(user=requested,friend=requester)[0]
+    friendship_confirmed_1.save()
+    friendship_confirmed_0.save()
     friendship.save()
     return friendship
 
@@ -121,17 +126,17 @@ def add_habit_tracker(user, month, habits):
     return habit_tracker
 
 def add_day_tracker(tracker, date, completed_on_day):
-    day_tracker = DayTracker.objects.get_or_create(tracker=tracker, date=date, completed_on_day=completed_on_day)[0]
+    day_tracker = Day.objects.get_or_create(habit_tracker=tracker, date=date, completed_on_day=completed_on_day)[0]
     day_tracker.save()
     return day_tracker
 
 def bool_habit_entry(day_tracker, habit, done):
-    bool_habit_entry = BoolHabitEntry.objects.get_or_create(day_tracker=day_tracker, habit=habit, done=done)[0]
+    bool_habit_entry = BoolHabitEntry.objects.get_or_create(day=day_tracker, habit=habit, done=done)[0]
     bool_habit_entry.save()
     return bool_habit_entry
 
 def add_journal_entry(day_tracker, journal_text="Today I wrote something in my Journal"):
-    journal_entry = JournalEntry.objects.get_or_create(day_tracker=day_tracker, journal_text=journal_text)[0]
+    journal_entry = JournalEntry.objects.get_or_create(day=day_tracker, journal_text=journal_text)[0]
     journal_entry.save()
     return journal_entry
 
