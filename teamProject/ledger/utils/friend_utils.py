@@ -7,7 +7,7 @@ def get_friends_for_user(user):
     return friendships
 
 def make_friend_request(sender, receiver):
-    friend_request = FriendRequest.objects.create(requester=sender, requested=receiver))
+    friend_request = FriendRequest.objects.create(requester=sender, requested=receiver)
 
 def get_friend_request(sender, receiver):
     try:

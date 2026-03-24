@@ -2,12 +2,20 @@ from django.db import models
 from django.contrib.auth.models import User
 from ledger.utils import date_utils
 
+def user_profile_pic_path(instance, filename):
+    import time
+    ext = filename.split('.')[-1]
+    return f'profile_images/user_{instance.user.id}_{int(time.time())}.{ext}'
+
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
 
-    picture = models.ImageField(upload_to='profile_images', blank=True)
-    
-    about = models.TextField(blank=True)
+    picture = models.ImageField(upload_to=user_profile_pic_path, blank=True)
+    about_me = models.TextField(blank=True, default='')
+    LIGHT = 'light'
+    DARK = 'dark'
+    THEME_CHOICES = ((LIGHT, 'Light'), (DARK, 'Dark'))
+    theme = models.CharField(max_length=10, choices=THEME_CHOICES, default=LIGHT)
     # other data to store defined here 
     # ...
 
@@ -112,7 +120,7 @@ class BoolHabitEntry(models.Model):
     day = models.ForeignKey(Day, on_delete=models.CASCADE, related_name="bool_habit_entries")
     habit = models.ForeignKey(Habit, on_delete=models.CASCADE)
 
-    done = models.BooleanField(default=False);
+    done = models.BooleanField(default=False)
 
 class JournalEntry(models.Model):
     day = models.ForeignKey(Day, on_delete=models.CASCADE)
