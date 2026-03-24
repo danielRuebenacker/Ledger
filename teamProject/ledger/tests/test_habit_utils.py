@@ -1,3 +1,4 @@
+from django.shortcuts import reverse
 from django.test import TestCase
 from ledger.utils import habit_utils, date
 from .test_factories import *
@@ -67,4 +68,37 @@ class TestHabitTrackerGet(TestCase):
         habit_utils.register_habits_with_habit_tracker(habit_list, habit_tracker)
         habit_list_query = list(habit_tracker.habits.all())
         self.assertEquals(habit_list, habit_list_query)
+
+
+class TestHabitTrackerForm(TestCase):
+    def setUp(self):
+        self.user = UserFactory()
+        self.user.set_password("test")
+        self.user.save()
+        self.profile = UserProfileFactory(user=self.user)
+
+        self.client.login(username="test", password="test")
+
+    def test_full_habit_tracker_creation(self):
+        url = reverse('ledger:myhabits')
+
+        response = self.client.post(url, {
+            'dos': 'read, bed before 12',
+            'donts': 'caffeine', 
+            'easy_wins': 'go outside, drink water',
+        })
+
+        # 302: redirect
+        self.assertEqual(response.status_code, 302)
+
+        habit_tracker = habit_utils.get_current_month_habit_tracker(self.profile)
+
+        # 5 habits 
+        self.assertEqual(Habit.objects.count(), 5)
+
+        self.assertTrue(Habit.objects.filter(name='read').exists())
+        self.assertTrue(Habit.objects.filter(name='caffeine').exists())
+
+        # many to many habit count
+        self.assertEquals(habit_tracker.habits.count(), 5)
 

@@ -13,31 +13,34 @@ def index(request):
 def myhabits(request):
     context_dict = {}
     user_profile = request.user.userprofile
+    new_signup = True
     # if habit tracker is not created present form view
     habit_tracker, created = HabitTracker.objects.get_or_create(user=user_profile, month=date.get_first_of_this_month())
+    if not created:
+        new_signup = False
     
-    # newly created
-    if created:
-        if request.method == 'POST':
-            form = HabitTrackerForm(request.POST)
+    if request.method == 'POST':
+        form = HabitTrackerForm(request.POST)
 
-            if form.is_valid():
-                # ignore empty strings
-                dos_strings = [h for h in form.cleaned_data.get('dos') if h]
-                donts_strings = [h for h in form.cleaned_data.get('donts') if h]
-                easy_wins_strings = [h for h in form.cleaned_data.get('easy_wins') if h] 
+        if form.is_valid():
+            # ignore empty strings
+            dos_strings = [h for h in form.cleaned_data.get('dos') if h]
+            donts_strings = [h for h in form.cleaned_data.get('donts') if h]
+            easy_wins_strings = [h for h in form.cleaned_data.get('easy_wins') if h] 
 
-                # makes into habits/gets habit then adds to habit tracker
-                habit_utils.get_or_create_habits_then_register(dos_strings, donts_strings, easy_wins_strings, habit_tracker)
+            # makes into habits/gets habit then adds to habit tracker
+            habit_utils.get_or_create_habits_then_register(dos_strings, donts_strings, easy_wins_strings, habit_tracker)
 
-                return redirect('myhabits.html')
-        else:
+            new_signup = False
+            return redirect('ledger:myhabits')
+    else:
+        if new_signup: 
             form = HabitTrackerForm()
 
-        context_dict['form'] = form
-        return render(request, 'ledger/create_habit_tracker.html', context=context_dict)
-    else:
-        return render(request, 'ledger/myhabits.html', context=context_dict)
+            context_dict['form'] = form
+            return render(request, 'ledger/create_habit_tracker.html', context=context_dict)
+        else:
+            return render(request, 'ledger/myhabits.html', context=context_dict)
 
 
 
