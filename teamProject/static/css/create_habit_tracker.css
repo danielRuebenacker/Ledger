@@ -4,12 +4,12 @@
     justify-content: center;
     align-items: center;
     min-height: 80vh;
-	margin-top: 20px;
 }
 
-/* The Form Card */
+/* The Fixed White Card */
 .habit-config-card {
-    background: #ffffff;
+    background-color: #ffffff !important; /* Always white */
+    color: #333333 !important;           /* Always dark text */
     padding: 2.5rem;
     border-radius: 12px;
     box-shadow: 0 10px 25px rgba(0,0,0,0.1);
@@ -19,16 +19,33 @@
 
 .habit-config-card h1 {
     text-align: center;
-    color: #2c3e50;
+    color: #333;
     margin-bottom: 1.8rem;
-    font-size: 1.5rem;
 }
 
-/* Field Spacing */
-.habit-field-group {
-    margin-bottom: 20px;
+/* Input Fields & Cursor Fix */
+.habit-config-card input[type="text"],
+.habit-config-card .tagify {
+    background-color: #ffffff !important;
+    color: #333333 !important;
+    border: 1px solid #ddd !important;
+    border-radius: 6px;
+    width: 100%;
+    padding: 10px;
+    
+    /* THE CURSOR FIX: Explicitly Black */
+    caret-color: #000000 !important; 
 }
 
+/* Tagify Overrides for the white background */
+.tagify {
+    --tags-border-color: #ddd;
+    --tag-bg: #425325;
+    --tag-text-color: #ffffff;
+    --placeholder-color: #888;
+}
+
+/* Label styling */
 .habit-field-group label {
     display: block;
     margin-bottom: 8px;
@@ -36,87 +53,43 @@
     color: #444;
 }
 
-/* Input Wrapper & Tooltips */
-.habit-input-wrapper {
-    position: relative;
-    display: flex;
-    align-items: center;
-    width: 100%; 
-}
-
-.habit-help-icon {
-    position: absolute;
-    right: 12px;
-    background: #425325;
-    color: white;
-    width: 18px;
-    height: 18px;
-    border-radius: 50%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 12px;
-    cursor: help;
-    z-index: 5;
-}
-
-.habit-help-tooltip {
-    display: none;
-    position: absolute;
-    left: 105%;
-    top: 50%;
-    transform: translateY(-50%);
-    background: white;
-    border: 1px solid #ddd;
-    padding: 12px;
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-    width: 240px;
-    z-index: 100;
-    font-size: 0.9rem;
-}
-
-.habit-help-icon:hover + .habit-help-tooltip {
-    display: block;
-}
-
-/* Inputs & Tagify Specifics */
-.habit-config-card input[type="text"],
-.habit-config-card .tagify { /* Added .tagify selector for django-tagify2 compatibility */
-    flex-grow: 1; 
-    padding: 10px;
-    border: 1px solid #d1d1d1;
-    border-radius: 6px;
-    box-sizing: border-box; 
-    width: 100%;
-    transition: border-color 0.2s;
-}
-
-.habit-config-card .tagify:focus-within {
-    border-color: #425325;
-}
-
-/* Submit Button */
+/* The Pill-Style Button */
 .btn-save-habits {
     width: 100%;
-    padding: 14px;
+    padding: 12px;
     background-color: #425325;
     color: white;
     border: none;
-    border-radius: 6px;
-    font-weight: bold;
-    font-size: 1rem;
+    border-radius: 999px; 
     cursor: pointer;
-    margin-top: 15px;
-    transition: background 0.3s;
+    margin-top: 20px;
+    font-weight: 600;
 }
 
 .btn-save-habits:hover {
     background-color: #35421d;
 }
 
-.field-error-message {
-    color: #d9534f;
-    font-size: 0.85rem;
-    margin-top: 5px;
+/* Truncate the Tagify placeholder so it doesn't overflow */
+.tagify__input::before {
+    content: attr(data-placeholder);
+    display: inline-block;
+    max-width: 90%; /* Leaves a little room for the cursor */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    pointer-events: none;
+}
+
+/* Ensure the Tagify container itself doesn't grow horizontally */
+.tagify {
+    display: flex !important;
+    flex-wrap: wrap;
+    overflow: hidden;
+    max-width: 100%;
+}
+
+/* Optional: If you want the placeholder to disappear as soon as you type */
+.tagify__input:not(:empty)::before {
+    display: none;
 }
