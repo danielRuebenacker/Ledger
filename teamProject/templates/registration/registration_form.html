@@ -1,16 +1,42 @@
 {% extends 'ledger/base.html' %}
+{% load static %}
 
 {% block title_block %}
 	Register
 {% endblock %}
 
 {% block body_block %}
-<h1>Register Here</h1>
+<link rel="stylesheet" type="text/css" href="{% static 'css/registration.css' %}">
 
-<form method="post" action=".">
-	{% csrf_token %}
-	{{ form.as_p }}
+<div class="registration-container">
+    <div class="registration-card">
+        <h1>Register Here</h1>
 
-	<input type="submit" value="Register" />
-</form>
+        <form method="post" action="." enctype="multipart/form-data">
+            {% csrf_token %}
+            
+			{% for field in form %}
+				<div class="form-group">
+					<label>{{ field.label }}</label>
+					<div class="input-wrapper">
+						{{ field }}
+						
+						{% if field.name == "username" or "password" in field.name %}
+							<span class="help-icon">!</span>
+							<div class="help-tooltip">
+								{{ field.help_text|safe }}
+							</div>
+						{% endif %}
+					</div>
+
+					{% for error in field.errors %}
+						<span class="error-text" style="color: red; font-size: 0.8rem;">{{ error }}</span>
+					{% endfor %}
+				</div>
+			{% endfor %}
+
+            <button type="submit" class="btn-register">Register</button>
+        </form>
+    </div>
+</div>
 {% endblock %}
