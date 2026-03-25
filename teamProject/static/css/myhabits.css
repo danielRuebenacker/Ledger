@@ -1,0 +1,337 @@
+@import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,700;1,400&display=swap');
+
+.desk {
+    font-family: 'Lora', Georgia, serif;
+    width: 100%;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+}
+
+/* The open book */
+#flipbook {
+    box-shadow:
+        0 4px 16px rgba(0,0,0,0.3),
+        0 0 40px rgba(0,0,0,0.1);
+    border-radius: 4px;
+}
+
+/* All pages share a paper look */
+#flipbook .page {
+    background: #fdf6e3;
+    overflow: hidden;
+}
+
+/* Spine shadow — left pages get shadow on right edge, right pages on left */
+#flipbook .page-left {
+    background: linear-gradient(to left, #f0e8d0, #fdf6e3 15%);
+}
+
+#flipbook .page-right {
+    background: linear-gradient(to right, #f0e8d0, #fdf6e3 15%);
+}
+
+.page-inner {
+    padding: 20px 24px;
+    color: #3a2e1f;
+    line-height: 1.4;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+    overflow-y: auto;
+    box-sizing: border-box;
+}
+
+/* ── Left page: journal ── */
+.ledger-left {
+    background-image: repeating-linear-gradient(
+        transparent, transparent 23px, #d6c9a8 23px, #d6c9a8 24px
+    );
+    background-position: 0 8px;
+}
+
+.ledger-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #c4a97d;
+}
+
+.ledger-month {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #5c3d2e;
+    font-style: italic;
+}
+
+.ledger-days {
+    font-size: 0.85rem;
+    color: #6b5a47;
+}
+
+.journal-list {
+    flex: 1;
+}
+
+.journal-row {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    min-height: 24px;
+    line-height: 24px;
+    font-size: 0.82rem;
+}
+
+.journal-row.empty .journal-text {
+    color: transparent;
+}
+
+.journal-day {
+    min-width: 22px;
+    text-align: right;
+    color: #8a7a65;
+    font-size: 0.78rem;
+    flex-shrink: 0;
+}
+
+.journal-text {
+    color: #3a2e1f;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* ── Right page: habit grid ── */
+.ledger-right {
+    align-items: stretch;
+    padding: 16px 12px;
+}
+
+.habit-grid-container {
+    display: flex;
+    gap: 6px;
+    height: 100%;
+    overflow-x: auto;
+}
+
+.grid-section {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.grid-section-header {
+    text-align: center;
+    font-size: 1.1rem;
+    padding: 4px 0;
+    border-bottom: 2px solid #c4a97d;
+    margin-bottom: 4px;
+}
+
+.grid-section-icon {
+    font-size: 1rem;
+}
+
+.habit-grid {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.65rem;
+    table-layout: fixed;
+}
+
+.habit-grid thead th {
+    font-weight: 700;
+    color: #5c3d2e;
+    padding: 2px 1px;
+    font-size: 0.6rem;
+    text-align: center;
+    border-bottom: 1px solid #c4a97d;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 50px;
+}
+
+.habit-grid th.grid-habit-name {
+    writing-mode: vertical-lr;
+    text-orientation: mixed;
+    transform: rotate(180deg);
+    height: 60px;
+    vertical-align: bottom;
+    font-size: 0.6rem;
+    padding: 4px 2px;
+}
+
+.grid-day-num {
+    text-align: right;
+    color: #8a7a65;
+    font-size: 0.6rem;
+    padding: 0 3px 0 0;
+    width: 18px;
+}
+
+.grid-cell {
+    text-align: center;
+    padding: 0;
+    height: 14px;
+    border: 1px solid #e0d5c0;
+}
+
+.grid-x {
+    color: #3a2e1f;
+    font-size: 0.7rem;
+    font-weight: 700;
+    line-height: 14px;
+}
+
+.habit-details {
+    font-size: 1rem;
+    color: #6b5a47;
+    font-style: italic;
+    margin-top: 20px;
+    line-height: 1.7;
+    text-align: center;
+}
+
+/* Controls below the book */
+.book-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    max-width: 960px;
+    margin-top: 24px;
+}
+
+#page-indicator {
+    font-size: 0.85rem;
+    color: #e8dcc3;
+    font-style: italic;
+}
+
+button {
+    font-family: 'Lora', Georgia, serif;
+    font-size: 0.9rem;
+    padding: 8px 20px;
+    border: 1px solid #b8a080;
+    border-radius: 3px;
+    background: linear-gradient(to bottom, #f5edd5, #e8dcc3);
+    color: #5c3d2e;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+
+button:hover:not(:disabled) {
+    background: linear-gradient(to bottom, #e8dcc3, #ddd0b5);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+}
+
+button:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+/* Modal overlay */
+.modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.5);
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Log Habits modal */
+.log-modal {
+    background: #fdf6e3;
+    border-radius: 8px;
+    padding: 32px 36px;
+    width: 520px;
+    font-family: 'Lora', Georgia, serif;
+    color: #3a2e1f;
+    max-height: 85vh;
+    overflow-y: auto;
+}
+
+.log-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 18px;
+}
+
+.log-label {
+    font-weight: 700;
+    font-size: 1rem;
+    color: #5c3d2e;
+    min-width: 110px;
+}
+
+.log-date-input {
+    font-family: 'Lora', Georgia, serif;
+    padding: 5px 10px;
+    border: 1px solid #b8a080;
+    border-radius: 3px;
+    background: #fff;
+}
+
+.log-journal-input {
+    flex: 1;
+    padding: 6px 10px;
+    border: 1px solid #b8a080;
+    border-radius: 3px;
+    font-family: 'Lora', Georgia, serif;
+    font-size: 0.95rem;
+}
+
+/* Habit group inside log modal */
+.log-group {
+    margin-bottom: 18px;
+}
+
+.log-group-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 700;
+    font-size: 1rem;
+    color: #5c3d2e;
+    margin-bottom: 6px;
+}
+
+.log-group-emoji {
+    font-size: 1.2rem;
+}
+
+.log-habit-list {
+    padding-left: 130px;
+}
+
+.log-habit-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 4px;
+    font-size: 0.95rem;
+    color: #3a2e1f;
+}
+
+.log-habit-item input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+}
+
+.log-habit-item label {
+    cursor: pointer;
+}
