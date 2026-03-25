@@ -139,9 +139,9 @@ def settings(request):
 def get_notifications(request):
     # only nudges for now
     user = request.user
-    user_profile = user.userprofile
     if not user.is_authenticated:
         return JsonResponse({"error": "Not logged in"}, status=403)
+    user_profile = user.userprofile
 
     # say 20 notifs, reverse ordered
     nudges = Nudge.objects.filter(nudged=user_profile).order_by('-date_of_nudge')[:20]
