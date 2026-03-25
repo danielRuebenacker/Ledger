@@ -16,3 +16,9 @@ def get_first_of_n_months_ago(n):
     for _ in range(n):
         dt = get_first_day_of_month(dt) - timedelta(days=1)
     return get_first_day_of_month(dt)
+
+# https://stackoverflow.com/questions/1060279/iterating-through-a-range-of-dates-in-python
+def daterange(start_date, end_date):
+    days = int((end_date - start_date).days)
+    for n in range(days):
+        yield start_date + timedelta(n)

@@ -1,0 +1,18 @@
+{% extends 'ledger/base.html' %}
+{% load staticfiles %}
+
+{% block header %}
+	{{ form.media }}
+{% endblock %}
+
+{% block title_block %}
+	Create Habit Tracker
+{% endblock %}
+
+{% block body_block %}
+	<form action="" method="post">
+		{% csrf_token %}
+		{{ form }}
+		<input type="submit" value="OK">
+	</form>
+{% endblock %}

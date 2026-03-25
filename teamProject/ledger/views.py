@@ -3,9 +3,10 @@ from django.shortcuts import redirect, render
 from django.contrib.auth.decorators import login_required
 
 # ----------- utils ---------------------------
-from ledger.utils import habit_utils, date, friends
+from ledger.utils import habit_utils, date_utils, friend_utils
 
-# ------------ models --------------------
+# ------------ forms/models --------------------
+from ledger.forms import HabitTrackerForm
 from ledger.models import HabitTracker, UserProfile, Nudge
 from django.contrib.auth.models import User
 
@@ -24,8 +25,41 @@ def index(request):
 @login_required
 def myhabits(request):
     context_dict = {}
+    user_profile = request.user.userprofile
+    # if habit tracker is not created present form view
+    habit_tracker, _ = HabitTracker.objects.get_or_create(user=user_profile, month=date_utils.get_first_of_this_month())
 
-    return render(request, 'ledger/myhabits.html', context=context_dict)
+    
+    if request.method == 'POST':
+        form = HabitTrackerForm(request.POST)
+
+        if form.is_valid():
+            # ignore empty strings
+            clean = lambda x: x.strip().lower()
+
+            # get all cleaned data, and clean according to our clean
+            habit_string_lists = [
+                    [clean(h) for h in form.cleaned_data.get(f, []) if h] 
+                    for f in ('dos', 'donts', 'easy_wins', 'numeric')
+            ]
+
+            # makes into habits/gets habit then adds to habit tracker
+            habit_utils.get_or_create_habits_then_register(*habit_string_lists, habit_tracker)
+
+            # log empty habits until today (exclusive)
+            habit_utils.create_empty_days_until_today(date_utils.get_first_of_this_month(), habit_tracker)
+
+            return redirect('ledger:myhabits')
+    else:
+        if not habit_utils.check_if_any_habits_added(habit_tracker): 
+            form = HabitTrackerForm()
+
+            context_dict['form'] = form
+            return render(request, 'ledger/create_habit_tracker.html', context=context_dict)
+        else:
+            return render(request, 'ledger/myhabits.html', context=context_dict)
+
+
 
 
 

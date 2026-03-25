@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from ledger.utils import date_utils
 
 def user_profile_pic_path(instance, filename):
     import time
@@ -46,6 +47,9 @@ class Habit(models.Model):
 
     def __str__(self):
         return self.name
+
+    class Meta:
+        unique_together = ('name', 'habit_type')
     
 class Nudge(models.Model):
     nudger = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name="sent_nudge")
@@ -89,10 +93,10 @@ class Friendship(models.Model):
 class HabitTracker(models.Model):
     # belongs to one user
     user = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name="habit_trackers")
-    # this will be a MONTH field (set to 1st of month)
-    month = models.DateField()
+    # this will be a MONTH field (set to 1st of month) (can only create habit trackers for THIS month (present))
+    month = models.DateField(default=date_utils.get_first_of_this_month)
     # associated habits (M-N relationship)
-    habits = models.ManyToManyField(Habit, related_name="habit_trackers")
+    habits = models.ManyToManyField(Habit, related_name="habits")
 
     streak = models.IntegerField(default=0)
     points = models.IntegerField(default=0)
