@@ -65,5 +65,11 @@ def calculate_points(day):
 
     # for each entry add as many points as habit says
     for entry in habit_entries:
-        points += entry.habit.points 
+        habit = entry.habit
+        # only if they were actually supposed to do the habit
+        if habit.habit_type == Habit.TYPE_DO and entry.done:
+            points += entry.habit.points 
+        # or they weren't and they didn't
+        if habit.habit_type == Habit.TYPE_DONT and not entry.done:
+            points += entry.habit.points 
     return points
