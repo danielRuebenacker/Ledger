@@ -1,0 +1,95 @@
+/* Layout & Centering */
+.habit-config-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 80vh;
+}
+
+/* The Fixed White Card */
+.habit-config-card {
+    background-color: #ffffff !important; /* Always white */
+    color: #333333 !important;           /* Always dark text */
+    padding: 2.5rem;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    width: 100%;
+    max-width: 480px;
+}
+
+.habit-config-card h1 {
+    text-align: center;
+    color: #333;
+    margin-bottom: 1.8rem;
+}
+
+/* Input Fields & Cursor Fix */
+.habit-config-card input[type="text"],
+.habit-config-card .tagify {
+    background-color: #ffffff !important;
+    color: #333333 !important;
+    border: 1px solid #ddd !important;
+    border-radius: 6px;
+    width: 100%;
+    padding: 10px;
+    
+    /* THE CURSOR FIX: Explicitly Black */
+    caret-color: #000000 !important; 
+}
+
+/* Tagify Overrides for the white background */
+.tagify {
+    --tags-border-color: #ddd;
+    --tag-bg: #425325;
+    --tag-text-color: #ffffff;
+    --placeholder-color: #888;
+}
+
+/* Label styling */
+.habit-field-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #444;
+}
+
+/* The Pill-Style Button */
+.btn-save-habits {
+    width: 100%;
+    padding: 12px;
+    background-color: #425325;
+    color: white;
+    border: none;
+    border-radius: 999px; 
+    cursor: pointer;
+    margin-top: 20px;
+    font-weight: 600;
+}
+
+.btn-save-habits:hover {
+    background-color: #35421d;
+}
+
+/* Truncate the Tagify placeholder so it doesn't overflow */
+.tagify__input::before {
+    content: attr(data-placeholder);
+    display: inline-block;
+    max-width: 90%; /* Leaves a little room for the cursor */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    pointer-events: none;
+}
+
+/* Ensure the Tagify container itself doesn't grow horizontally */
+.tagify {
+    display: flex !important;
+    flex-wrap: wrap;
+    overflow: hidden;
+    max-width: 100%;
+}
+
+/* Optional: If you want the placeholder to disappear as soon as you type */
+.tagify__input:not(:empty)::before {
+    display: none;
+}
