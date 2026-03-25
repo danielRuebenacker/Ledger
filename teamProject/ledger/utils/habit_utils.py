@@ -8,6 +8,7 @@ def get_user_habit_trackers(user):
     return list(user.habit_trackers.all().order_by('month'))
 
 def get_current_month_habit_tracker(user):
+    from ledger.models import HabitTracker
     # get this months habit tracker
     habit_tracker, _ = HabitTracker.objects.get_or_create(user=user)
     return habit_tracker
@@ -44,6 +45,7 @@ def register_habits_with_habit_tracker(habits, habit_tracker):
     habit_tracker.habits.add(*habits)
 
 def get_or_create_habits_then_register(dos_strings, donts_strings, easy_wins_strings, numeric_strings, habit_tracker):
+    from ledger.models import Habit
     dos = get_or_create_habits_from_list(dos_strings, Habit.TYPE_DO)
     donts = get_or_create_habits_from_list(donts_strings, Habit.TYPE_DONT)
     easy_wins = get_or_create_habits_from_list(easy_wins_strings, Habit.TYPE_EASY_WIN)
@@ -54,6 +56,7 @@ def get_or_create_habits_then_register(dos_strings, donts_strings, easy_wins_str
          register_habits_with_habit_tracker(habit_type, habit_tracker)
 
 def log_bool_habit(habit, done, day):
+    from ledger.models import BoolHabitEntry
     bool_habit_entry = BoolHabitEntry.objects.create(day=day, habit=habit, done=done)
     return bool_habit_entry
 

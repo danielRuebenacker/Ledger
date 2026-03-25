@@ -2,13 +2,13 @@ from django.utils import timezone
 from datetime import timedelta
 
 def today():
-    return timezone.localtime(timezone.now()).date
+    return timezone.localtime(timezone.now()).date()
 
 def now():
     return timezone.localtime(timezone.now())
 
 def get_first_day_of_month(date):
-    return date.replace(day = 1, second = 0, microsecond = 0)
+    return date.replace(day = 1)
 
 def get_yesterday():
     td = today()
