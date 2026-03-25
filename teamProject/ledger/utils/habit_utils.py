@@ -1,5 +1,5 @@
-from ledger.models import UserProfile, HabitTracker, Day, Habit, BoolHabitEntry
 from ledger.utils import date_utils
+from datetime import timedelta
 
 def check_if_any_habits_added(habit_tracker):
     return habit_tracker.habits.exists()
@@ -25,11 +25,13 @@ def get_habit_tracker_habit_entries(habit_tracker):
 
 
 def get_day(habit_tracker, date):
+    from ledger.models import Day
     # date is a datetime object
     day, _ = Day.objects.get_or_create(habit_tracker=habit_tracker, date=date, defaults = {'completed_on_day': False})
     return day
 
 def get_or_create_habits_from_list(habit_strings, habit_type):
+    from ledger.models import Habit
     habits = []
     for habit_string in habit_strings:
         # by default: not community + zero points 
@@ -51,21 +53,10 @@ def get_or_create_habits_then_register(dos_strings, donts_strings, easy_wins_str
     for habit_type in habits:
          register_habits_with_habit_tracker(habit_type, habit_tracker)
 
-
 def log_bool_habit(habit, done, day):
     bool_habit_entry = BoolHabitEntry.objects.create(day=day, habit=habit, done=done)
     return bool_habit_entry
 
-def calculate_streak(user):
-    # based on previous day
-    # user: userprofile
-    habit_tracker = get_current_month_habit_tracker(user)
-    streak = user.streak
-    last_logged_day = Day.objects.filter(habit_tracker=habit_tracker).latest()
-    if last_logged_day.completed_on_day == True:
-        return streak + 1
-    else:
-        return 1
 
 def create_empty_habit_entries_for_day(habit_tracker, date, habits):
     day = get_day(habit_tracker=habit_tracker, date=date)
@@ -80,7 +71,37 @@ def create_empty_days_until_today(date, habit_tracker):
     for single_date in date_utils.daterange(date, date_utils.today()):
         create_empty_habit_entries_for_day(habit_tracker, single_date, habits)
 
-def calculate_points(day):
+def calculate_streak(tracker):
+    # 1. Get the current day (local time)
+    today = date_utils.today()
+    
+    # 2. Start checking from today (or yesterday if today isn't done yet)
+    # If today is finishe start at today. If not start at yesterday
+    current_day = today
+    today_record = tracker.days.filter(date=today).first()
+    
+    if not today_record or not today_record.completed_on_day:
+        current_day = today - timedelta(days=1)
+        
+    streak = 0
+    
+    # 3. Loop backwards one day at a time
+    while True:
+        day_record = tracker.days.filter(date=current_day, completed_on_day=True).first()
+        
+        if day_record:
+            streak += 1
+            current_day -= timedelta(days=1)
+        else:
+            # Streak broken
+            break
+            
+    return streak
+
+
+
+def calculate_points_for_one(day):
+    from ledger.models import Habit
     if day.completed_on_day == False:
         return 0
 
