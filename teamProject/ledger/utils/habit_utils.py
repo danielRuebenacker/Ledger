@@ -58,18 +58,17 @@ def calculate_streak(user):
         return 1
 
 def calculate_points(day):
-    # calculates points for a day
-    if day.completed_on_day == False: return 0
-    habit_entries = day.bool_habit_entries 
+    if day.completed_on_day == False:
+        return 0
+
     points = 0
 
-    # for each entry add as many points as habit says
-    for entry in habit_entries:
+    for entry in day.bool_habit_entries.all():
         habit = entry.habit
-        # only if they were actually supposed to do the habit
+        # DOS
         if habit.habit_type == Habit.TYPE_DO and entry.done:
-            points += entry.habit.points 
-        # or they weren't and they didn't
+            points += habit.points 
+        # DONTS
         if habit.habit_type == Habit.TYPE_DONT and not entry.done:
-            points += entry.habit.points 
+            points += habit.points 
     return points
