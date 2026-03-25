@@ -1,9 +1,16 @@
-from ledger.models import UserProfile
-from ledger.utils.friends import get_friends_for_user
-from django.http import JsonResponse
-from django.shortcuts import render
+# ----------- django specific ---------------
+from django.shortcuts import redirect, render
 from django.contrib.auth.decorators import login_required
+
+# ----------- utils ---------------------------
+from ledger.utils import habit_utils, date, friends
+
+# ------------ models --------------------
+from ledger.models import HabitTracker, UserProfile, Nudge
 from django.contrib.auth.models import User
+
+# ------------ json/files -----------
+from django.http import JsonResponse
 import json
 import os
 
@@ -14,10 +21,13 @@ def index(request):
 
     return render(request, 'ledger/index.html', context=context_dict)
 
+@login_required
 def myhabits(request):
     context_dict = {}
 
     return render(request, 'ledger/myhabits.html', context=context_dict)
+
+
 
 def leaderboards(request):
     context_dict = {}
@@ -45,7 +55,7 @@ def profile(request, username=None):
 
     picture_url = user_profile.picture.url if user_profile.picture else '/media/guest.jpg'
 
-    friend_count = get_friends_for_user(user_profile).count()
+    friend_count = friend_utils.get_friends_for_user(user_profile).count()
 
     context_dict = {
         'profile_user': user,
@@ -90,3 +100,31 @@ def settings(request):
 
     picture_url = profile.picture.url if profile.picture else '/media/guest.jpg'
     return render(request, 'ledger/settings.html', {'picture_url': picture_url,'about_me': profile.about_me,})
+
+
+def get_notifications(request):
+    # only nudges for now
+    user = request.user
+    user_profile = user.userprofile
+    if not user.is_authenticated:
+        return JsonResponse({"error": "Not logged in"}, status=403)
+
+    # say 20 notifs, reverse ordered
+    nudges = Nudge.objects.filter(nudged=user_profile).order_by('-date_of_nudge')[:20]
+    data = [
+        {
+            "nudger": n.nudger.user.username, 
+            "notified": n.notified,
+            "date": n.date_of_nudge.strftime("%Y-%m-%d %H:%M")
+        } 
+        for n in nudges]
+    # json response only allows dicts so need safe = false to allow list
+    return JsonResponse(data, safe=False)
+
+def mark_notifications_read(request):
+    # only nudges for now
+    user_profile = request.user.userprofile
+    # update nudges
+    Nudge.objects.filter(nudged=user_profile, notified=False).update(notified=True)
+    # return okay response
+    return JsonResponse({"status": "ok"})
