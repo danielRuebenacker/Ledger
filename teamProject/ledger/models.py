@@ -9,7 +9,7 @@ def user_profile_pic_path(instance, filename):
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
 
-    picture = models.ImageField(upload_to=user_profile_pic_path, blank=True)
+    picture = models.ImageField(upload_to=user_profile_pic_path, blank=True, default="guest.jpg")
     about_me = models.TextField(blank=True, default='')
     LIGHT = 'light'
     DARK = 'dark'
