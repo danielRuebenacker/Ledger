@@ -1,9 +1,19 @@
-from django.urls import path
+from django.urls import path, include
 from ledger import views
+from registration.backends.simple.views import RegistrationView 
+from ledger.forms import CustomRegistrationForm
 
 app_name = 'ledger'
 
 urlpatterns = [
+        path('accounts/register/',
+                RegistrationView.as_view(
+                form_class=CustomRegistrationForm,
+                success_url='/'
+                ),
+                name='registration_register',
+        ),
+        path('accounts/', include('registration.backends.simple.urls')),
         path('', views.index, name='index'),
         path('myhabits', views.myhabits, name='myhabits'),
         path('leaderboards', views.leaderboards, name='leaderboards'),

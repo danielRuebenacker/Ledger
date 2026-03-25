@@ -10,7 +10,7 @@ def user_profile_pic_path(instance, filename):
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
 
-    picture = models.ImageField(upload_to=user_profile_pic_path, blank=True)
+    picture = models.ImageField(upload_to=user_profile_pic_path, blank=True, default="guest.jpg")
     about_me = models.TextField(blank=True, default='')
     LIGHT = 'light'
     DARK = 'dark'
@@ -97,6 +97,9 @@ class HabitTracker(models.Model):
     month = models.DateField(default=date_utils.get_first_of_this_month)
     # associated habits (M-N relationship)
     habits = models.ManyToManyField(Habit, related_name="habits")
+
+    streak = models.IntegerField(default=0)
+    points = models.IntegerField(default=0)
 
     class Meta:
         # tells django this combination must be unique
