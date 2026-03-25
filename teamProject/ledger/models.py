@@ -111,7 +111,7 @@ class HabitTracker(models.Model):
         return self.user.user.username + self.month.strftime("%m-%Y")
 
     @property
-    def is_in_danger(self):
+    def is_streak_low(self):
         now = date_utils.now()
         if now.hour >= 18:
             day = self.days.filter(date=now.date()).first()
