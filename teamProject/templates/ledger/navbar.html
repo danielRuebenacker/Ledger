@@ -1,0 +1,36 @@
+<nav class="navbar navbar-expand-lg custom-navbar">
+	<div class="container-fluid">
+		<a class="navbar-brand" href="{% url 'ledger:index' %}">Ledger</a>
+		<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navContent">
+			<span class="navbar-toggler-icon"></span>
+		</button>
+
+		<div class="collapse navbar-collapse" id="navContent">
+			<ul class="navbar-nav me-auto">
+				<li class="nav-item"><a class="nav-link nav-box" href="{% url 'ledger:myhabits' %}">MyHabits</a></li>
+				<li class="nav-item"><a class="nav-link nav-box" href="{% url 'ledger:leaderboards' %}">Leaderboards</a></li>
+				<li class="nav-item"><a class="nav-link nav-box" href="{% url 'ledger:social' %}">Social</a></li>
+			</ul>
+		<ul class="navbar-nav ms-auto">
+				{% if user.is_authenticated %}
+
+					<li class="nav-item dropdown">
+					  <a class="nav-link dropdown-toggle" href="#" id="notifDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+						✉️
+						<span class="badge bg-danger" id="notif-badge"></span>
+					  </a>
+					  <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="notifDropdown" id="notif-list">
+						<li><span class="dropdown-item ">No notifications</span></li>
+					  </ul>
+					</li>
+					<li class="nav-item"><a class="nav-link nav-box" href="/profile/{{ user.username }}/">Profile</a></li>
+					<li class="nav-item"><a class="nav-link nav-box" href="{%url 'ledger:settings' %}">Settings</a></li>
+					<li class="nav-item"><a class="nav-link nav-box" href="{% url 'auth_logout' %}?next={% url 'ledger:index' %}">Logout</a></li>
+				{% else %}
+					<li class="nav-item"><a class="nav-link nav-box" href="{% url 'auth_login' %}">Log In</a></li>
+					<li class="nav-item"><a class="nav-link nav-box" href="{% url 'registration_register' %}">Sign Up</a></li>
+				{% endif %}
+			</ul>
+		</div>
+	</div>
+</nav>

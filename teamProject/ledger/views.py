@@ -5,9 +5,9 @@ from django.contrib.auth.decorators import login_required
 # ----------- utils ---------------------------
 from ledger.utils import habit_utils, date_utils, friend_utils
 
-# ------------ models --------------------
+# ------------ forms/models --------------------
 from ledger.forms import HabitTrackerForm
-from ledger.models import HabitTracker, UserProfile
+from ledger.models import HabitTracker, UserProfile, Nudge
 from django.contrib.auth.models import User
 
 # ------------ json/files -----------
@@ -58,6 +58,8 @@ def myhabits(request):
             return render(request, 'ledger/create_habit_tracker.html', context=context_dict)
         else:
             return render(request, 'ledger/myhabits.html', context=context_dict)
+
+
 
 
 
@@ -132,3 +134,31 @@ def settings(request):
 
     picture_url = profile.picture.url if profile.picture else '/media/guest.jpg'
     return render(request, 'ledger/settings.html', {'picture_url': picture_url,'about_me': profile.about_me,})
+
+
+def get_notifications(request):
+    # only nudges for now
+    user = request.user
+    user_profile = user.userprofile
+    if not user.is_authenticated:
+        return JsonResponse({"error": "Not logged in"}, status=403)
+
+    # say 20 notifs, reverse ordered
+    nudges = Nudge.objects.filter(nudged=user_profile).order_by('-date_of_nudge')[:20]
+    data = [
+        {
+            "nudger": n.nudger.user.username, 
+            "notified": n.notified,
+            "date": n.date_of_nudge.strftime("%Y-%m-%d %H:%M")
+        } 
+        for n in nudges]
+    # json response only allows dicts so need safe = false to allow list
+    return JsonResponse(data, safe=False)
+
+def mark_notifications_read(request):
+    # only nudges for now
+    user_profile = request.user.userprofile
+    # update nudges
+    Nudge.objects.filter(nudged=user_profile, notified=False).update(notified=True)
+    # return okay response
+    return JsonResponse({"status": "ok"})
