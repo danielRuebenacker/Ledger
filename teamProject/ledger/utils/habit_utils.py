@@ -47,12 +47,28 @@ def log_bool_habit(habit, user, done, date):
     return bool_habit_entry
 
 def calculate_streak(user):
+    # based on previous day
+    # user: userprofile
     habit_tracker = get_current_month_habit_tracker(user)
-    if habit_tracker is None: return
-    # reverse ordering by date
-    days = habit_tracker.days.order_by("-date")
-    streak = 0
-    for day in days:
-        if not day.completed_on_the_day:
-            return streak
-        streak += 1
+    streak = user.streak
+    last_logged_day = Day.objects.filter(habit_tracker=habit_tracker).latest()
+    if last_logged_day.completed_on_day == True:
+        return streak + 1
+    else:
+        return 1
+
+def calculate_points(day):
+    if day.completed_on_day == False:
+        return 0
+
+    points = 0
+
+    for entry in day.bool_habit_entries.all():
+        habit = entry.habit
+        # DOS
+        if habit.habit_type == Habit.TYPE_DO and entry.done:
+            points += habit.points 
+        # DONTS
+        if habit.habit_type == Habit.TYPE_DONT and not entry.done:
+            points += habit.points 
+    return points
