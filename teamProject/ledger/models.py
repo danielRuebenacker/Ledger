@@ -94,6 +94,9 @@ class HabitTracker(models.Model):
     # associated habits (M-N relationship)
     habits = models.ManyToManyField(Habit, related_name="habit_trackers")
 
+    streak = models.IntegerField(default=0)
+    points = models.IntegerField(default=0)
+
     class Meta:
         # tells django this combination must be unique
         unique_together = ("user", "month")
