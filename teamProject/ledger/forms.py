@@ -1,8 +1,9 @@
 from django import forms
 from django.contrib.auth.models import User
-from ledger.models import UserProfile, HabitTracker, Habit
+from ledger.models import UserProfile,  Habit
 from tagify.fields import TagField
 from registration.forms import RegistrationForm
+from ledger.utils.habit_utils import supply_form_with_popular_habits
 
 class UserProfileForm(forms.ModelForm):
     class Meta:
@@ -10,11 +11,46 @@ class UserProfileForm(forms.ModelForm):
         fields = ('picture', )
 
 class HabitTrackerForm(forms.Form):
-    # TODO: have data_list call method that fetches top community habits
-    dos = TagField(label='Must DOs', place_holder='Habit you want to DO everyday..', delimiters=',', data_list=None)
-    donts = TagField(label='Must NOT DOs', place_holder='Habit you want to NOT DO everyday..', delimiters=',', data_list=None)
-    easy_wins = TagField(label='Easy Wins', place_holder='Habits that motivate you to keep going..', delimiters=',', data_list=None)
-    numeric = TagField(label='Numeric Habits', place_holder='E.g. Screentime', delimiters=',', data_list=None)
+    dos = TagField(
+        label='Must DOs', 
+        place_holder='Habits you want to DO every day...', 
+        delimiters=',',
+    )
+    donts = TagField(
+        label='Must NOT DOs', 
+        place_holder='Habits you want to NOT DO every day...', 
+        delimiters=',',
+    )
+    easy_wins = TagField(
+        label='Easy Wins', 
+        place_holder='Habits that motivate you...', 
+        delimiters=',',
+    )
+    numeric = TagField(
+        label='Numeric Habits', 
+        place_holder='E.g., Screentime, Liters of water', 
+        delimiters=',',
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        type_map = {
+            'dos': Habit.TYPE_DO,
+            'donts': Habit.TYPE_DONT,
+            'easy_wins': Habit.TYPE_EASY_WIN,
+            'numeric': Habit.TYPE_NUMERIC,
+        }
+
+        for field_name, habit_type in type_map.items():
+            try:
+                popular = supply_form_with_popular_habits(habit_type)
+                
+                if popular:
+                    self.fields[field_name].set_tag_args('data_list', popular)
+            except Exception:
+                # Fallback for migrations or empty DBs
+                self.fields[field_name].set_tag_args('data_list', [])
 
 class CustomRegistrationForm(RegistrationForm): 
     theme = forms.ChoiceField(

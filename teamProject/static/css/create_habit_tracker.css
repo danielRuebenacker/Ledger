@@ -85,11 +85,31 @@
 .tagify {
     display: flex !important;
     flex-wrap: wrap;
-    overflow: hidden;
+    overflow: visible !important;
     max-width: 100%;
 }
 
 /* Optional: If you want the placeholder to disappear as soon as you type */
 .tagify__input:not(:empty)::before {
     display: none;
+}
+
+/* Force the suggestion list to the front */
+.tagify__dropdown {
+    z-index: 9999 !important;
+    background: white !important;
+    border: 1px solid #ddd;
+    border-top: 0;
+}
+
+/* Ensure the items inside are visible */
+.tagify__dropdown__item {
+    color: #333 !important;
+    padding: 0.5rem;
+}
+
+/* Highlight the item when hovering/navigating */
+.tagify__dropdown__item--active {
+    background: #425325 !important;
+    color: white !important;
 }
