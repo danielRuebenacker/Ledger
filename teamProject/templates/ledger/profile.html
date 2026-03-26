@@ -1,23 +1,29 @@
 {% extends 'ledger/base.html' %}
+{% load staticfiles %}
+
+{% block title_block %}
+    {{ profile_user.username }}'s Profile
+{% endblock %}
+
 {% block body_block %}
 <link rel="stylesheet" href="{% static 'css/profile.css' %}">
 
 <div class="banner">
     <div class="profile-header">
-        <img src="/media/guest.jpg" class="profile-img">
-        
+        <img src="{{ picture_url }}" class="profile-img">
+
         <div class="user-info">
-            <h1>william</h1>
+            <h1>{{ profile_user.username }}</h1>
             <div class="stats-container">
-                <div class="stat-pill">🔥10</div>
-                <div class="stat-pill">10 Friends</div>
+                <div class="stat-pill">🔥 0</div>
+                <div class="stat-pill">{{ friend_count }} Friends</div>
             </div>
         </div>
     </div>
 
-    <div>
+    <div class="about-section">
         <h3>About</h3>
-        <p>Man i love css please someone send help</p>
+        <p>{{ profile.about_me|default:"No about me yet." }}</p>
     </div>
 </div>
 

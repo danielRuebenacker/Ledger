@@ -141,6 +141,17 @@
     width: 100%;
 }
 
+/* Faint vertical separator between habits within a category */
+.grid-cell + .grid-cell,
+.grid-habit-name + .grid-habit-name {
+    border-left: 1px solid #d6c9a8;
+}
+
+/* Stronger vertical separator between category groups */
+.grid-category-start {
+    border-left: 1px solid #c4a97d;
+}
+
 .habit-grid thead th {
     font-weight: 700;
     color: #5c3d2e;

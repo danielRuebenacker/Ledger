@@ -41,7 +41,9 @@ $(document).ready(function () {
                     rightHtml += '<p class="habit-details">No habits tracked this month.</p>';
                 } else { 
                     var allHabits = [];
+                    var categoryStarts = {};
                     $.each(month.sections, function (s, section) {
+                        categoryStarts[allHabits.length] = true;
                         $.each(section.habits, function (h, habit) {
                             allHabits.push({
                                 name: habit.name,
@@ -52,15 +54,18 @@ $(document).ready(function () {
                     });
                     rightHtml += '<table class="habit-grid">';
                     rightHtml += '<thead>';
+                    // Category row — emoji + label, spanning its habits
                     rightHtml += '<tr><th></th>';
-                    $.each(allHabits, function (h, habit) {
-                        rightHtml += '<th class="grid-section-icon">' + habit.emoji + '</th>';
+                    $.each(month.sections, function (s, section) {
+                        rightHtml += '<th class="grid-section-icon grid-category-start" colspan="' + section.habits.length + '">' + section.emoji + ' ' + section.label + '</th>';
                     });
                     rightHtml += '</tr>';
+                    // Habit name row — one cell per habit
                     rightHtml += '<tr><th></th>';
                     $.each(allHabits, function (h, habit) {
-                        rightHtml += '<th class="grid-habit-name">' + habit.name + '</th>';
-                    })
+                        var cls = 'grid-habit-name' + (categoryStarts[h] ? ' grid-category-start' : '');
+                        rightHtml += '<th class="' + cls + '">' + habit.name + '</th>';
+                    });
                     rightHtml += '</tr>';
                     rightHtml += '</thead>';
                     rightHtml += '<tbody>';
@@ -69,7 +74,8 @@ $(document).ready(function () {
                         rightHtml += '<td class="grid-day-num">' + (d + 1) + '</td>';
                         $.each(allHabits, function (h, habit) {
                             var done = habit.grid[d];
-                            rightHtml += '<td class="grid-cell">';
+                            var cls = 'grid-cell' + (categoryStarts[h] ? ' grid-category-start' : '');
+                            rightHtml += '<td class="' + cls + '">';
                             if (done) {
                                 rightHtml += '<span class="grid-x">\u2716</span>';
                             }

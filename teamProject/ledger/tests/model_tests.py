@@ -5,7 +5,13 @@ from ledger.models import Habit, HabitTracker, Day
 from .test_factories import *
 
 # utils
-from ledger.utils import date
+from ledger.utils import date_utils
+
+class UserProfileTests(TestCase):
+    def test_get_user_profile_from_userself(self):
+        user = UserFactory()
+        user_profile = UserProfileFactory(user=user)
+        self.assertEquals(user_profile, user.userprofile)
 
 class HabitTests(TestCase):
     def test_create_habit(self):
@@ -38,7 +44,7 @@ class HabitTrackerTests(TestCase):
 
     def test_habit_tracker_month_is_correct(self):
         habit_tracker = HabitTrackerFactory()
-        self.assertEqual(habit_tracker.month, date.get_first_of_this_month())
+        self.assertEqual(habit_tracker.month, date_utils.get_first_of_this_month())
 
 class DayTests(TestCase):
     def test_create_Day(self):
