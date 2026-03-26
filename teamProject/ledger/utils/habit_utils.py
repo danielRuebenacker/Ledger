@@ -222,6 +222,10 @@ def save_log(user_profile, log_date, checked_ids, journal_text):
         if j:
             j.journal_text = journal_text
             j.save()
+        else:
+            JournalEntry.objects.create(day=day_obj, journal_text=journal_text)
+    elif j:
+        j.delete()
 def supply_form_with_popular_habits(habit_type):
     from ledger.models import Habit
     return list(
