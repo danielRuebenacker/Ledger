@@ -20,7 +20,9 @@
                     <div class="stat-pill">{{ friend_count }} Friends</div>
                 </div>
                 {% if is_friend and tracker and tracker.is_streak_low %}
-                <button id="nudge-btn">👋 Nudge</button>
+                <button id="nudge-btn" {% if already_nudged %}disabled{% endif %}>
+                    {% if already_nudged %}✅ Nudged!{% else %}👋 Nudge{% endif %}
+                </button>
                 {% endif %}
             </div>
         </div>

@@ -1,6 +1,7 @@
 # ----------- django specific ---------------
 from django.shortcuts import redirect, render
 from django.contrib.auth.decorators import login_required
+from django.utils import timezone
 
 # ----------- utils ---------------------------
 from ledger.utils import habit_utils, date_utils, friend_utils
@@ -98,6 +99,7 @@ def profile(request, username=None):
         streak = 0
 
     is_friend = False
+    logged_in_profile = None
     if request.user.is_authenticated and request.user != user:
         try:
             logged_in_profile = UserProfile.objects.get(user=request.user)
@@ -108,6 +110,15 @@ def profile(request, username=None):
         except UserProfile.DoesNotExist:
             pass
 
+    already_nudged = False
+    if is_friend and logged_in_profile:
+        today = timezone.now().date()
+        already_nudged = Nudge.objects.filter(
+            nudger=logged_in_profile,
+            nudged=user_profile,
+            date_of_nudge__date=today
+        ).exists()
+
     context_dict = {
         'profile_user': user,
         'profile': user_profile,
@@ -117,6 +128,7 @@ def profile(request, username=None):
         'tracker': tracker,
         'is_own_profile': request.user == user,
         'is_friend': is_friend,
+        'already_nudged': already_nudged,
     }
     return render(request, 'ledger/profile.html', context=context_dict)
 
