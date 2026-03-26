@@ -39,38 +39,45 @@ $(document).ready(function () {
 
                 if (month.sections.length === 0) {
                     rightHtml += '<p class="habit-details">No habits tracked this month.</p>';
-                } else {
-                    rightHtml += '<div class="habit-grid-container">';
+                } else { 
+                    var allHabits = [];
                     $.each(month.sections, function (s, section) {
-                        rightHtml += '<div class="grid-section">';
-                        // Section header row with emoji + habit names
-                        rightHtml += '<div class="grid-section-header">';
-                        rightHtml += '<span class="grid-section-icon">' + section.emoji + '</span>';
-                        rightHtml += '</div>';
-                        // Habit name headers
-                        rightHtml += '<table class="habit-grid">';
-                        rightHtml += '<thead><tr><th></th>';
                         $.each(section.habits, function (h, habit) {
-                            rightHtml += '<th class="grid-habit-name">' + habit.name + '</th>';
-                        });
-                        rightHtml += '</tr></thead><tbody>';
-                        // One row per day
-                        for (var d = 0; d < month.num_days; d++) {
-                            rightHtml += '<tr>';
-                            rightHtml += '<td class="grid-day-num">' + (d + 1) + '</td>';
-                            $.each(section.habits, function (h, habit) {
-                                var done = habit.grid[d];
-                                rightHtml += '<td class="grid-cell">';
-                                if (done) {
-                                    rightHtml += '<span class="grid-x">\u2716</span>';
-                                }
-                                rightHtml += '</td>';
+                            allHabits.push({
+                                name: habit.name,
+                                emoji: section.emoji,
+                                grid: habit.grid
                             });
-                            rightHtml += '</tr>';
-                        }
-                        rightHtml += '</tbody></table></div>';
+                        });
                     });
-                    rightHtml += '</div>';
+                    rightHtml += '<table class="habit-grid">';
+                    rightHtml += '<thead>';
+                    rightHtml += '<tr><th></th>';
+                    $.each(allHabits, function (h, habit) {
+                        rightHtml += '<th class="grid-section-icon">' + habit.emoji + '</th>';
+                    });
+                    rightHtml += '</tr>';
+                    rightHtml += '<tr><th></th>';
+                    $.each(allHabits, function (h, habit) {
+                        rightHtml += '<th class="grid-habit-name">' + habit.name + '</th>';
+                    })
+                    rightHtml += '</tr>';
+                    rightHtml += '</thead>';
+                    rightHtml += '<tbody>';
+                    for (var d = 0; d < month.num_days; d++) {
+                        rightHtml += '<tr>';
+                        rightHtml += '<td class="grid-day-num">' + (d + 1) + '</td>';
+                        $.each(allHabits, function (h, habit) {
+                            var done = habit.grid[d];
+                            rightHtml += '<td class="grid-cell">';
+                            if (done) {
+                                rightHtml += '<span class="grid-x">\u2716</span>';
+                            }
+                            rightHtml += '</td>';
+                        });
+                        rightHtml += '</tr>';
+                    }
+                    rightHtml += '</tbody></table>';
                 }
 
                 rightHtml += '</div></div>';
@@ -112,7 +119,16 @@ $(document).ready(function () {
     function updateControls() {
         var current = $book.turn('page');
         var total = $book.turn('pages');
-        $('#page-indicator').text('Page ' + current + ' of ' + total);
+        var displayPage = Math.ceil((current - 1) / 2);
+        var displayTotal = Math.floor((total - 1) / 2);
+
+        if (displayPage < 1) {
+            $('#page-indicator').text('Cover');
+        } else if (displayPage > displayTotal) {
+            $('#page-indicator').text('End');
+        } else {
+            $('#page-indicator').text('Page ' + displayPage + ' of ' + displayTotal);
+        }
         $('#prev-btn').prop('disabled', current <= 1);
         $('#next-btn').prop('disabled', current >= total);
     }

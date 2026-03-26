@@ -24,17 +24,13 @@ class Habit(models.Model):
     TYPE_DO = "do"
     TYPE_DONT = "dont"
     TYPE_EASY_WIN = "easy_win"
-    TYPE_NUMERIC = "numeric"
     HABIT_TYPE_CHOICES = (
             (TYPE_DO , "DO"),
             (TYPE_DONT , "DONT"),
             (TYPE_EASY_WIN , "EASY_WIN"),
-            (TYPE_NUMERIC, "NUMERIC"),
     )
     habit_type = models.CharField(max_length=10, choices=HABIT_TYPE_CHOICES)
     # allows for easy habit creation with Habit.objects.create(..., type=Habit.TYPE_DO, ...)
-
-    points = models.IntegerField(default=0)
 
     def __str__(self):
         return self.name

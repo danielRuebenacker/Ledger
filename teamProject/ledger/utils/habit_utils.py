@@ -63,9 +63,7 @@ HABIT_GROUPS_TEMPLATE = {
     'do': {'label': 'Must DOs', 'emoji': '\u2705', 'habits': []},
     'dont': {'label': "Must DON'Ts", 'emoji': '\u274c', 'habits': []},
     'easy_win': {'label': 'Small Wins', 'emoji': '\U0001F3C6', 'habits': []},
-    'numeric': {'label': 'Metrics', 'emoji': '\U0001F4CA', 'habits': []},
 }
-
 
 def build_month_data(tracker):
     month_label = tracker.month.strftime('%B %Y')
@@ -126,7 +124,7 @@ def get_all_months_data(user_profile):
     return [build_month_data(t) for t in trackers]
 
 
-def create_habit(name, habit_type, points, user_profile):
+def create_habit(name, habit_type, user_profile):
     if not name:
         return None, 'Name is required.'
 
@@ -134,15 +132,10 @@ def create_habit(name, habit_type, points, user_profile):
     if habit_type not in valid_types:
         return None, 'Invalid habit type.'
 
-    try:
-        points = int(points)
-    except (ValueError, TypeError):
-        points = 0
-
     if Habit.objects.filter(name=name).exists():
         return None, 'A habit with that name already exists.'
 
-    habit = Habit.objects.create(name=name, habit_type=habit_type, points=points)
+    habit = Habit.objects.create(name=name, habit_type=habit_type)
 
     today = date.today()
     first_of_month = today.replace(day=1)

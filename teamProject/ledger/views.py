@@ -46,9 +46,8 @@ def create_habit_api(request):
     user_profile, _ = UserProfile.objects.get_or_create(user=request.user)
     name = request.POST.get('name', '').strip()
     habit_type = request.POST.get('habit_type', '')
-    points = request.POST.get('points', '0')
 
-    habit, error = create_habit(name, habit_type, points, user_profile)
+    habit, error = create_habit(name, habit_type, user_profile)
     if error:
         return JsonResponse({'error': error}, status=400)
     return JsonResponse({'success': True, 'name': habit.name})

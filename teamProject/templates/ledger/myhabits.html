@@ -13,7 +13,7 @@
 		<!-- Cover page -->
 		<div class="page page-right">
 			<div class="page-inner">
-				<h2 style="border:none; font-size:2rem;">My Habit Ledger</h2>
+				<h2 class="cover-title">My Habit Ledger</h2>
 				<p class="habit-details">Your personal record of progress.<br>Turn the page to begin.</p>
 			</div>
 		</div>
@@ -25,44 +25,36 @@
 		<button id="next-btn">Next</button>
 	</div>
 
-	<div style="margin-top:16px; display:flex; gap:10px; justify-content:center;">
+	<div class="habit-actions">
 		<button id="add-habit-btn">+ New Habit</button>
 		<button id="log-habit-btn">Log Habits</button>
 	</div>
 
-	<p id="no-data-msg" style="display:none; color:#e8dcc3; margin-top:20px; font-style:italic;">
+	<p id="no-data-msg">
 		No habit data yet. Start tracking to fill your ledger!
 	</p>
 </div>
 
 <!-- Create Habit Modal -->
-<div id="habit-modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:1000; justify-content:center; align-items:center;">
-	<div style="background:#fdf6e3; border-radius:8px; padding:32px; width:380px; font-family:'Lora',Georgia,serif; color:#3a2e1f;">
-		<h3 style="margin-top:0; color:#5c3d2e; border-bottom:2px solid #c4a97d; padding-bottom:8px;">Create a New Habit</h3>
+<div id="habit-modal-overlay">
+	<div class="habit-modal">
+		<h3 class="habit-modal-title">Create a New Habit</h3>
 		<form id="create-habit-form">
 			{% csrf_token %}
-			<div style="margin-bottom:14px;">
-				<label for="habit-name" style="display:block; margin-bottom:4px;">Name</label>
-				<input type="text" id="habit-name" name="name" maxlength="25" required
-					style="width:100%; padding:6px; border:1px solid #b8a080; border-radius:3px; font-family:inherit; box-sizing:border-box;">
+			<div class="form-group">
+				<label for="habit-name" class="form-label">Name</label>
+				<input type="text" id="habit-name" name="name" maxlength="25" required class="form-input">
 			</div>
-			<div style="margin-bottom:14px;">
-				<label for="habit-type" style="display:block; margin-bottom:4px;">Type</label>
-				<select id="habit-type" name="habit_type" required
-					style="width:100%; padding:6px; border:1px solid #b8a080; border-radius:3px; font-family:inherit;">
+			<div class="form-group">
+				<label for="habit-type" class="form-label">Type</label>
+				<select id="habit-type" name="habit_type" required class="form-input">
 					<option value="do">Do</option>
 					<option value="dont">Don't</option>
 					<option value="easy_win">Easy Win</option>
-					<option value="numeric">Numeric</option>
 				</select>
 			</div>
-			<div style="margin-bottom:14px;">
-				<label for="habit-points" style="display:block; margin-bottom:4px;">Points</label>
-				<input type="number" id="habit-points" name="points" value="0" min="0"
-					style="width:100%; padding:6px; border:1px solid #b8a080; border-radius:3px; font-family:inherit; box-sizing:border-box;">
-			</div>
-			<p id="habit-form-error" style="color:#ae2012; display:none; margin-bottom:10px;"></p>
-			<div style="display:flex; justify-content:flex-end; gap:10px;">
+			<p id="habit-form-error" class="form-error"></p>
+			<div class="form-actions">
 				<button type="button" id="cancel-habit-btn">Cancel</button>
 				<button type="submit">Create</button>
 			</div>
@@ -90,9 +82,9 @@
 				<!-- Habit groups will be injected here by JS -->
 			</div>
 
-			<p id="log-form-error" style="color:#ae2012; display:none; margin:10px 0;"></p>
+			<p id="log-form-error"></p>
 
-			<div style="display:flex; justify-content:flex-end; gap:10px; margin-top:16px;">
+			<div class="form-actions--log">
 				<button type="button" id="cancel-log-btn">Cancel</button>
 				<button type="submit">Log</button>
 			</div>
