@@ -1,29 +1,30 @@
 $(document).ready(function () {
-	// 1. Existing Auto-Show Logic (if Django flag is set)
-    var modalElement = $('#createTrackerModal')[0];
+	var modalElement = document.getElementById('createTrackerModal');
     var trackerModal;
 
+    // 1. Initialize the modal instance if the element exists
     if (modalElement) {
         trackerModal = new bootstrap.Modal(modalElement, {
             backdrop: true,
             keyboard: true
         });
 
-        // Auto-show if the Django variable says so
-        if (typeof SHOW_TRACKER_FORM !== 'undefined' && SHOW_TRACKER_FORM) {
+        // 2. Auto-show only if the Django flag is True
+        // We use the variable you defined: SHOW_TRACKER_FORM
+        if (typeof SHOW_TRACKER_FORM !== 'undefined' && SHOW_TRACKER_FORM === true) {
             trackerModal.show();
         }
     }
 
-    // 2. NEW: Manual Trigger Logic
-    $('#setup-tracker-btn').on('click', function(e) {
+    // 3. Manual trigger for the button on the turn.js page
+    $(document).on('click', '#setup-tracker-btn', function(e) {
         e.preventDefault();
+        console.log("Setup button clicked"); // Debugging line
+        
         if (trackerModal) {
             trackerModal.show();
-        } else if (modalElement) {
-            // Fallback if trackerModal wasn't initialized yet
-            trackerModal = new bootstrap.Modal(modalElement);
-            trackerModal.show();
+        } else {
+            console.error("Modal instance not initialized.");
         }
     });
 
