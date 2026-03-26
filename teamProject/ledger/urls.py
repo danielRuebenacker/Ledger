@@ -6,15 +6,10 @@ from ledger.forms import CustomRegistrationForm
 app_name = 'ledger'
 
 urlpatterns = [
-        path(
-        'accounts/register/',
-        RegistrationView.as_view(
-            form_class=CustomRegistrationForm,
-            success_url=reverse_lazy('ledger:index')
-                ),
-                name='registration_register',
-        ),
+        path('accounts/register/',RegistrationView.as_view(form_class=CustomRegistrationForm,success_url=reverse_lazy('ledger:index')),name='registration_register',),
         path('accounts/', include('registration.backends.simple.urls')),
+        path('api/friends/request', views.add_friend_request, name='add_friend_request'),
+        path('api/friends/handle', views.handle_friend_request, name='handle_friend_request'),
         path('', views.index, name='index'),
         path('myhabits/', views.myhabits, name='myhabits'),
         path('leaderboards/', views.leaderboards, name='leaderboards'),
