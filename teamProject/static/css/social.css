@@ -1,0 +1,156 @@
+.social-wrapper {
+    padding: 40px;
+    max-width: 1100px;
+    margin: 0 auto;
+}
+
+.social-layout {
+    display: flex;
+    gap: 30px;
+    align-items: flex-start;
+}
+
+.social-sidebar {
+    width: 180px;
+    flex-shrink: 0;
+    border: 1px solid #ccc;
+    border-radius: 12px;
+    padding: 20px;
+    background-color: #fafafa;
+}
+
+.social-sidebar a {
+    display: block;
+    width: 100%;
+    padding: 8px 12px;
+    margin-bottom: 10px;
+    text-align: center;
+    text-decoration: none;
+    border-radius: 8px;
+    font-size: 14px;
+    box-sizing: border-box;
+    background-color: white;
+    color: #222;
+    border: 1px solid #ccc;
+}
+
+.social-sidebar a:last-child {
+    margin-bottom: 0;
+}
+
+.social-sidebar a.active {
+    background-color: #4a90d9;
+    color: white;
+    border-color: #4a90d9;
+}
+
+.social-content {
+    flex: 1;
+    border: 1px solid #ccc;
+    border-radius: 12px;
+    padding: 25px;
+    background-color: #fff;
+    min-height: 300px;
+}
+
+.social-search-bar {
+    margin-bottom: 16px;
+    display: flex;
+    gap: 10px;
+}
+
+.social-search-bar input {
+    flex: 1;
+    padding: 10px 14px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 14px;
+    box-sizing: border-box;
+}
+
+.social-search-bar button {
+    padding: 10px 16px;
+    background-color: #222;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.user-card {
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    padding: 16px 22px;
+    margin-bottom: 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #fafafa;
+}
+
+.user-card-name {
+    font-size: 16px;
+}
+
+.user-card-name a {
+    text-decoration: none;
+    color: inherit;
+}
+
+.user-card-name .online-dot {
+    color: #aaa;
+    font-size: 18px;
+    margin-left: 6px;
+}
+
+.user-card-right {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.user-card-stats {
+    font-size: 15px;
+    color: #444;
+}
+
+.btn-add {
+    padding: 8px 14px;
+    background-color: #4a90d9;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.btn-add:disabled {
+    background-color: #aaa;
+    cursor: default;
+}
+
+.btn-accept {
+    padding: 8px 14px;
+    background-color: #4a90d9;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.btn-decline {
+    padding: 8px 14px;
+    background-color: white;
+    color: #222;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.social-empty {
+    color: #888;
+    font-size: 16px;
+}
