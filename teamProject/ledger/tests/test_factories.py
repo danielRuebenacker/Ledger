@@ -1,4 +1,5 @@
 # factory_boy 
+from datetime import timedelta
 import factory
 
 # ledger specific models 
@@ -42,7 +43,7 @@ class DayFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = Day
     habit_tracker = factory.SubFactory(HabitTrackerFactory)
-    date = factory.LazyFunction(date_utils.today)
+    date = factory.Sequence( lambda n: date_utils.today() - timedelta(days=n))
     completed_on_day = True
 
 class BoolHabitEntryFactory(factory.django.DjangoModelFactory):

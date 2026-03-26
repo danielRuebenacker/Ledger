@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
-from ledger.utils import date_utils
+from django.utils import timezone
+from ledger.utils import date_utils, habit_utils
 
 def user_profile_pic_path(instance, filename):
     import time
@@ -12,12 +13,13 @@ class UserProfile(models.Model):
 
     picture = models.ImageField(upload_to=user_profile_pic_path, blank=True, default="guest.jpg")
     about_me = models.TextField(blank=True, default='')
+
     LIGHT = 'light'
     DARK = 'dark'
     THEME_CHOICES = ((LIGHT, 'Light'), (DARK, 'Dark'))
+    
+    # settings
     theme = models.CharField(max_length=10, choices=THEME_CHOICES, default=LIGHT)
-    # other data to store defined here 
-    # ...
 
     def __str__(self):
         return self.user.username
@@ -110,6 +112,22 @@ class HabitTracker(models.Model):
 
     def __str__(self):
         return self.user.user.username + self.month.strftime("%m-%Y")
+
+    @property
+    def is_streak_low(self):
+        now = date_utils.now()
+        if now.hour >= 18:
+            day = self.days.filter(date=now.date()).first()
+
+            # if not logged today or 
+            if not day or not day.completed_on_day:
+                return True
+        return False
+
+    def refresh_streak(self):
+        self.streak = habit_utils.calculate_streak(self)
+        self.save(update_fields=['streak'])
+
 
 class Day(models.Model): 
     habit_tracker = models.ForeignKey(HabitTracker, on_delete=models.CASCADE, related_name="days")
