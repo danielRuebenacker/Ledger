@@ -23,7 +23,7 @@
 						<li><span class="dropdown-item ">No notifications</span></li>
 					  </ul>
 					</li>
-					<li class="nav-item"><a class="nav-link nav-box" href="/profile/{{ user.username }}/">Profile</a></li>
+					<li class="nav-item"><a class="nav-link nav-box" href="{% url 'ledger:profile_user' user.username %}">Profile</a></li>
 					<li class="nav-item"><a class="nav-link nav-box" href="{%url 'ledger:settings' %}">Settings</a></li>
 					<li class="nav-item"><a class="nav-link nav-box" href="{% url 'auth_logout' %}?next={% url 'ledger:index' %}">Logout</a></li>
 				{% else %}

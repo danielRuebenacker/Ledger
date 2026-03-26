@@ -131,7 +131,7 @@ def populate_friendship():
     print(f"Created {len(requests_to_create)} requests and {len(friendships_to_create)} friendship links.")
 
 def populate_trackers():
-    random.seed(42) # Deterministic results
+    random.seed(42)  # Deterministic results
     users = list(UserProfile.objects.all())
     all_habits = list(Habit.objects.all())
     first_of_month = get_first_of_this_month()
@@ -143,12 +143,24 @@ def populate_trackers():
     journal_entries = []
     m2m_relations = []
 
-    # 1. Create Trackers
+    # 1. Create Trackers with dummy leaderboard data
     for user in users:
-        trackers_to_create.append(HabitTracker(user=user, month=first_of_month))
+        # Generate random dummy data for leaderboards
+        random_streak = random.randint(0, 30) #
+        random_points = random.randint(0, 500) #
+        
+        trackers_to_create.append(
+            HabitTracker(
+                user=user, 
+                month=first_of_month,
+                streak=random_streak, # Assign random streak
+                points=random_points  # Assign random points
+            )
+        )
     
     # Bulk create trackers first so they get IDs
     HabitTracker.objects.bulk_create(trackers_to_create, ignore_conflicts=True)
+    
     # Re-fetch trackers to associate them with days/habits
     trackers = HabitTracker.objects.filter(month=first_of_month)
 
@@ -195,7 +207,7 @@ def populate_trackers():
     JournalEntry.objects.bulk_create(journal_entries)
     BoolHabitEntry.objects.bulk_create(habit_entries)
 
-    print(f"Populated {len(trackers_to_create)} trackers with associated days and entries.")
+    print(f"Populated {len(trackers_to_create)} trackers with random leaderboard data, days, and entries.")
 
 def create_admin():
     username = "admin"

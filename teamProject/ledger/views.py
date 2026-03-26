@@ -7,7 +7,7 @@ from django.utils import timezone
 from ledger.utils import habit_utils, date_utils, friend_utils
 
 # ------------ forms/models --------------------
-from ledger.forms import HabitTrackerForm
+from ledger.forms import HabitTrackerForm, CustomRegistrationForm
 from ledger.models import HabitTracker, UserProfile, Nudge, Friendship
 from django.db.models import Q
 from django.contrib.auth.models import User
@@ -58,14 +58,42 @@ def myhabits(request):
         else:
             return render(request, 'ledger/myhabits.html', context=context_dict)
 
-
-
-
-
 def leaderboards(request):
-    context_dict = {}
-
-    return render(request, 'ledger/myhabits.html', context=context_dict)
+    from ledger.utils import date_utils
+    from ledger.models import HabitTracker
+ 
+    this_month = date_utils.get_first_of_this_month()
+ 
+    top_streaks = (HabitTracker.objects.filter(month=this_month, streak__gt=0).select_related('user__user').order_by('-streak')[:50])
+ 
+    top_points = (HabitTracker.objects.filter(month=this_month, points__gt=0).select_related('user__user').order_by('-points')[:50])
+ 
+    current_streak_rank = None
+    current_points_rank = None
+ 
+    if request.user.is_authenticated:
+        try:
+            user_profile = request.user.userprofile
+            tracker = HabitTracker.objects.get(user=user_profile, month=this_month)
+ 
+            streak_rank = HabitTracker.objects.filter(month=this_month, streak__gt=tracker.streak).count() + 1
+ 
+            points_rank = HabitTracker.objects.filter(month=this_month, points__gt=tracker.points).count() + 1
+ 
+            current_streak_rank = streak_rank if streak_rank <= 50 else None
+            current_points_rank = points_rank if points_rank <= 50 else None
+ 
+        except HabitTracker.DoesNotExist:
+            pass
+ 
+    context_dict = {
+        'top_streaks': top_streaks,
+        'top_points': top_points,
+        'current_streak_rank': current_streak_rank,
+        'current_points_rank': current_points_rank,
+    }
+ 
+    return render(request, 'ledger/leaderboards.html', context=context_dict)
 
 def social(request):
     context_dict = {}
@@ -110,11 +138,7 @@ def profile(request, username=None):
     already_nudged = False
     if is_friend and logged_in_profile:
         today = timezone.now().date()
-        already_nudged = Nudge.objects.filter(
-            nudger=logged_in_profile,
-            nudged=user_profile,
-            date_of_nudge__date=today
-        ).exists()
+        already_nudged = Nudge.objects.filter(nudger=logged_in_profile,nudged=user_profile,date_of_nudge__date=today).exists()
 
     context_dict = {
         'profile_user': user,
@@ -213,3 +237,15 @@ def nudge(request, username):
         return JsonResponse({'status': 'ok'})
 
     return JsonResponse({'status': 'invalid'}, status=400)
+
+def register(request):
+    if request.method == 'POST':
+        form = CustomRegistrationForm(request.POST, request.FILES)
+        if form.is_valid():
+            user = form.save()
+            # Redirect to login or index after successful registration
+            return redirect('ledger:index') 
+    else:
+        form = CustomRegistrationForm()
+
+    return render(request, 'ledger/registration_form.html', {'form': form})
