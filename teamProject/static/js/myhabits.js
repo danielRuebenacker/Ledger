@@ -193,32 +193,32 @@ $(document).ready(function () {
     });
 
     // Create habit form submission
-    $('#create-habit-form').on('submit', function (e) {
-        e.preventDefault();
-        var $form = $(this);
-        var $error = $('#habit-form-error');
-        $error.hide();
-
-        $.ajax({
-            url: CREATE_HABIT_URL,
-            method: 'POST',
-            data: $form.serialize(),
-            dataType: 'json',
-            success: function (data) {
-                $('#habit-modal-overlay').hide();
-                $form[0].reset();
-                location.reload();
-            },
-            error: function (xhr) {
-                var msg = 'Something went wrong.';
-                if (xhr.responseJSON && xhr.responseJSON.error) {
-                    msg = xhr.responseJSON.error;
-                }
-                $error.text(msg).show();
-            }
-        });
-    });
-
+    // $('#create-habit-form').on('submit', function (e) {
+    //     e.preventDefault();
+    //     var $form = $(this);
+    //     var $error = $('#habit-form-error');
+    //     $error.hide();
+    //
+    //     $.ajax({
+    //         url: CREATE_HABIT_URL,
+    //         method: 'POST',
+    //         data: $form.serialize(),
+    //         dataType: 'json',
+    //         success: function (data) {
+    //             $('#habit-modal-overlay').hide();
+    //             $form[0].reset();
+    //             location.reload();
+    //         },
+    //         error: function (xhr) {
+    //             var msg = 'Something went wrong.';
+    //             if (xhr.responseJSON && xhr.responseJSON.error) {
+    //                 msg = xhr.responseJSON.error;
+    //             }
+    //             $error.text(msg).show();
+    //         }
+    //     });
+    // });
+    //
     // ── Log Habits Modal ──
 
     function formatDateLabel(dateStr) {
@@ -315,5 +315,21 @@ $(document).ready(function () {
     //         }
     //     });
     // });
+	//
+	
+	// 1. Initialize Modals
+    var createHabitModal = new bootstrap.Modal(document.getElementById('createHabitModal'));
+    var logHabitModal = new bootstrap.Modal(document.getElementById('logHabitModal'));
 
+    // 2. Button Triggers
+    $('#add-habit-btn').on('click', function () {
+        createHabitModal.show();
+    });
+
+    $('#log-habit-btn').on('click', function () {
+        // Today logic we wrote earlier
+        var today = new Date().toISOString().split('T')[0];
+        $('#id_date').val(today).trigger('change');
+        logHabitModal.show();
+    });
 });

@@ -11,7 +11,7 @@ from django.utils import timezone
 from ledger.utils import habit_utils, date_utils, friend_utils
 
 # ------------ forms/models --------------------
-from ledger.forms import HabitTrackerForm, CustomRegistrationForm, LogHabitForm
+from ledger.forms import HabitTrackerForm, CustomRegistrationForm, LogHabitForm, CreateHabitForm
 from ledger.models import HabitTracker, UserProfile, Nudge, Friendship, BoolHabitEntry, JournalEntry, Day
 from django.db.models import Q
 from django.contrib.auth.models import User
@@ -83,6 +83,26 @@ def log_habits_view(request):
 
     return redirect(reverse('ledger:myhabits'))
 
+def create_habit_view(request):
+    if request.method == 'POST':
+        user_profile = request.user.userprofile
+        form = CreateHabitForm(request.POST)
+
+        if form.is_valid():
+            # 1. Create the Habit (or get it if it already exists as community)
+            habit = form.save()
+
+            # 2. Add this habit to the user's current month tracker
+            import datetime
+            first_of_month = datetime.date.today().replace(day=1)
+            tracker = HabitTracker.objects.filter(user=user_profile, month=first_of_month).first()
+            
+            if tracker:
+                tracker.habits.add(habit)
+                tracker.save()
+
+    return redirect(reverse('ledger:myhabits'))
+
 @login_required
 def myhabits(request):
     context_dict = {}
@@ -90,7 +110,9 @@ def myhabits(request):
     # if habit tracker is not created present form view
     habit_tracker, _ = HabitTracker.objects.get_or_create(user=user_profile, month=date_utils.get_first_of_this_month())
     log_form = LogHabitForm(user_profile=user_profile)
+    create_habit_form = CreateHabitForm()
     context_dict['log_form'] = log_form
+    context_dict['create_form'] = create_habit_form
 
 
     
