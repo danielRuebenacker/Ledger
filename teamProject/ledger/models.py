@@ -43,6 +43,8 @@ class Habit(models.Model):
     habit_type = models.CharField(max_length=10, choices=HABIT_TYPE_CHOICES)
     # allows for easy habit creation with Habit.objects.create(..., type=Habit.TYPE_DO, ...)
 
+    points = models.IntegerField(default=0)
+
     def __str__(self):
         return self.name
 
