@@ -1,0 +1,82 @@
+{% extends 'ledger/base.html' %}
+{% load static %}
+
+{% block header %}
+<link rel="stylesheet" href="{% static 'css/social.css' %}">
+<script src="{% static 'js/social.js' %}" defer></script>
+{% endblock %}
+
+{% block title_block %}Social{% endblock %}
+
+{% block body_block %}
+{% csrf_token %}
+<div class="social-wrapper">
+    <div class="social-layout">
+        <div class="social-sidebar">
+            <a href="{% url 'ledger:social' %}?tab=search" {% if active_tab == 'search' %}class="active"{% endif %}>Find Users</a>
+            <a href="{% url 'ledger:social' %}?tab=friends" {% if active_tab == 'friends' %}class="active"{% endif %}>Friends</a>
+            <a href="{% url 'ledger:social' %}?tab=requests" {% if active_tab == 'requests' %}class="active"{% endif %}>Friend Requests</a>
+        </div>
+
+        <div class="social-content">
+            {% if active_tab != 'requests' %}
+            <form method="get" action="" class="social-search-bar">
+                <input type="hidden" name="tab" value="{{ active_tab }}">
+                <input type="text" name="q" value="{{ query }}" placeholder="Search...">
+                <button type="submit">Search</button>
+            </form>
+            {% endif %}
+
+            {% if active_tab == 'search' %}
+                {% for item in users_with_status %}
+                <div class="user-card">
+                    <span class="user-card-name">
+                        <a href="{% url 'ledger:profile_user' item.user.username %}">{{ item.user.username }}</a>
+                    </span>
+                    <div class="user-card-right">
+                        {% if item.status == 'friend' %}
+                            <span class="user-card-stats">Friend</span>
+                        {% elif item.status == 'pending' %}
+                            <button class="btn-add btn-disabled" disabled>Pending</button>
+                        {% else %}
+                            <button class="btn-add" data-user-id="{{ item.user.id }}">Add Friend</button>
+                        {% endif %}
+                    </div>
+                </div>
+                {% empty %}
+                <p class="social-empty">No users found.</p>
+                {% endfor %}
+            {% endif %}
+
+            {% if active_tab == 'friends' %}
+                {% for friend_profile in friends %}
+                <div class="user-card">
+                    <span class="user-card-name">
+                        <a href="{% url 'ledger:profile_user' friend_profile.user.username %}">{{ friend_profile.user.username }}</a>
+                    </span>
+                    <div class="user-card-right"><span class="user-card-stats">Friend</span></div>
+                </div>
+                {% empty %}
+                <p class="social-empty">You have no friends yet.</p>
+                {% endfor %}
+            {% endif %}
+
+            {% if active_tab == 'requests' %}
+                {% for req in friend_requests %}
+                <div class="user-card" id="req-card-{{ req.id }}">
+                    <span class="user-card-name">
+                        <a href="{% url 'ledger:profile_user' req.requester.user.username %}">{{ req.requester.user.username }}</a>
+                    </span>
+                    <div class="user-card-right">
+                        <button class="btn-accept" data-request-id="{{ req.id }}" data-action="accept">Accept</button>
+                        <button class="btn-decline" data-request-id="{{ req.id }}" data-action="reject">Decline</button>
+                    </div>
+                </div>
+                {% empty %}
+                <p class="social-empty">No friend requests yet.</p>
+                {% endfor %}
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
