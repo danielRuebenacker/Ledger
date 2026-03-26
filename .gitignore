@@ -61,9 +61,8 @@ cover/
 local_settings.py
 db.sqlite3
 db.sqlite3-journal
-media/
-!media/guest.jpg
 media/profile_images/*
+!media/guest.jpg
 
 # Flask stuff:
 instance/
