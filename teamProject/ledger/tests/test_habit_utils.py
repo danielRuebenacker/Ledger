@@ -3,7 +3,7 @@ from django.test import TestCase
 from ledger.utils import habit_utils, date_utils
 from .test_factories import *
 
-class TestHabitTrackerGet(TestCase):
+class TestHabitTrackerUtils(TestCase):
     def test_get_habit_tracker(self):
         habit_tracker = HabitTrackerFactory()
         user = habit_tracker.user
@@ -91,8 +91,12 @@ class TestHabitTrackerGet(TestCase):
         ht.refresh_streak()
         self.assertEquals(ht.streak, 2)
 
-
-
+    def test_supply_popular_habits(self):
+        _ = HabitFactory(is_community=True)
+        _ = HabitFactory(is_community=True)
+        _ = HabitFactory(is_community=True)
+        popular_habits = habit_utils.supply_form_with_popular_habits(Habit.TYPE_DO)
+        self.assertEquals(len(popular_habits), 3)
 
 class TestHabitTrackerForm(TestCase):
     def setUp(self):
