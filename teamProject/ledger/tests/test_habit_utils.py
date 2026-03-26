@@ -2,8 +2,9 @@ from django.shortcuts import reverse
 from django.test import TestCase
 from ledger.utils import habit_utils, date_utils
 from .test_factories import *
+from freezegun import freeze_time
 
-class TestHabitTrackerGet(TestCase):
+class TestHabitTrackerUtils(TestCase):
     def test_get_habit_tracker(self):
         habit_tracker = HabitTrackerFactory()
         user = habit_tracker.user
@@ -67,32 +68,52 @@ class TestHabitTrackerGet(TestCase):
         habit_list_query = list(habit_tracker.habits.all())
         self.assertEquals(habit_list, habit_list_query)
 
+class TestStreaks(TestCase):
+    def setUp(self):
+        self.ht = HabitTrackerFactory()
+
     def test_basic_consecutive_streak(self):
-        ht = HabitTrackerFactory()
         # most recently created day should be today!
         DayFactory.reset_sequence(0)
-        _ = DayFactory(habit_tracker=ht, completed_on_day=True)
-        _ = DayFactory(habit_tracker=ht, completed_on_day=True)
-        _ = DayFactory(habit_tracker=ht, completed_on_day=True)
-        _ = DayFactory(habit_tracker=ht, completed_on_day=True)
-        _ = DayFactory(habit_tracker=ht, completed_on_day=True)
-        ht.refresh_streak()
-        self.assertEquals(ht.streak, 5)
+        _ = DayFactory(habit_tracker=self.ht, completed_on_day=True)
+        _ = DayFactory(habit_tracker=self.ht, completed_on_day=True)
+        _ = DayFactory(habit_tracker=self.ht, completed_on_day=True)
+        _ = DayFactory(habit_tracker=self.ht, completed_on_day=True)
+        _ = DayFactory(habit_tracker=self.ht, completed_on_day=True)
+        self.ht.refresh_streak()
+        self.assertEquals(self.ht.streak, 5)
 
     def test_broken_continuity_streak(self):
-        ht = HabitTrackerFactory()
         # most recently created day should be today!
         DayFactory.reset_sequence(0)
-        _ = DayFactory(habit_tracker=ht, completed_on_day=True)
-        _ = DayFactory(habit_tracker=ht, completed_on_day=True)
+        _ = DayFactory(habit_tracker=self.ht, completed_on_day=True)
+        _ = DayFactory(habit_tracker=self.ht, completed_on_day=True)
         # false!
-        _ = DayFactory(habit_tracker=ht, completed_on_day=False)
-        _ = DayFactory(habit_tracker=ht, completed_on_day=True)
-        ht.refresh_streak()
-        self.assertEquals(ht.streak, 2)
+        _ = DayFactory(habit_tracker=self.ht, completed_on_day=False)
+        _ = DayFactory(habit_tracker=self.ht, completed_on_day=True)
+        self.ht.refresh_streak()
+        self.assertEquals(self.ht.streak, 2)
 
+    @freeze_time("2026-03-26 14:00:00")
+    def test_is_streak_low_in_afternoon(self):
+        self.assertFalse(self.ht.is_streak_low)
 
+    @freeze_time("2026-03-26 19:00:00")
+    def test_is_streak_low_in_evening(self):
+        self.assertTrue(self.ht.is_streak_low)
 
+    @freeze_time("2026-03-26 19:00:00")
+    def test_is_streak_low_in_evening_after_logging(self):
+        DayFactory.reset_sequence(0)
+        _ = DayFactory(habit_tracker=self.ht, completed_on_day=True)
+        self.assertFalse(self.ht.is_streak_low)
+
+    def test_supply_popular_habits(self):
+        _ = HabitFactory(is_community=True)
+        _ = HabitFactory(is_community=True)
+        _ = HabitFactory(is_community=True)
+        popular_habits = habit_utils.supply_form_with_popular_habits(Habit.TYPE_DO)
+        self.assertEquals(len(popular_habits), 3)
 
 class TestHabitTrackerForm(TestCase):
     def setUp(self):
