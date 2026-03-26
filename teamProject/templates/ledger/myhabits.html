@@ -37,24 +37,23 @@
 		<button id="next-btn">Next</button>
 	</div>
 
-	<div class="habit-actions">
-		<button id="add-habit-btn">+ New Habit</button>
-		<button id="log-habit-btn">Log Habits</button>
-	</div>
+	<!-- <div class="habit-actions"> -->
+	<!-- 	<button id="add-habit-btn">+ New Habit</button> -->
+	<!-- 	<button id="log-habit-btn">Log Habits</button> -->
+	<!-- </div> -->
 
 	<p id="no-data-msg">
 		No habit data yet. Start tracking to fill your ledger!
 	</p>
 </div>
 
-{# 1. EXISTING MODALS (REMAINS SAME) #}
-<div id="habit-modal-overlay">...</div>
-<div id="log-modal-overlay" class="modal-overlay">...</div>
+{% include 'ledger/partials/_log_modal.html' %}
 
 {# 2. NEW BOOTSTRAP MODAL (PARTIAL) #}
 {% if display_create_tracker %}
     {% include 'ledger/partials/_create_tracker_modal.html' %}
 {% endif %}
+
 
 {% endblock %}
 

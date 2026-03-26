@@ -56,3 +56,28 @@ class CustomRegistrationForm(RegistrationForm):
             profile_data['picture'] = self.cleaned_data.get('picture')
         UserProfile.objects.create(**profile_data)
         return user
+
+class LogHabitForm(forms.Form):
+    date = forms.DateField(
+        widget=forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+        initial=forms.utils.timezone.now
+    )
+    journal_text = forms.CharField(
+        widget=forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'How was your day?'}),
+        required=False
+    )
+    # We will define 'habits' in __init__ to make it dynamic per user
+    habits = forms.ModelMultipleChoiceField(
+        queryset=Habit.objects.none(),
+        widget=forms.CheckboxSelectMultiple,
+        required=False
+    )
+
+    def __init__(self, *args, **kwargs):
+        user_profile = kwargs.pop('user_profile', None)
+        super().__init__(*args, **kwargs)
+        if user_profile:
+            # Get the habits from the user's current tracker
+            tracker = user_profile.habit_trackers.order_by('-month').first()
+            if tracker:
+                self.fields['habits'].queryset = tracker.habits.all()

@@ -276,55 +276,22 @@ $(document).ready(function () {
         });
     }
 
-    // Open log modal
-    $('#log-habit-btn').on('click', function () {
-        var today = new Date().toISOString().split('T')[0];
-        $('#log-date').val(today);
-        $('#log-form-error').hide();
-        loadLogHabits(today);
-        $('#log-modal-overlay').css('display', 'flex');
-    });
+	// Initialize the Log Modal
+	var logModalEl = document.getElementById('logHabitModal');
+	var logBootstrapModal;
+	if (logModalEl) {
+		logBootstrapModal = new bootstrap.Modal(logModalEl);
+	}
 
-    // When date changes, reload habits for that date
-    $('#log-date').on('change', function () {
-        loadLogHabits($(this).val());
-    });
-
-    // Close log modal
-    $('#cancel-log-btn').on('click', function () {
-        $('#log-modal-overlay').hide();
-    });
-
-    $('#log-modal-overlay').on('click', function (e) {
-        if (e.target === this) {
-            $(this).hide();
-        }
-    });
-
-    // Submit log
-    $('#log-habit-form').on('submit', function (e) {
-        e.preventDefault();
-        var $form = $(this);
-        var $error = $('#log-form-error');
-        $error.hide();
-
-        $.ajax({
-            url: LOG_HABITS_URL,
-            method: 'POST',
-            data: $form.serialize(),
-            dataType: 'json',
-            success: function () {
-                $('#log-modal-overlay').hide();
-                location.reload();
-            },
-            error: function (xhr) {
-                var msg = 'Something went wrong.';
-                if (xhr.responseJSON && xhr.responseJSON.error) {
-                    msg = xhr.responseJSON.error;
-                }
-                $error.text(msg).show();
-            }
-        });
-    });
+	// When the "Log Habits" button is clicked
+	$('#log-habit-btn').on('click', function () {
+		if (logBootstrapModal) {
+			// Set date to today automatically before showing
+			var today = new Date().toISOString().split('T')[0];
+			$('#id_date').val(today); 
+			
+			logBootstrapModal.show();
+		}
+	});
 
 });

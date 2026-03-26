@@ -1,34 +1,42 @@
-<div id="log-modal-overlay" class="modal-overlay">
-    <div class="log-modal">
-        <form id="log-habit-form" method="post" action="{% url 'ledger:log_habits_api' %}">
-            {% csrf_token %}
-            <h3>Log Daily Habits</h3>
+<div class="modal fade" id="logHabitModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content habit-config-card">
+            <div class="modal-header border-0 pb-0">
+                <h1 class="modal-title fs-4 fw-bold">Log Your Progress</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
             
-            {{ log_form.as_p }}
+			<form id="log-habit-form" method="POST" action="{% url 'ledger:log_habits_view' %}">
+				{% csrf_token %}
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="fw-bold">Date</label>
+                        {{ log_form.date }}
+                    </div>
 
-            <div id="log-habits-container">
-                {% for group in log_groups %}
-                    <div class="log-group">
-                        <div class="log-group-header">
-                            <span>{{ group.emoji }} {{ group.label }}</span>
-                        </div>
-                        <div class="log-habit-list">
-                            {% for habit in group.habits %}
-                                <div class="log-habit-item">
-                                    <input type="checkbox" name="habits" value="{{ habit.id }}" 
-                                           id="h-{{ habit.id }}" {% if habit.checked %}checked{% endif %}>
-                                    <label for="h-{{ habit.id }}">{{ habit.name }}</label>
+                    <div class="mb-3">
+                        <label class="fw-bold">Habits Completed</label>
+                        <div class="habit-checkbox-grid">
+                            {% for checkbox in log_form.habits %}
+                                <div class="form-check">
+                                    {{ checkbox.tag }}
+                                    <label class="form-check-label" for="{{ checkbox.id_for_label }}">
+                                        {{ checkbox.choice_label }}
+                                    </label>
                                 </div>
                             {% endfor %}
                         </div>
                     </div>
-                {% endfor %}
-            </div>
 
-            <div class="form-actions-log">
-                <button type="button" id="cancel-log-btn">Cancel</button>
-                <button type="submit">Save Log</button>
-            </div>
-        </form>
+                    <div class="mb-3">
+                        <label class="fw-bold">Journal Entry</label>
+                        {{ log_form.journal_text }}
+                    </div>
+                </div>
+                <div class="modal-footer border-0">
+                    <button type="submit" class="btn-save-habits">Save Entry</button>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
