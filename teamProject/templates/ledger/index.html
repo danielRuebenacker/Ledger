@@ -1,11 +1,48 @@
 {% extends 'ledger/base.html' %}
 {% load staticfiles %}
-
+ 
 {% block title_block %}
 	Home
 {% endblock %}
-
+ 
 {% block body_block %}
-<h1>Ledger</h1>
-<p>Sleepy? Screen time taking half of your day? Want to do something about it? Get to tracking your habits now!</p>
+<link rel="stylesheet" href="{% static 'css/index.css' %}">
+ 
+<div class="hero-wrapper">
+    <div class="hero-bg-grid"></div>
+ 
+    <div class="hero-content">
+        <div class="badge">Track · Improve · Thrive</div>
+ 
+        <h1 class="hero-title">
+            Take back <br><span class="accent">your day.</span>
+        </h1>
+ 
+        <p class="hero-sub">
+            Sleepy? Screen time eating your hours? Ledger helps you track your habits, 
+            build streaks, and hold yourself accountable — one day at a time.
+        </p>
+ 
+ 
+    </div>
+ 
+    <div class="feature-grid">
+        <div class="feature-card">
+            <div class="feature-icon">🔥</div>
+            <h3>Build Streaks</h3>
+            <p>Stay consistent day after day and watch your habits compound into real change.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">👥</div>
+            <h3>Friend Accountability</h3>
+            <p>Add friends, see their progress, and send nudges when they're falling behind.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">📊</div>
+            <h3>Track Everything</h3>
+            <p>Log sleep, screen time, workouts — anything that matters to you.</p>
+        </div>
+    </div>
+</div>
+ 
 {% endblock %}
