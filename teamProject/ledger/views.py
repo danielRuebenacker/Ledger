@@ -46,9 +46,6 @@ def myhabits(request):
             # makes into habits/gets habit then adds to habit tracker
             habit_utils.get_or_create_habits_then_register(*habit_string_lists, habit_tracker)
 
-            # log empty habits until today (exclusive)
-            habit_utils.create_empty_days_until_today(date_utils.get_first_of_this_month(), habit_tracker)
-
             return redirect('ledger:myhabits')
     else:
         if not habit_utils.check_if_any_habits_added(habit_tracker): 
