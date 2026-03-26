@@ -102,7 +102,7 @@ class HabitTracker(models.Model):
 
     streak = models.IntegerField(default=0)
     points = models.IntegerField(default=0)
-
+    
     class Meta:
         # tells django this combination must be unique
         unique_together = ("user", "month")
@@ -116,7 +116,7 @@ class HabitTracker(models.Model):
         if now.hour >= 18:
             day = self.days.filter(date=now.date()).first()
 
-            # if not logged today or 
+            # if day doesnt exist or exists somehow but not completed
             if not day or not day.completed_on_day:
                 return True
         return False

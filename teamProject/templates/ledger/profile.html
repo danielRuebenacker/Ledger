@@ -12,11 +12,18 @@
     <div class="profile-header">
         <img src="{{ picture_url }}" class="profile-img">
 
-        <div class="user-info">
+        <div class="user-info" style="flex: 1;">
             <h1>{{ profile_user.username }}</h1>
             <div class="stats-container">
-                <div class="stat-pill">🔥 0</div>
-                <div class="stat-pill">{{ friend_count }} Friends</div>
+                <div style="display:flex; gap:8px;">
+                    <div class="stat-pill">🔥 {{ streak }}</div>
+                    <div class="stat-pill">{{ friend_count }} Friends</div>
+                </div>
+                {% if is_friend and tracker and tracker.is_streak_low %}
+                <button id="nudge-btn" {% if already_nudged %}disabled{% endif %}>
+                    {% if already_nudged %}✅ Nudged!{% else %}👋 Nudge{% endif %}
+                </button>
+                {% endif %}
             </div>
         </div>
     </div>
@@ -27,4 +34,8 @@
     </div>
 </div>
 
+<script>
+    const profileUsername = "{{ profile_user.username }}";
+</script>
+<script src="{% static 'js/profile.js' %}"></script>
 {% endblock %}

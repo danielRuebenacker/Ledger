@@ -60,19 +60,14 @@ def log_bool_habit(habit, done, day):
     bool_habit_entry, _ = BoolHabitEntry.objects.get_or_create(day=day, habit=habit, defaults={'done': done})
     return bool_habit_entry
 
-
-def create_empty_habit_entries_for_day(habit_tracker, date, habits):
-    day = get_day(habit_tracker=habit_tracker, date=date)
-    for habit in habits:
-        # all false
-        log_bool_habit(habit=habit, done=False, day=day)
-
-
-def create_empty_days_until_today(date, habit_tracker):
-    # day: datetime object
-    habits = habit_tracker.habits.all()
-    for single_date in date_utils.daterange(date, date_utils.today()):
-        create_empty_habit_entries_for_day(habit_tracker, single_date, habits)
+def supply_form_with_popular_habits(habit_type):
+    from ledger.models import Habit
+    return list(
+            Habit.objects.filter(
+                habit_type=habit_type, 
+                is_community=True
+            ).order_by('-points')[:10].values_list('name', flat=True)
+        )
 
 def calculate_streak(tracker):
     # 1. Get the current day (local time)
