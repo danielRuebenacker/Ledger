@@ -1,8 +1,9 @@
 # ----------- django specific ---------------
 from datetime import date, datetime
 from django.views.decorators.http import require_POST
+from django.contrib import messages
 
-from django.shortcuts import redirect, render
+from django.shortcuts import redirect, render, reverse
 from django.contrib.auth.decorators import login_required
 from django.utils import timezone
 
@@ -11,7 +12,7 @@ from ledger.utils import habit_utils, date_utils, friend_utils
 
 # ------------ forms/models --------------------
 from ledger.forms import HabitTrackerForm, CustomRegistrationForm, LogHabitForm
-from ledger.models import HabitTracker, UserProfile, Nudge, Friendship, BoolHabitEntry, JournalEntry
+from ledger.models import HabitTracker, UserProfile, Nudge, Friendship, BoolHabitEntry, JournalEntry, Day
 from django.db.models import Q
 from django.contrib.auth.models import User
 
@@ -28,38 +29,59 @@ def index(request):
     return render(request, 'ledger/index.html', context=context_dict)
 
 def log_habits_view(request):
-    user_profile = request.user.userprofile
-    
     if request.method == 'POST':
+        user_profile = request.user.userprofile
         form = LogHabitForm(request.POST, user_profile=user_profile)
+
         if form.is_valid():
-            # Extract data
-            date = form.cleaned_data['date']
+            # Extract cleaned data
+            log_date = form.cleaned_data['date']
             journal_text = form.cleaned_data['journal_text']
-            selected_habits = form.cleaned_data['habits'] # QuerySet of Habit objects
+            selected_habits = form.cleaned_data['habits'] # This is a QuerySet of Habit objects
 
-            # 1. Get or Create the HabitTracker for this month
-            tracker = user_profile.habit_trackers.filter(month__month=date.month, month__year=date.year).first()
-            
+            # 1. Get the correct HabitTracker for this month
+            # We assume the user has a tracker for the month of the log_date
+            first_of_month = log_date.replace(day=1)
+            tracker = HabitTracker.objects.filter(user=user_profile, month=first_of_month).first()
+
+            if not tracker:
+                messages.error(request, "No habit tracker found for this month. Please create one first!")
+                return redirect(reverse('ledger:myhabits'))
+
             # 2. Get or Create the Day object
-            day, created = Day.objects.get_or_create(habit_tracker=tracker, date=date)
+            day_obj, created = Day.objects.get_or_create(
+                habit_tracker=tracker, 
+                date=log_date
+            )
 
-            # 3. Save/Update Journal
-            JournalEntry.objects.update_or_create(day=day, defaults={'journal_text': journal_text})
+            # 3. Update/Create Journal Entry
+            if journal_text:
+                JournalEntry.objects.update_or_create(
+                    day=day_obj, 
+                    defaults={'journal_text': journal_text}
+                )
 
-            # 4. Update Habit Entries
-            # Reset all for this day first, then set selected ones to True
-            day.bool_habit_entries.all().update(done=False)
-            for habit in selected_habits:
-                BoolHabitEntry.objects.update_or_create(day=day, habit=habit, defaults={'done': True})
+            # 4. Sync BoolHabitEntries
+            # First, get all habits associated with this tracker
+            all_tracker_habits = tracker.habits.all()
 
-            return JsonResponse({'status': 'success', 'message': 'Habits logged!'})
-        
-        return JsonResponse({'status': 'error', 'errors': form.errors}, status=400)
+            for habit in all_tracker_habits:
+                # If the habit was checked in the form, done=True, otherwise False
+                is_done = habit in selected_habits
+                
+                BoolHabitEntry.objects.update_or_create(
+                    day=day_obj,
+                    habit=habit,
+                    defaults={'done': is_done}
+                )
+            
+            # 5. Optional: Trigger a streak refresh
+            tracker.refresh_streak()
 
-    # If GET: Return data for the selected date (for your JS to fill the form)
-    # ... (Logic to fetch existing day data)
-    return JsonResponse({'status': 'ready'})
+            messages.success(request, f"Progress logged for {log_date.strftime('%B %d')}!")
+            return redirect(reverse('ledger:myhabits'))
+
+    return redirect(reverse('ledger:myhabits'))
 
 @login_required
 def myhabits(request):

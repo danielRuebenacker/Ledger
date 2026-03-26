@@ -276,22 +276,44 @@ $(document).ready(function () {
         });
     }
 
-	// Initialize the Log Modal
-	var logModalEl = document.getElementById('logHabitModal');
-	var logBootstrapModal;
-	if (logModalEl) {
-		logBootstrapModal = new bootstrap.Modal(logModalEl);
-	}
+	// Initialize the Bootstrap Modal
+    var logModalEl = document.getElementById('logHabitModal');
+    var logBootstrapModal = logModalEl ? new bootstrap.Modal(logModalEl) : null;
 
-	// When the "Log Habits" button is clicked
-	$('#log-habit-btn').on('click', function () {
-		if (logBootstrapModal) {
-			// Set date to today automatically before showing
-			var today = new Date().toISOString().split('T')[0];
-			$('#id_date').val(today); 
-			
-			logBootstrapModal.show();
-		}
-	});
+    // Show modal on button click
+    $('#log-habit-btn').on('click', function () {
+        if (logBootstrapModal) {
+            // Set default date to today
+            var today = new Date().toISOString().split('T')[0];
+            $('#id_date').val(today);
+            
+            // Trigger the change event to fetch existing data for today
+            $('#id_date').trigger('change');
+            
+            logBootstrapModal.show();
+        }
+    });
+
+    // // Keep the GET AJAX to load existing data when date changes
+    // $(document).on('change', '#id_date', function() {
+    //     var selectedDate = $(this).val();
+    //     $.ajax({
+    //         url: LOG_HABITS_URL, // Your existing GET API
+    //         method: 'GET',
+    //         data: { date: selectedDate },
+    //         success: function(data) {
+    //             $('#id_journal_text').val(data.journal || '');
+    //             $('input[name="habits"]').prop('checked', false);
+    //
+    //             $.each(data.groups, function(i, group) {
+    //                 $.each(group.habits, function(j, habit) {
+    //                     if (habit.checked) {
+    //                         $('input[value="' + habit.id + '"]').prop('checked', true);
+    //                     }
+    //                 });
+    //             });
+    //         }
+    //     });
+    // });
 
 });

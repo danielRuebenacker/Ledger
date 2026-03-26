@@ -24,6 +24,7 @@ urlpatterns = [
         path('profile/<str:username>/', views.profile, name='profile_user'),
 
         # apis
+        path('log_habits_view', views.log_habits_view, name='log_habits_view'),
         path('api/notifications/get_notifs', views.get_notifications, name='notifications'),
         path('api/notifications/mark_read/', views.mark_notifications_read, name='mark_notifications_read'),
         path('profile/<str:username>/nudge/', views.nudge, name='nudge'),

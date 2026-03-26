@@ -4,6 +4,7 @@ from ledger.models import UserProfile,  Habit
 from tagify.fields import TagField
 from registration.forms import RegistrationForm
 from ledger.utils.habit_utils import supply_form_with_popular_habits
+from ledger.utils import date_utils
 
 class UserProfileForm(forms.ModelForm):
     class Meta:
@@ -60,7 +61,7 @@ class CustomRegistrationForm(RegistrationForm):
 class LogHabitForm(forms.Form):
     date = forms.DateField(
         widget=forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
-        initial=forms.utils.timezone.now
+        initial=date_utils.today
     )
     journal_text = forms.CharField(
         widget=forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'How was your day?'}),
