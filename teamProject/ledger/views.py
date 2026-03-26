@@ -50,16 +50,15 @@ def myhabits(request):
 
             # makes into habits/gets habit then adds to habit tracker
             habit_utils.get_or_create_habits_then_register(*habit_string_lists, habit_tracker)
-
-            return redirect('ledger:myhabits')
     else:
         if not habit_utils.check_if_any_habits_added(habit_tracker): 
             form = HabitTrackerForm()
 
             context_dict['form'] = form
-            return render(request, 'ledger/create_habit_tracker.html', context=context_dict)
-        else:
-            return render(request, 'ledger/myhabits.html', context=context_dict)
+            # the create habit tracker partial will be displayed
+            context_dict['display_create_tracker'] = True
+            
+    return render(request, 'ledger/myhabits.html', context=context_dict)
 
 def leaderboards(request):
     context_dict = {}
@@ -162,7 +161,6 @@ def settings(request):
 
     picture_url = profile.picture.url if profile.picture else '/media/guest.jpg'
     return render(request, 'ledger/settings.html', {'picture_url': picture_url,'about_me': profile.about_me,})
-
 
 def get_notifications(request):
     # only nudges for now

@@ -11,26 +11,10 @@ class UserProfileForm(forms.ModelForm):
         fields = ('picture', )
 
 class HabitTrackerForm(forms.Form):
-    dos = TagField(
-        label='Must DOs', 
-        place_holder='Habits you want to DO every day...', 
-        delimiters=',',
-    )
-    donts = TagField(
-        label='Must NOT DOs', 
-        place_holder='Habits you want to NOT DO every day...', 
-        delimiters=',',
-    )
-    easy_wins = TagField(
-        label='Easy Wins', 
-        place_holder='Habits that motivate you...', 
-        delimiters=',',
-    )
-    numeric = TagField(
-        label='Numeric Habits', 
-        place_holder='E.g., Screentime, Liters of water', 
-        delimiters=',',
-    )
+    dos = TagField( label='Must DOs', place_holder='Habits you want to DO every day...', delimiters=',',)
+    donts = TagField( label='Must NOT DOs', place_holder='Habits you want to NOT DO every day...', delimiters=',',)
+    easy_wins = TagField( label='Easy Wins', place_holder='Habits that motivate you...', delimiters=',',)
+    numeric = TagField( label='Numeric Habits', place_holder='E.g., Screentime, Liters of water', delimiters=',',)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

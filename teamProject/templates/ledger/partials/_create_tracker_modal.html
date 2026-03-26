@@ -1,0 +1,34 @@
+<div class="modal fade" id="createTrackerModal" tabindex="-1" aria-labelledby="createTrackerModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-md">
+        <div class="modal-content habit-config-card border-0">
+            
+            <div class="modal-header border-0 pb-0 justify-content-center">
+                <h1 class="modal-title fs-4 fw-bold" id="createTrackerModalLabel">Create Your Ledger</h1>
+            </div>
+
+            <form action="" method="POST">
+                {% csrf_token %}
+                
+                <div class="modal-body"> {% for field in form %}
+                        <div class="habit-field-group mb-3">
+                            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                            <div class="habit-input-wrapper">
+                                {{ field }}
+                                {% if field.help_text %}
+                                    <div class="habit-help-icon" title="More info">?</div>
+                                    <div class="habit-help-tooltip">{{ field.help_text }}</div>
+                                {% endif %}
+                            </div>
+                            {% if field.errors %}
+                                <p class="field-error-message text-danger small">{{ field.errors.as_text }}</p>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+
+                <div class="modal-footer border-0 pt-0">
+                    <button type="submit" class="btn-save-habits border-0">OK</button>
+                </div>
+            </form> </div>
+    </div>
+</div>

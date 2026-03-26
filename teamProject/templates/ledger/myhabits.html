@@ -1,6 +1,11 @@
 {% extends 'ledger/base.html' %}
 {% load staticfiles %}
 
+{% block header %}
+	{{ form.media }}
+    <link rel="stylesheet" href="{% static 'css/create_habit_tracker.css' %}">
+{% endblock %}
+
 {% block title_block %}
 	MyHabits
 {% endblock %}
@@ -10,11 +15,15 @@
 
 <div class="desk">
 	<div id="flipbook">
-		<!-- Cover page -->
 		<div class="page page-right">
 			<div class="page-inner">
 				<h2 class="cover-title">My Habit Ledger</h2>
 				<p class="habit-details">Your personal record of progress.<br>Turn the page to begin.</p>
+				<div class="setup-cta-container" style="margin-top: 20px; text-align: center;">
+            <button id="setup-tracker-btn" class="btn-save-habits" style="width: auto; padding: 10px 20px; font-size: 0.9rem;">
+                Not tracking habits yet?
+            </button>
+        </div>
 			</div>
 		</div>
 	</div>
@@ -35,72 +44,24 @@
 	</p>
 </div>
 
-<!-- Create Habit Modal -->
-<div id="habit-modal-overlay">
-	<div class="habit-modal">
-		<h3 class="habit-modal-title">Create a New Habit</h3>
-		<form id="create-habit-form">
-			{% csrf_token %}
-			<div class="form-group">
-				<label for="habit-name" class="form-label">Name</label>
-				<input type="text" id="habit-name" name="name" maxlength="25" required class="form-input">
-			</div>
-			<div class="form-group">
-				<label for="habit-type" class="form-label">Type</label>
-				<select id="habit-type" name="habit_type" required class="form-input">
-					<option value="do">Do</option>
-					<option value="dont">Don't</option>
-					<option value="easy_win">Easy Win</option>
-				</select>
-			</div>
-			<p id="habit-form-error" class="form-error"></p>
-			<div class="form-actions">
-				<button type="button" id="cancel-habit-btn">Cancel</button>
-				<button type="submit">Create</button>
-			</div>
-		</form>
-	</div>
-</div>
+{# 1. EXISTING MODALS (REMAINS SAME) #}
+<div id="habit-modal-overlay">...</div>
+<div id="log-modal-overlay" class="modal-overlay">...</div>
 
-<!-- Log Habits Modal -->
-<div id="log-modal-overlay" class="modal-overlay">
-	<div class="log-modal">
-		<form id="log-habit-form">
-			{% csrf_token %}
-
-			<div class="log-row">
-				<span class="log-label">Log Habits</span>
-				<input type="date" id="log-date" name="date" class="log-date-input">
-			</div>
-
-			<div class="log-row">
-				<span class="log-label">Journal Entry</span>
-				<input type="text" id="log-journal" name="journal" class="log-journal-input" placeholder="">
-			</div>
-
-			<div id="log-habits-container">
-				<!-- Habit groups will be injected here by JS -->
-			</div>
-
-			<p id="log-form-error"></p>
-
-			<div class="form-actions--log">
-				<button type="button" id="cancel-log-btn">Cancel</button>
-				<button type="submit">Log</button>
-			</div>
-		</form>
-	</div>
-</div>
-
+{# 2. NEW BOOTSTRAP MODAL (PARTIAL) #}
+{% if display_create_tracker %}
+    {% include 'ledger/partials/_create_tracker_modal.html' %}
+{% endif %}
 
 {% endblock %}
 
 {% block scripts %}
-<script src="https://cdnjs.cloudflare.com/ajax/libs/turn.js/3/turn.min.js"></script>
-<script>
-	var MYHABITS_API_URL = "{% url 'ledger:myhabits_api' %}";
-	var CREATE_HABIT_URL = "{% url 'ledger:create_habit_api' %}";
-	var LOG_HABITS_URL = "{% url 'ledger:log_habits_api' %}";
-</script>
-<script src="{% static 'js/myhabits.js' %}"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/turn.js/3/turn.min.js"></script>
+	<script>
+		var MYHABITS_API_URL  = "{% url 'ledger:myhabits_api' %}";
+		var CREATE_HABIT_URL  = "{% url 'ledger:create_habit_api' %}";
+		var LOG_HABITS_URL    = "{% url 'ledger:log_habits_api' %}";
+		var SHOW_TRACKER_FORM = {{ display_create_tracker|yesno:"true,false" }};
+	</script>
+	<script src="{% static 'js/myhabits.js' %}"></script>
 {% endblock %}

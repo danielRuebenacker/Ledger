@@ -1,4 +1,32 @@
 $(document).ready(function () {
+	// 1. Existing Auto-Show Logic (if Django flag is set)
+    var modalElement = $('#createTrackerModal')[0];
+    var trackerModal;
+
+    if (modalElement) {
+        trackerModal = new bootstrap.Modal(modalElement, {
+            backdrop: true,
+            keyboard: true
+        });
+
+        // Auto-show if the Django variable says so
+        if (typeof SHOW_TRACKER_FORM !== 'undefined' && SHOW_TRACKER_FORM) {
+            trackerModal.show();
+        }
+    }
+
+    // 2. NEW: Manual Trigger Logic
+    $('#setup-tracker-btn').on('click', function(e) {
+        e.preventDefault();
+        if (trackerModal) {
+            trackerModal.show();
+        } else if (modalElement) {
+            // Fallback if trackerModal wasn't initialized yet
+            trackerModal = new bootstrap.Modal(modalElement);
+            trackerModal.show();
+        }
+    });
+
     var $book = $('#flipbook');
 
     $.ajax({
