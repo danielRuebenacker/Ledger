@@ -82,3 +82,15 @@ class LogHabitForm(forms.Form):
             tracker = user_profile.habit_trackers.order_by('-month').first()
             if tracker:
                 self.fields['habits'].queryset = tracker.habits.all()
+
+class CreateHabitForm(forms.ModelForm):
+    class Meta:
+        model = Habit
+        fields = ['name', 'habit_type']
+        widgets = {
+            'name': forms.TextInput(attrs={
+                'class': 'form-control', 
+                'placeholder': 'e.g. Drink Water'
+            }),
+            'habit_type': forms.Select(attrs={'class': 'form-select'}),
+        }
