@@ -12,7 +12,11 @@ def get_first_day_of_month(date):
 
 def get_yesterday():
     td = today()
-    return td - timedelta(days=1)
+    # if first of month just return today
+    if td.day == 1:
+        return td
+    day = td.day
+    return td.replace(day=day-1)
 
 def get_first_of_this_month():
     return get_first_day_of_month(today())
