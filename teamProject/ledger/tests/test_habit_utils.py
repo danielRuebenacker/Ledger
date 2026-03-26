@@ -67,6 +67,32 @@ class TestHabitTrackerGet(TestCase):
         habit_list_query = list(habit_tracker.habits.all())
         self.assertEquals(habit_list, habit_list_query)
 
+    def test_basic_consecutive_streak(self):
+        ht = HabitTrackerFactory()
+        # most recently created day should be today!
+        DayFactory.reset_sequence(0)
+        _ = DayFactory(habit_tracker=ht, completed_on_day=True)
+        _ = DayFactory(habit_tracker=ht, completed_on_day=True)
+        _ = DayFactory(habit_tracker=ht, completed_on_day=True)
+        _ = DayFactory(habit_tracker=ht, completed_on_day=True)
+        _ = DayFactory(habit_tracker=ht, completed_on_day=True)
+        ht.refresh_streak()
+        self.assertEquals(ht.streak, 5)
+
+    def test_broken_continuity_streak(self):
+        ht = HabitTrackerFactory()
+        # most recently created day should be today!
+        DayFactory.reset_sequence(0)
+        _ = DayFactory(habit_tracker=ht, completed_on_day=True)
+        _ = DayFactory(habit_tracker=ht, completed_on_day=True)
+        # false!
+        _ = DayFactory(habit_tracker=ht, completed_on_day=False)
+        _ = DayFactory(habit_tracker=ht, completed_on_day=True)
+        ht.refresh_streak()
+        self.assertEquals(ht.streak, 2)
+
+
+
 
 class TestHabitTrackerForm(TestCase):
     def setUp(self):
@@ -113,4 +139,5 @@ class TestHabitTrackerForm(TestCase):
 
         # many to many habit count
         self.assertEquals(habit_tracker.habits.count(), NUM_HABITS)
+
 
