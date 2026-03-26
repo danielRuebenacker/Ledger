@@ -12,8 +12,8 @@ from django.utils import timezone
 from ledger.utils import habit_utils, date_utils, friend_utils
 
 # ------------ forms/models --------------------
-from ledger.forms import HabitTrackerForm, CustomRegistrationForm
-from ledger.models import HabitTracker, UserProfile, Nudge, Friendship, FriendRequest
+from ledger.forms import HabitTrackerForm, CustomRegistrationForm, LogHabitForm, CreateHabitForm
+from ledger.models import HabitTracker, UserProfile, Nudge, Friendship, FriendRequest, Day, JournalEntry, BoolHabitEntry
 from django.db.models import Q
 from django.contrib.auth.models import User
 
