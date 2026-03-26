@@ -10,13 +10,13 @@ def get_user_habit_trackers(user):
 def get_current_month_habit_tracker(user):
     from ledger.models import HabitTracker
     # get this months habit tracker
-    habit_tracker, _ = HabitTracker.objects.get_or_create(user=user)
+    habit_tracker, _ = HabitTracker.objects.get_or_create(user=user, month=date_utils.get_first_of_this_month())
     return habit_tracker
 
 def get_habit_tracker_habit_entries(habit_tracker):
     # this method takes a habit tracker and fetches all habit entries and organises them into a dict
     # by days. i.e. days is a dict of day keys to habit entry list values
-    days = habit_tracker.days
+    days = habit_tracker.days.all()
     # stores collection of habit entries
     day_habits = {}
     for day in days:
@@ -57,7 +57,7 @@ def get_or_create_habits_then_register(dos_strings, donts_strings, easy_wins_str
 
 def log_bool_habit(habit, done, day):
     from ledger.models import BoolHabitEntry
-    bool_habit_entry = BoolHabitEntry.objects.create(day=day, habit=habit, done=done)
+    bool_habit_entry, _ = BoolHabitEntry.objects.get_or_create(day=day, habit=habit, defaults={'done': done})
     return bool_habit_entry
 
 

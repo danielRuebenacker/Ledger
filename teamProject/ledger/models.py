@@ -27,7 +27,7 @@ class UserProfile(models.Model):
 
 class Habit(models.Model):
     # say max length 25 chars (should be enough)
-    name = models.CharField(max_length=25, blank=False, unique=True)
+    name = models.CharField(max_length=25, blank=False)
 
     is_community = models.BooleanField(default=False, blank=False)
 

@@ -13,4 +13,7 @@ urlpatterns = [
         path('profile/<str:username>/', views.profile, name='profile_user'),
         path('api/notifications/get_notifs', views.get_notifications, name='notifications'),
         path('api/notifications/mark_read/', views.mark_notifications_read, name='mark_notifications_read'),
+        path('api/habits/log', views.log_habit_entry, name='log_habit_entry'),
+        path('api/friends/request', views.send_friend_request, name='send_friend_request'),
+        path('api/friends/handle', views.handle_friend_request, name='handle_friend_request'),
 ]

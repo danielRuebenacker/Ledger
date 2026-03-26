@@ -9,7 +9,7 @@ from django.contrib.auth.models import User
 import random
 from datetime import datetime
 from datetime import timedelta
-from ledger.utils.date import get_first_of_this_month
+from ledger.utils.date_utils import get_first_of_this_month
 
 def populate_users():
     names = ["Jones", "Smith", "Miller", "Davis", "David", "Wilson", "Johnson", "Taylor", "Kelly", "Madison", "Parker"]
@@ -27,21 +27,18 @@ def populate_habits():
     point1 = 1
     point2 = 2
     point3 = 3
-    habit1 = {"name": "Read", "is_community": False, "habit_type": "TYPE_DO", "points": point2}
-    habit2 = {"name": "Walk", "is_community": False, "habit_type": "TYPE_DO", "points": point2}
-    habit3 = {"name": "Phone before bed", "is_community": False, "habit_type": "TYPE_DONT", "points": point2}
-    
-    habit4 = {"name": "Study", "is_community": False, "habit_type": "TYPE_DO", "points": point2}
-    habit5 = {"name": "Caffeine", "is_community": False, "habit_type": "TYPE_DONT", "points": point3}
-    habit6 = {"name": "Go outside", "is_community": False, "habit_type": "TYPE_EASY_WIN", "points": point1}
-    
-    habit7 = {"name": "Listen to music", "is_community": False, "habit_type": "TYPE_EASY_WIN", "points": point1}
-    habit8 = {"name": "Coffee", "is_community": False, "habit_type": "TYPE_EASY_WIN", "points": point1}
-    habit9 = {"name": "Phone someone", "is_community": False, "habit_type": "TYPE_EASY_WIN", "points": point1}
-    
-    habit10 = {"name": "Gym", "is_community": False, "habit_type": "TYPE_DO", "points": point2}
-    habit11 = {"name": "Doomscroll", "is_community": False, "habit_type": "TYPE_DONT", "points": point3}
-    habit12 = {"name": "Journal", "is_community": False, "habit_type": "TYPE_DO", "points": point2}
+    habit1 = {"name": "Read",            "is_community": False, "habit_type": "do",       "points": point2}
+    habit2 = {"name": "Walk",            "is_community": False, "habit_type": "do",       "points": point2}
+    habit3 = {"name": "Phone before bed","is_community": False, "habit_type": "dont",     "points": point2}
+    habit4 = {"name": "Study",           "is_community": False, "habit_type": "do",       "points": point2}
+    habit5 = {"name": "Caffeine",        "is_community": False, "habit_type": "dont",     "points": point3}
+    habit6 = {"name": "Go outside",      "is_community": False, "habit_type": "easy_win", "points": point1}
+    habit7 = {"name": "Listen to music", "is_community": False, "habit_type": "easy_win", "points": point1}
+    habit8 = {"name": "Coffee",          "is_community": False, "habit_type": "easy_win", "points": point1}
+    habit9 = {"name": "Phone someone",   "is_community": False, "habit_type": "easy_win", "points": point1}
+    habit10 = {"name": "Gym",            "is_community": False, "habit_type": "do",       "points": point2}
+    habit11 = {"name": "Doomscroll",     "is_community": False, "habit_type": "dont",     "points": point3}
+    habit12 = {"name": "Journal",        "is_community": False, "habit_type": "do",       "points": point2}
 
     habits.append(habit1)
     habits.append(habit2)
@@ -91,6 +88,13 @@ def populate_trackers():
             for habit in day_tracker.habit_tracker.habits.all():
                 bool_habit_entry(day_tracker, habit, True)
             add_journal_entry(day_tracker)
+        # recalculate streak and points
+        tracker.refresh_streak()
+        tracker.points = sum(
+            sum(e.habit.points for e in d.bool_habit_entries.all() if e.done)
+            for d in tracker.days.all()
+        )
+        tracker.save(update_fields=['points'])
         
 
 def add_user(username, email, password):
