@@ -1,9 +1,87 @@
 {% extends 'ledger/base.html' %}
 {% load staticfiles %}
-
+ 
 {% block title_block %}
-	Leaderboards
+    Leaderboards
 {% endblock %}
-
+ 
 {% block body_block %}
+<link rel="stylesheet" href="{% static 'css/leaderboards.css' %}">
+ 
+<div class="lb-wrapper">
+ 
+    <div class="lb-header">
+        <h1 class="lb-title">Leaderboards</h1>
+        <p class="lb-sub">Top 50 this month — streaks &amp; points</p>
+    </div>
+ 
+    <div class="lb-grid">
+ 
+        <div class="lb-panel">
+            <div class="lb-panel-header">
+                <span class="lb-panel-icon">🔥</span>
+                <h2>Top Streaks</h2>
+            </div>
+ 
+            {% if top_streaks %}
+            <ol class="lb-list">
+                {% for tracker in top_streaks %}
+                {% with forloop.counter as rank %}
+                <li class="lb-row {% if rank == 1 %}rank-gold{% elif rank == 2 %}rank-silver{% elif rank == 3 %}rank-bronze{% endif %} {% if request.user.is_authenticated and tracker.user.user == request.user %}lb-you{% endif %}">
+                    <span class="lb-rank">
+                        {% if rank == 1 %}🥇{% elif rank == 2 %}🥈{% elif rank == 3 %}🥉{% else %}{{ rank }}{% endif %}
+                    </span>
+                    <span class="lb-username">
+                        <a href="{% url 'ledger:profile_user' tracker.user.user.username %}">
+                            {{ tracker.user.user.username }}
+                        </a>
+                        {% if request.user.is_authenticated and tracker.user.user == request.user %}
+                            <span class="you-tag">You</span>
+                        {% endif %}
+                    </span>
+                    <span class="lb-value">{{ tracker.streak }} days</span>
+                </li>
+                {% endwith %}
+                {% endfor %}
+            </ol>
+            {% else %}
+            <p class="lb-empty">No streak data for this month yet.</p>
+            {% endif %}
+        </div>
+ 
+        <div class="lb-panel">
+            <div class="lb-panel-header">
+                <span class="lb-panel-icon">⭐</span>
+                <h2>Top Points</h2>
+            </div>
+ 
+            {% if top_points %}
+            <ol class="lb-list">
+                {% for tracker in top_points %}
+                {% with forloop.counter as rank %}
+                <li class="lb-row {% if rank == 1 %}rank-gold{% elif rank == 2 %}rank-silver{% elif rank == 3 %}rank-bronze{% endif %} {% if request.user.is_authenticated and tracker.user.user == request.user %}lb-you{% endif %}">
+                    <span class="lb-rank">
+                        {% if rank == 1 %}🥇{% elif rank == 2 %}🥈{% elif rank == 3 %}🥉{% else %}{{ rank }}{% endif %}
+                    </span>
+                    <span class="lb-username">
+                        <a href="{% url 'ledger:profile_user' tracker.user.user.username %}">
+                            {{ tracker.user.user.username }}
+                        </a>
+                        {% if request.user.is_authenticated and tracker.user.user == request.user %}
+                            <span class="you-tag">You</span>
+                        {% endif %}
+                    </span>
+                    <span class="lb-value">{{ tracker.points }} pts</span>
+                </li>
+                {% endwith %}
+                {% endfor %}
+            </ol>
+            {% else %}
+            <p class="lb-empty">No points data for this month yet.</p>
+            {% endif %}
+        </div>
+ 
+    </div>
+</div>
+ 
 {% endblock %}
