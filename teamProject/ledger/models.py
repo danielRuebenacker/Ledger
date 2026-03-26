@@ -102,9 +102,6 @@ class HabitTracker(models.Model):
 
     streak = models.IntegerField(default=0)
     points = models.IntegerField(default=0)
-
-    streak = models.IntegerField(default=0)
-    points = models.IntegerField(default=0)
     
     class Meta:
         # tells django this combination must be unique

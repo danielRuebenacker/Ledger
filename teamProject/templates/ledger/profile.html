@@ -12,16 +12,16 @@
     <div class="profile-header">
         <img src="{{ picture_url }}" class="profile-img">
 
-        <div class="user-info">
-            <div class="user-info-top">
-                <h1>{{ profile_user.username }}</h1>
-                {% if is_friend %}
+        <div class="user-info" style="flex: 1;">
+            <h1>{{ profile_user.username }}</h1>
+            <div class="stats-container">
+                <div style="display:flex; gap:8px;">
+                    <div class="stat-pill">🔥 {{ streak }}</div>
+                    <div class="stat-pill">{{ friend_count }} Friends</div>
+                </div>
+                {% if is_friend and tracker and tracker.is_streak_low %}
                 <button id="nudge-btn">👋 Nudge</button>
                 {% endif %}
-            </div>
-            <div class="stats-container">
-                <div class="stat-pill">🔥 0</div>
-                <div class="stat-pill">{{ friend_count }} Friends</div>
             </div>
         </div>
     </div>

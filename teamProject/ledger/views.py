@@ -7,7 +7,8 @@ from ledger.utils import habit_utils, date_utils, friend_utils
 
 # ------------ forms/models --------------------
 from ledger.forms import HabitTrackerForm
-from ledger.models import HabitTracker, UserProfile, Nudge
+from ledger.models import HabitTracker, UserProfile, Nudge, Friendship
+from django.db.models import Q
 from django.contrib.auth.models import User
 
 # ------------ json/files -----------
@@ -78,7 +79,6 @@ def profile(request, username=None):
         if request.user.is_authenticated:
             username = request.user.username
         else:
-            from django.shortcuts import redirect
             return redirect('/login/')
 
     try:
@@ -88,15 +88,35 @@ def profile(request, username=None):
         return render(request, 'ledger/404.html', status=404)
 
     picture_url = user_profile.picture.url if user_profile.picture else '/media/guest.jpg'
-
     friend_count = friend_utils.get_friends_for_user(user_profile).count()
+
+    try:
+        tracker = HabitTracker.objects.get(user=user_profile, month=date_utils.get_first_of_this_month())
+        streak = tracker.streak
+    except HabitTracker.DoesNotExist:
+        tracker = None
+        streak = 0
+
+    is_friend = False
+    if request.user.is_authenticated and request.user != user:
+        try:
+            logged_in_profile = UserProfile.objects.get(user=request.user)
+            is_friend = Friendship.objects.filter(
+                Q(user=logged_in_profile, friend=user_profile) |
+                Q(user=user_profile, friend=logged_in_profile)
+            ).exists()
+        except UserProfile.DoesNotExist:
+            pass
 
     context_dict = {
         'profile_user': user,
         'profile': user_profile,
         'picture_url': picture_url,
         'friend_count': friend_count,
+        'streak': streak,
+        'tracker': tracker,
         'is_own_profile': request.user == user,
+        'is_friend': is_friend,
     }
     return render(request, 'ledger/profile.html', context=context_dict)
 
@@ -162,3 +182,25 @@ def mark_notifications_read(request):
     Nudge.objects.filter(nudged=user_profile, notified=False).update(notified=True)
     # return okay response
     return JsonResponse({"status": "ok"})
+
+
+@login_required
+def nudge(request, username):
+    if request.method == 'POST':
+        try:
+            nudger_profile = UserProfile.objects.get(user=request.user)
+            nudged_user = User.objects.get(username=username)
+            nudged_profile = UserProfile.objects.get(user=nudged_user)
+        except (UserProfile.DoesNotExist, User.DoesNotExist):
+            return JsonResponse({'status': 'error'}, status=404)
+
+        if not Friendship.objects.filter(
+            Q(user=nudger_profile, friend=nudged_profile) |
+            Q(user=nudged_profile, friend=nudger_profile)
+        ).exists():
+            return JsonResponse({'status': 'not friends'}, status=403)
+
+        Nudge.objects.create(nudger=nudger_profile, nudged=nudged_profile)
+        return JsonResponse({'status': 'ok'})
+
+    return JsonResponse({'status': 'invalid'}, status=400)
