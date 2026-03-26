@@ -13,7 +13,12 @@
         <img src="{{ picture_url }}" class="profile-img">
 
         <div class="user-info">
-            <h1>{{ profile_user.username }}</h1>
+            <div class="user-info-top">
+                <h1>{{ profile_user.username }}</h1>
+                {% if is_friend %}
+                <button id="nudge-btn">👋 Nudge</button>
+                {% endif %}
+            </div>
             <div class="stats-container">
                 <div class="stat-pill">🔥 0</div>
                 <div class="stat-pill">{{ friend_count }} Friends</div>
@@ -27,4 +32,8 @@
     </div>
 </div>
 
+<script>
+    const profileUsername = "{{ profile_user.username }}";
+</script>
+<script src="{% static 'js/profile.js' %}"></script>
 {% endblock %}
