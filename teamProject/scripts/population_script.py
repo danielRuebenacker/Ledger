@@ -1,145 +1,216 @@
 import os
+import sys
+
+script_dir = os.path.dirname(os.path.abspath(__file__))
+
+project_root = os.path.dirname(script_dir)
+
+# Add the project root to sys.path so it can find 'teamProject'
+sys.path.append(project_root)
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'teamProject.settings')
 
 import django
 django.setup()
+
 from ledger.models import UserProfile, Habit, Nudge, Friendship, HabitTracker, Day, BoolHabitEntry, JournalEntry, FriendRequest
 from django.contrib.auth.models import User
 import random
 from datetime import datetime
 from datetime import timedelta
-from ledger.utils.date import get_first_of_this_month
+from ledger.utils.date_utils import get_first_of_this_month
+
+from django.contrib.auth.hashers import make_password
 
 def populate_users():
-    names = ["Jones", "Smith", "Miller", "Davis", "David", "Wilson", "Johnson", "Taylor", "Kelly", "Madison", "Parker"]
+    first_names = ["Luke", "John", "Bob", "Robert", "Alan", "Gordon", "Michael", "Sam", "Euan", "Mark", "Jeremy"]
+    last_names = ["Jones", "Smith", "Miller", "Davis", "Brown", "Stewart"]
 
-    for nameZero in names:
-        for name in names:
-            if name != nameZero:
-                username = f"{name}_{nameZero}"
-                email = f"{name}_{nameZero}@fake.com"
-                password = 'password123'
-                add_user(username, email, password)
+    
+    users_to_create = []
+    
+    # 1. Prepare User objects in memory
+    for fname in first_names:
+        for lname in last_names:
+            username = f"{fname}_{lname}"
+            # Check if user already exists to make script re-runnable
+            if not User.objects.filter(username=username).exists():
+                users_to_create.append(User(
+                    username=username,
+                    password=make_password("insecure")
+                ))
+    
+    # 2. Bulk Create Users
+    User.objects.bulk_create(users_to_create)
+    
+    # 3. Bulk Create Profiles for any User that doesn't have one
+    # This handles both newly created users and any orphans
+    existing_user_ids_with_profile = UserProfile.objects.values_list('user_id', flat=True)
+    users_needing_profile = User.objects.exclude(id__in=existing_user_ids_with_profile)
+    
+    profiles_to_create = [UserProfile(user=u) for u in users_needing_profile]
+    UserProfile.objects.bulk_create(profiles_to_create)
+
+    print(f"Created {len(users_to_create)} users and {len(profiles_to_create)} profiles.")
+
 
 def populate_habits():
-    habits = []
-    point1 = 1
-    point2 = 2
-    point3 = 3
-    habit1 = {"name": "Read", "is_community": False, "habit_type": "TYPE_DO", "points": point2}
-    habit2 = {"name": "Walk", "is_community": False, "habit_type": "TYPE_DO", "points": point2}
-    habit3 = {"name": "Phone before bed", "is_community": False, "habit_type": "TYPE_DONT", "points": point2}
-    
-    habit4 = {"name": "Study", "is_community": False, "habit_type": "TYPE_DO", "points": point2}
-    habit5 = {"name": "Caffeine", "is_community": False, "habit_type": "TYPE_DONT", "points": point3}
-    habit6 = {"name": "Go outside", "is_community": False, "habit_type": "TYPE_EASY_WIN", "points": point1}
-    
-    habit7 = {"name": "Listen to music", "is_community": False, "habit_type": "TYPE_EASY_WIN", "points": point1}
-    habit8 = {"name": "Coffee", "is_community": False, "habit_type": "TYPE_EASY_WIN", "points": point1}
-    habit9 = {"name": "Phone someone", "is_community": False, "habit_type": "TYPE_EASY_WIN", "points": point1}
-    
-    habit10 = {"name": "Gym", "is_community": False, "habit_type": "TYPE_DO", "points": point2}
-    habit11 = {"name": "Doomscroll", "is_community": False, "habit_type": "TYPE_DONT", "points": point3}
-    habit12 = {"name": "Journal", "is_community": False, "habit_type": "TYPE_DO", "points": point2}
+    # Define point constants
+    p1, p2, p3 = 1, 2, 3
 
-    habits.append(habit1)
-    habits.append(habit2)
-    habits.append(habit3)
-    habits.append(habit4)
-    habits.append(habit5)
-    habits.append(habit6)
-    habits.append(habit7)
-    habits.append(habit8)
-    habits.append(habit9)
-    habits.append(habit10)
-    habits.append(habit11)
-    habits.append(habit12)
+    # Define all habits
+    habits_data = [
+        # dos 
+        {"name": "Read", "is_community": True, "habit_type": Habit.TYPE_DO, "points": p2},
+        {"name": "Walk", "is_community": True, "habit_type": Habit.TYPE_DO, "points": p2},
+        {"name": "Study", "is_community": True, "habit_type": Habit.TYPE_DO, "points": p2},
+        {"name": "Gym", "is_community": True, "habit_type": Habit.TYPE_DO, "points": p2},
+        {"name": "Journal", "is_community": True, "habit_type": Habit.TYPE_DO, "points": p2},
 
-    for habit in habits:
-        add_habit(name=habit["name"], is_community=habit["is_community"], habit_type=habit["habit_type"], points=habit["points"])
+        # donts
+        {"name": "Phone before bed", "is_community": True, "habit_type": Habit.TYPE_DONT, "points": p2},
+        {"name": "Doomscroll", "is_community": True, "habit_type": Habit.TYPE_DONT, "points": p3},
+        {"name": "Caffeine", "is_community": True, "habit_type": Habit.TYPE_DONT, "points": p3},
+
+        # easy Ws
+        {"name": "Go outside", "is_community": True, "habit_type": Habit.TYPE_EASY_WIN, "points": p1},
+        {"name": "Listen to music", "is_community": True, "habit_type": Habit.TYPE_EASY_WIN, "points": p1},
+        {"name": "Coffee", "is_community": True, "habit_type": Habit.TYPE_EASY_WIN, "points": p1},
+        {"name": "Phone someone", "is_community": True, "habit_type": Habit.TYPE_EASY_WIN, "points": p1},
+
+        # numeric
+        {"name": "Screentime", "is_community": True, "habit_type": Habit.TYPE_EASY_WIN, "points": p3},
+        {"name": "Hours of Sleep", "is_community": True, "habit_type": Habit.TYPE_EASY_WIN, "points": p1},
+    ]
+
+    # Create habits directly in the database
+    for data in habits_data:
+        Habit.objects.create(**data)
 
 def populate_friendship():
     users = list(UserProfile.objects.all())
-    p = 100 - random.randint(60, 80)
+    num_users = len(users)
+    
+    # Deterministic seed
+    random.seed(42)
+    p = 25 
+    
+    requests_to_create = []
+    friendships_to_create = []
 
-    for i in range(len(users)):
-         for j in range(len(users)):
-             if i < j:
-                 rand = random.randint(0, 100)
-                 if rand < p:
-                     random_time = random.randint(0, 21)
-                     add_Friendship(users[i], users[j], status="ACCEPTED", date_accepted=datetime.today() - timedelta(random_time) )    
+    for i in range(num_users):
+        for j in range(i + 1, num_users):
+            if random.randint(0, 100) < p:
+                u1, u2 = users[i], users[j]
+                
+                # Metadata for the request
+                days_ago = random.randint(0, 21)
+                date = datetime.today() - timedelta(days=days_ago)
+
+                # 1. Prepare the FriendRequest (The record)
+                requests_to_create.append(
+                    FriendRequest(
+                        requester=u1,
+                        requested=u2,
+                        status="ACCEPTED",
+                        date_accepted=date
+                    )
+                )
+
+                # 2. Prepare the Friendships (The bidirectional link)
+                # We create both directions so the relationship is mutual
+                friendships_to_create.append(Friendship(user=u1, friend=u2))
+                friendships_to_create.append(Friendship(user=u2, friend=u1))
+
+    # Single database hit for requests
+    FriendRequest.objects.bulk_create(requests_to_create, ignore_conflicts=True)
+    
+    # Single database hit for friendships
+    Friendship.objects.bulk_create(friendships_to_create, ignore_conflicts=True)
+
+    print(f"Created {len(requests_to_create)} requests and {len(friendships_to_create)} friendship links.")
 
 def populate_trackers():
+    random.seed(42) # Deterministic results
     users = list(UserProfile.objects.all())
-    habits = list(Habit.objects.all())
+    all_habits = list(Habit.objects.all())
+    first_of_month = get_first_of_this_month()
     
+    # Containers for bulk creation
+    trackers_to_create = []
+    days_to_create = []
+    habit_entries = []
+    journal_entries = []
+    m2m_relations = []
+
+    # 1. Create Trackers
     for user in users:
-        p_of_habit = random.randint(20, 50)
-        user_habits = []
-        for habit in habits:
-            p_habit = random.randint(0, 100)
-            if p_habit < p_of_habit:
-                user_habits.append(habit)
-        tracker = add_habit_tracker(user, get_first_of_this_month(), user_habits)
-        range_random = random.randint(3, 7)
-        day_trackers = []
-        for time_delta in range(range_random):
-            day_trackers.append(add_day_tracker(tracker, datetime.today() - timedelta(time_delta), True))
-        for day_tracker in day_trackers:
-            for habit in day_tracker.habit_tracker.habits.all():
-                bool_habit_entry(day_tracker, habit, True)
-            add_journal_entry(day_tracker)
+        trackers_to_create.append(HabitTracker(user=user, month=first_of_month))
+    
+    # Bulk create trackers first so they get IDs
+    HabitTracker.objects.bulk_create(trackers_to_create, ignore_conflicts=True)
+    # Re-fetch trackers to associate them with days/habits
+    trackers = HabitTracker.objects.filter(month=first_of_month)
+
+    # 2. Build Days and Entries in memory
+    for tracker in trackers:
+        # Assign a random but deterministic subset of habits to this tracker
+        p_threshold = random.randint(20, 50)
+        selected_habits = [h for h in all_habits if random.randint(0, 100) < p_threshold]
         
+        # Prepare ManyToMany links (HabitTracker <-> Habit)
+        for h in selected_habits:
+            m2m_relations.append(HabitTracker.habits.through(habittracker_id=tracker.id, habit_id=h.id))
 
-def add_user(username, email, password):
-    userDjango = User.objects.create_user(username=username, email=email, password=password)
-    user = UserProfile.objects.get_or_create(user=userDjango)[0]
-    user.save()
-    return user
+        # Create 3-7 days for each tracker
+        num_days = random.randint(3, 7)
+        for i in range(num_days):
+            date = datetime.today().date() - timedelta(days=i)
+            day_obj = Day(habit_tracker=tracker, date=date, completed_on_day=True)
+            days_to_create.append(day_obj)
 
-def add_habit(name, is_community, habit_type, points):
-    habit = Habit.objects.get_or_create(name=name, is_community=is_community, habit_type=habit_type, points=points)[0]
-    habit.save()
-    return habit 
+    # Bulk create Days
+    Day.objects.bulk_create(days_to_create, ignore_conflicts=True)
+    
+    # 3. Create Habit and Journal Entries
+    # Fetch days back with their tracker/habit info to link entries
+    all_days = Day.objects.filter(habit_tracker__month=first_of_month).select_related('habit_tracker')
+    
+    # Map tracker IDs to their selected habits to avoid re-calculating
+    tracker_habit_map = {}
+    for rel in m2m_relations:
+        tracker_habit_map.setdefault(rel.habittracker_id, []).append(rel.habit_id)
 
-def add_Nudge(nudger, nudged, date_of_nudge, notified):
-    nudge = Nudge.objects.get_or_create(nudger=nudger, nudged=nudged, date_of_nudge=date_of_nudge, notified=notified)[0]
-    nudge.save()
-    return nudge
+    for day in all_days:
+        # Add Journal Entry
+        journal_entries.append(JournalEntry(day=day, journal_text=f"Journal for {day.date}"))
+        
+        # Add BoolHabitEntries for each habit in the tracker
+        habit_ids = tracker_habit_map.get(day.habit_tracker_id, [])
+        for h_id in habit_ids:
+            habit_entries.append(BoolHabitEntry(day=day, habit_id=h_id, done=True))
 
-def add_Friendship(requester, requested, status, date_accepted):
-    friendship = FriendRequest.objects.get_or_create(requester=requester, requested=requested, status=status, date_accepted=date_accepted)[0]
-    friendship_confirmed_0 = Friendship.objects.get_or_create(user=requester,friend=requested)[0]
-    friendship_confirmed_1 = Friendship.objects.get_or_create(user=requested,friend=requester)[0]
-    friendship_confirmed_1.save()
-    friendship_confirmed_0.save()
-    friendship.save()
-    return friendship
+    # Final Bulk Operations
+    HabitTracker.habits.through.objects.bulk_create(m2m_relations, ignore_conflicts=True)
+    JournalEntry.objects.bulk_create(journal_entries)
+    BoolHabitEntry.objects.bulk_create(habit_entries)
 
-def add_habit_tracker(user, month, habits):
-    habit_tracker = HabitTracker.objects.get_or_create(user=user, month=month)[0]
-    habit_tracker.save()
-    for habit in habits:
-        habit_tracker.habits.add(habit)
-    return habit_tracker
+    print(f"Populated {len(trackers_to_create)} trackers with associated days and entries.")
 
-def add_day_tracker(tracker, date, completed_on_day):
-    day_tracker = Day.objects.get_or_create(habit_tracker=tracker, date=date, completed_on_day=completed_on_day)[0]
-    day_tracker.save()
-    return day_tracker
+def create_admin():
+    username = "admin"
+    password = "admin"
 
-def bool_habit_entry(day_tracker, habit, done):
-    bool_habit_entry = BoolHabitEntry.objects.get_or_create(day=day_tracker, habit=habit, done=done)[0]
-    bool_habit_entry.save()
-    return bool_habit_entry
+    admin, _ = User.objects.get_or_create(username=username)
+    admin.set_password(password)
+    admin.is_staff = True
+    admin.is_superuser = True
+    admin.save()
 
-def add_journal_entry(day_tracker, journal_text="Today I wrote something in my Journal"):
-    journal_entry = JournalEntry.objects.get_or_create(day=day_tracker, journal_text=journal_text)[0]
-    journal_entry.save()
-    return journal_entry
+    profile, _ = UserProfile.objects.get_or_create(user=admin)
 
+    print(f"Created admin user: {username} and password: {password} (insecure). Only for testing purposes.")
+        
 if __name__ == '__main__':
     User.objects.all().delete()
     Habit.objects.all().delete()
@@ -151,7 +222,10 @@ if __name__ == '__main__':
     print("POP HABITS")
 
     populate_friendship()
-    print("POP FREINDS")
+    print("POP FRIENDS")
 
     populate_trackers()
     print("POP TRACKERS")
+
+    create_admin()
+    print("CREATE ADMIN")
