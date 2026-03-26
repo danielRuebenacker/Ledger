@@ -39,9 +39,9 @@
 }
 
 .social-sidebar a.active {
-    background-color: #4a90d9;
+    background-color: #425325;
     color: white;
-    border-color: #4a90d9;
+    border-color: #425325;
 }
 
 .social-content {
@@ -117,7 +117,7 @@
 
 .btn-add {
     padding: 8px 14px;
-    background-color: #4a90d9;
+    background-color: #425325;
     color: white;
     border: none;
     border-radius: 8px;
@@ -132,7 +132,7 @@
 
 .btn-accept {
     padding: 8px 14px;
-    background-color: #4a90d9;
+    background-color: #425325;
     color: white;
     border: none;
     border-radius: 8px;

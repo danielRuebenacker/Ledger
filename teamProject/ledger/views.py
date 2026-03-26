@@ -5,14 +5,15 @@ from django.contrib import messages
 
 from django.shortcuts import redirect, render, reverse
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_POST
 from django.utils import timezone
 
 # ----------- utils ---------------------------
 from ledger.utils import habit_utils, date_utils, friend_utils
 
 # ------------ forms/models --------------------
-from ledger.forms import HabitTrackerForm, CustomRegistrationForm, LogHabitForm, CreateHabitForm
-from ledger.models import HabitTracker, UserProfile, Nudge, Friendship, BoolHabitEntry, JournalEntry, Day
+from ledger.forms import HabitTrackerForm, CustomRegistrationForm
+from ledger.models import HabitTracker, UserProfile, Nudge, Friendship, FriendRequest
 from django.db.models import Q
 from django.contrib.auth.models import User
 
@@ -179,9 +180,85 @@ def leaderboards(request):
     return render(request, 'ledger/leaderboards.html', context=context_dict)
 
 def social(request):
-    context_dict = {}
+    query = request.GET.get('q', '').strip()
+    active_tab = request.GET.get('tab', 'search')
+    user_profile = request.user.userprofile
 
+    users_with_status = []
+    friends = []
+    friend_requests = []
+
+    if active_tab == 'search':
+        if query:
+            users_qs = User.objects.filter(username__icontains=query).exclude(id=request.user.id)
+        else:
+            users_qs = User.objects.exclude(id=request.user.id).order_by('?')[:10]
+
+        sent_requests = FriendRequest.objects.filter(requester=user_profile).values_list('requested_id', flat=True)
+        current_friends = Friendship.objects.filter(user=user_profile).values_list('friend_id', flat=True)
+
+        for u in users_qs:
+            try:
+                target_p = u.userprofile
+                status = 'none'
+                if target_p.id in current_friends:
+                    status = 'friend'
+                elif target_p.id in sent_requests:
+                    status = 'pending'
+                users_with_status.append({'user': u, 'status': status})
+            except UserProfile.DoesNotExist:
+                continue
+
+    elif active_tab == 'friends':
+        friendships = Friendship.objects.filter(user=user_profile)
+        friends = [f.friend for f in friendships]
+        if query:
+            friends = [f for f in friends if query.lower() in f.user.username.lower()]
+
+    elif active_tab == 'requests':
+        friend_requests = FriendRequest.objects.filter(requested=user_profile)
+
+    context_dict = {
+        'active_tab': active_tab,
+        'query': query,
+        'users_with_status': users_with_status,
+        'friends': friends,
+        'friend_requests': friend_requests,
+    }
     return render(request, 'ledger/social.html', context=context_dict)
+
+@require_POST
+def add_friend_request(request):
+    data = json.loads(request.body)
+    target_user_id = data.get('user_id')
+    
+    try:
+        receiver = User.objects.get(id=target_user_id).userprofile
+        sender = request.user.userprofile
+        
+        FriendRequest.objects.get_or_create(requester=sender, requested=receiver)
+        return JsonResponse({'status': 'ok'})
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
+
+@require_POST
+def handle_friend_request(request):
+    data = json.loads(request.body)
+    request_id = data.get('request_id')
+    action = data.get('action')
+    
+    try:
+        f_req = FriendRequest.objects.get(id=request_id, requested=request.user.userprofile)
+        if action == 'accept':
+            Friendship.objects.get_or_create(user=f_req.requester, friend=f_req.requested)
+            Friendship.objects.get_or_create(user=f_req.requested, friend=f_req.requester)
+            f_req.delete()
+            return JsonResponse({'status': 'accepted'})
+        elif action == 'reject':
+            f_req.delete()
+            return JsonResponse({'status': 'rejected'})
+    except FriendRequest.DoesNotExist:
+        return JsonResponse({'status': 'error'}, status=404)
 
 def profile(request, username=None):
     if username is None:
