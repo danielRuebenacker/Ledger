@@ -1,0 +1,34 @@
+<div id="log-modal-overlay" class="modal-overlay">
+    <div class="log-modal">
+        <form id="log-habit-form" method="post" action="{% url 'ledger:log_habits_api' %}">
+            {% csrf_token %}
+            <h3>Log Daily Habits</h3>
+            
+            {{ log_form.as_p }}
+
+            <div id="log-habits-container">
+                {% for group in log_groups %}
+                    <div class="log-group">
+                        <div class="log-group-header">
+                            <span>{{ group.emoji }} {{ group.label }}</span>
+                        </div>
+                        <div class="log-habit-list">
+                            {% for habit in group.habits %}
+                                <div class="log-habit-item">
+                                    <input type="checkbox" name="habits" value="{{ habit.id }}" 
+                                           id="h-{{ habit.id }}" {% if habit.checked %}checked{% endif %}>
+                                    <label for="h-{{ habit.id }}">{{ habit.name }}</label>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+
+            <div class="form-actions-log">
+                <button type="button" id="cancel-log-btn">Cancel</button>
+                <button type="submit">Save Log</button>
+            </div>
+        </form>
+    </div>
+</div>

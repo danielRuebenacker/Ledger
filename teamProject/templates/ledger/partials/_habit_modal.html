@@ -1,0 +1,30 @@
+<div id="habit-modal-overlay" class="modal-overlay">
+    <div class="modal-content">
+        <form id="create-habit-form" method="POST" action="{% url 'ledger:create_habit_api' %}">
+            {% csrf_token %}
+            <h3>Create New Habit</h3>
+            
+            <p id="habit-form-error" class="error-msg"></p>
+
+            <div class="form-group">
+                {{ habit_form.name.label_tag }}
+                {{ habit_form.name }}
+            </div>
+
+            <div class="form-group">
+                {{ habit_form.habit_type.label_tag }}
+                {{ habit_form.habit_type }}
+            </div>
+
+            <div class="form-group">
+                {{ habit_form.points.label_tag }}
+                {{ habit_form.points }}
+            </div>
+
+            <div class="form-actions">
+                <button type="button" id="cancel-habit-btn">Cancel</button>
+                <button type="submit">Create</button>
+            </div>
+        </form>
+    </div>
+</div>
