@@ -4,7 +4,6 @@ from ledger.models import (
     Day, BoolHabitEntry, JournalEntry, FriendRequest
 )
 
-# Use the @register decorator to link the model to the custom Admin class
 @admin.register(HabitTracker)
 class HabitTrackerAdmin(admin.ModelAdmin):
     # This defines the columns that appear in the admin table
