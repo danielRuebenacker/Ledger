@@ -1,7 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.utils import timezone
-from ledger.utils import date_utils, habit_utils
+from ledger.utils import date_utils
 
 def user_profile_pic_path(instance, filename):
     import time
@@ -40,7 +40,7 @@ class Habit(models.Model):
             (TYPE_DO , "DO"),
             (TYPE_DONT , "DONT"),
             (TYPE_EASY_WIN , "EASY_WIN"),
-            (TYPE_NUMERIC, "NUMERIC"),
+            (TYPE_NUMERIC , "NUMERIC"),
     )
     habit_type = models.CharField(max_length=10, choices=HABIT_TYPE_CHOICES)
     # allows for easy habit creation with Habit.objects.create(..., type=Habit.TYPE_DO, ...)
@@ -122,6 +122,7 @@ class HabitTracker(models.Model):
         return False
 
     def refresh_streak(self):
+        from ledger.utils import habit_utils
         self.streak = habit_utils.calculate_streak(self)
         self.save(update_fields=['streak'])
 

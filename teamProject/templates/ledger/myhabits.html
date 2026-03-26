@@ -1,9 +1,70 @@
 {% extends 'ledger/base.html' %}
 {% load staticfiles %}
 
+{% block header %}
+	{{ form.media }}
+    <link rel="stylesheet" href="{% static 'css/create_habit_tracker.css' %}">
+{% endblock %}
+
 {% block title_block %}
 	MyHabits
 {% endblock %}
 
 {% block body_block %}
+<link rel="stylesheet" href="{% static 'css/myhabits.css' %}">
+
+<div class="desk">
+	<div id="flipbook">
+		<div class="page page-right">
+			<div class="page page-right">
+				<div class="page-inner">
+					<h2 class="cover-title">My Habit Ledger</h2>
+					<p class="habit-details">Your personal record of progress.<br>Turn the page to begin.</p>
+					
+					<div class="setup-cta-container" style="margin-top: 20px; text-align: center;">
+						<button id="setup-tracker-btn" class="btn-save-habits" style="width: auto; padding: 10px 20px; font-size: 0.9rem;">
+							Not tracking habits yet?
+						</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="book-controls">
+		<button id="prev-btn" disabled>Previous</button>
+		<span id="page-indicator"></span>
+		<button id="next-btn">Next</button>
+	</div>
+
+	<div class="habit-actions">
+		<button id="add-habit-btn">+ New Habit</button>
+		<button id="log-habit-btn">Log Habits</button>
+	</div>
+
+	<p id="no-data-msg">
+		No habit data yet. Start tracking to fill your ledger!
+	</p>
+</div>
+
+{% include 'ledger/partials/_log_modal.html' %}
+{% include 'ledger/partials/_create_habit_modal.html' %}
+
+{# 2. NEW BOOTSTRAP MODAL (PARTIAL) #}
+{% if display_create_tracker %}
+    {% include 'ledger/partials/_create_tracker_modal.html' %}
+{% endif %}
+
+
+{% endblock %}
+
+{% block scripts %}
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/turn.js/3/turn.min.js"></script>
+	<script>
+		var MYHABITS_API_URL  = "{% url 'ledger:myhabits_api' %}";
+		var CREATE_HABIT_URL  = "{% url 'ledger:create_habit_api' %}";
+		var LOG_HABITS_URL    = "{% url 'ledger:log_habits_api' %}";
+		var SHOW_TRACKER_FORM = {{ display_create_tracker|yesno:"true,false" }};
+	</script>
+	<script src="{% static 'js/myhabits.js' %}"></script>
 {% endblock %}

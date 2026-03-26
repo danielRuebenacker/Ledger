@@ -4,6 +4,7 @@ from ledger.models import UserProfile,  Habit
 from tagify.fields import TagField
 from registration.forms import RegistrationForm
 from ledger.utils.habit_utils import supply_form_with_popular_habits
+from ledger.utils import date_utils
 
 class UserProfileForm(forms.ModelForm):
     class Meta:
@@ -11,26 +12,10 @@ class UserProfileForm(forms.ModelForm):
         fields = ('picture', )
 
 class HabitTrackerForm(forms.Form):
-    dos = TagField(
-        label='Must DOs', 
-        place_holder='Habits you want to DO every day...', 
-        delimiters=',',
-    )
-    donts = TagField(
-        label='Must NOT DOs', 
-        place_holder='Habits you want to NOT DO every day...', 
-        delimiters=',',
-    )
-    easy_wins = TagField(
-        label='Easy Wins', 
-        place_holder='Habits that motivate you...', 
-        delimiters=',',
-    )
-    numeric = TagField(
-        label='Numeric Habits', 
-        place_holder='E.g., Screentime, Liters of water', 
-        delimiters=',',
-    )
+    dos = TagField( label='Must DOs', place_holder='Habits you want to DO every day...', delimiters=',',)
+    donts = TagField( label='Must NOT DOs', place_holder='Habits you want to NOT DO every day...', delimiters=',',)
+    easy_wins = TagField( label='Easy Wins', place_holder='Habits that motivate you...', delimiters=',',)
+    numeric = TagField( label='Numeric Habits', place_holder='E.g., Screentime, Liters of water', delimiters=',',)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -72,3 +57,40 @@ class CustomRegistrationForm(RegistrationForm):
             profile_data['picture'] = self.cleaned_data.get('picture')
         UserProfile.objects.create(**profile_data)
         return user
+
+class LogHabitForm(forms.Form):
+    date = forms.DateField(
+        widget=forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+        initial=date_utils.today
+    )
+    journal_text = forms.CharField(
+        widget=forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'How was your day?'}),
+        required=False
+    )
+    # We will define 'habits' in __init__ to make it dynamic per user
+    habits = forms.ModelMultipleChoiceField(
+        queryset=Habit.objects.none(),
+        widget=forms.CheckboxSelectMultiple,
+        required=False
+    )
+
+    def __init__(self, *args, **kwargs):
+        user_profile = kwargs.pop('user_profile', None)
+        super().__init__(*args, **kwargs)
+        if user_profile:
+            # Get the habits from the user's current tracker
+            tracker = user_profile.habit_trackers.order_by('-month').first()
+            if tracker:
+                self.fields['habits'].queryset = tracker.habits.all()
+
+class CreateHabitForm(forms.ModelForm):
+    class Meta:
+        model = Habit
+        fields = ['name', 'habit_type']
+        widgets = {
+            'name': forms.TextInput(attrs={
+                'class': 'form-control', 
+                'placeholder': 'e.g. Drink Water'
+            }),
+            'habit_type': forms.Select(attrs={'class': 'form-select'}),
+        }

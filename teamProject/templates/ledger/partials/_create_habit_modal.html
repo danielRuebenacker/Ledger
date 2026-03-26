@@ -1,0 +1,27 @@
+<div class="modal fade" id="createHabitModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content habit-config-card border-0">
+            <div class="modal-header border-0 pb-0">
+                <h1 class="modal-title fs-4 fw-bold">New Habit</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <form method="POST" action="{% url 'ledger:create_habit_view' %}">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="habit-field-group mb-3">
+                        <label class="fw-bold">{{ create_form.name.label }}</label>
+                        {{ create_form.name }}
+                    </div>
+                    <div class="habit-field-group mb-3">
+                        <label class="fw-bold">{{ create_form.habit_type.label }}</label>
+                        {{ create_form.habit_type }}
+                    </div>
+                </div>
+                <div class="modal-footer border-0 pt-0">
+                    <button type="submit" class="btn-save-habits">Create Habit</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
