@@ -1,10 +1,20 @@
-from django.urls import path
+from django.urls import path, include, reverse_lazy
 from ledger import views
+from registration.backends.simple.views import RegistrationView
+from ledger.forms import CustomRegistrationForm
 
 app_name = 'ledger'
 
 urlpatterns = [
-        # basic 
+        path(
+        'accounts/register/',
+        RegistrationView.as_view(
+            form_class=CustomRegistrationForm,
+            success_url=reverse_lazy('ledger:index')
+                ),
+                name='registration_register',
+        ),
+        path('accounts/', include('registration.backends.simple.urls')),
         path('', views.index, name='index'),
         path('myhabits/', views.myhabits, name='myhabits'),
         path('leaderboards/', views.leaderboards, name='leaderboards'),

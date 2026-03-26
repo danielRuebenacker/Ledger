@@ -10,8 +10,8 @@ from django.utils import timezone
 from ledger.utils import habit_utils, date_utils, friend_utils
 
 # ------------ forms/models --------------------
-from ledger.forms import HabitTrackerForm
-from ledger.models import HabitTracker, UserProfile, Nudge, Friendship
+from ledger.forms import HabitTrackerForm, CustomRegistrationForm, LogHabitForm
+from ledger.models import HabitTracker, UserProfile, Nudge, Friendship, BoolHabitEntry, JournalEntry
 from django.db.models import Q
 from django.contrib.auth.models import User
 
@@ -27,12 +27,49 @@ def index(request):
 
     return render(request, 'ledger/index.html', context=context_dict)
 
+def log_habits_view(request):
+    user_profile = request.user.userprofile
+    
+    if request.method == 'POST':
+        form = LogHabitForm(request.POST, user_profile=user_profile)
+        if form.is_valid():
+            # Extract data
+            date = form.cleaned_data['date']
+            journal_text = form.cleaned_data['journal_text']
+            selected_habits = form.cleaned_data['habits'] # QuerySet of Habit objects
+
+            # 1. Get or Create the HabitTracker for this month
+            tracker = user_profile.habit_trackers.filter(month__month=date.month, month__year=date.year).first()
+            
+            # 2. Get or Create the Day object
+            day, created = Day.objects.get_or_create(habit_tracker=tracker, date=date)
+
+            # 3. Save/Update Journal
+            JournalEntry.objects.update_or_create(day=day, defaults={'journal_text': journal_text})
+
+            # 4. Update Habit Entries
+            # Reset all for this day first, then set selected ones to True
+            day.bool_habit_entries.all().update(done=False)
+            for habit in selected_habits:
+                BoolHabitEntry.objects.update_or_create(day=day, habit=habit, defaults={'done': True})
+
+            return JsonResponse({'status': 'success', 'message': 'Habits logged!'})
+        
+        return JsonResponse({'status': 'error', 'errors': form.errors}, status=400)
+
+    # If GET: Return data for the selected date (for your JS to fill the form)
+    # ... (Logic to fetch existing day data)
+    return JsonResponse({'status': 'ready'})
+
 @login_required
 def myhabits(request):
     context_dict = {}
     user_profile = request.user.userprofile
     # if habit tracker is not created present form view
     habit_tracker, _ = HabitTracker.objects.get_or_create(user=user_profile, month=date_utils.get_first_of_this_month())
+    log_form = LogHabitForm(user_profile=user_profile)
+    context_dict['log_form'] = log_form
+
 
     
     if request.method == 'POST':
@@ -61,9 +98,41 @@ def myhabits(request):
     return render(request, 'ledger/myhabits.html', context=context_dict)
 
 def leaderboards(request):
-    context_dict = {}
-
-    return render(request, 'ledger/myhabits.html', context=context_dict)
+    from ledger.utils import date_utils
+    from ledger.models import HabitTracker
+ 
+    this_month = date_utils.get_first_of_this_month()
+ 
+    top_streaks = (HabitTracker.objects.filter(month=this_month, streak__gt=0).select_related('user__user').order_by('-streak')[:50])
+ 
+    top_points = (HabitTracker.objects.filter(month=this_month, points__gt=0).select_related('user__user').order_by('-points')[:50])
+ 
+    current_streak_rank = None
+    current_points_rank = None
+ 
+    if request.user.is_authenticated:
+        try:
+            user_profile = request.user.userprofile
+            tracker = HabitTracker.objects.get(user=user_profile, month=this_month)
+ 
+            streak_rank = HabitTracker.objects.filter(month=this_month, streak__gt=tracker.streak).count() + 1
+ 
+            points_rank = HabitTracker.objects.filter(month=this_month, points__gt=tracker.points).count() + 1
+ 
+            current_streak_rank = streak_rank if streak_rank <= 50 else None
+            current_points_rank = points_rank if points_rank <= 50 else None
+ 
+        except HabitTracker.DoesNotExist:
+            pass
+ 
+    context_dict = {
+        'top_streaks': top_streaks,
+        'top_points': top_points,
+        'current_streak_rank': current_streak_rank,
+        'current_points_rank': current_points_rank,
+    }
+ 
+    return render(request, 'ledger/leaderboards.html', context=context_dict)
 
 def social(request):
     context_dict = {}
@@ -108,11 +177,7 @@ def profile(request, username=None):
     already_nudged = False
     if is_friend and logged_in_profile:
         today = timezone.now().date()
-        already_nudged = Nudge.objects.filter(
-            nudger=logged_in_profile,
-            nudged=user_profile,
-            date_of_nudge__date=today
-        ).exists()
+        already_nudged = Nudge.objects.filter(nudger=logged_in_profile,nudged=user_profile,date_of_nudge__date=today).exists()
 
     context_dict = {
         'profile_user': user,
@@ -188,6 +253,7 @@ def mark_notifications_read(request):
     Nudge.objects.filter(nudged=user_profile, notified=False).update(notified=True)
     # return okay response
     return JsonResponse({"status": "ok"})
+
 def myhabits_api(request):
     user_profile, _ = UserProfile.objects.get_or_create(user=request.user)
     months = habit_utils.get_all_months_data(user_profile)
@@ -261,3 +327,15 @@ def nudge(request, username):
         return JsonResponse({'status': 'ok'})
 
     return JsonResponse({'status': 'invalid'}, status=400)
+
+def register(request):
+    if request.method == 'POST':
+        form = CustomRegistrationForm(request.POST, request.FILES)
+        if form.is_valid():
+            user = form.save()
+            # Redirect to login or index after successful registration
+            return redirect('ledger:index') 
+    else:
+        form = CustomRegistrationForm()
+
+    return render(request, 'ledger/registration_form.html', {'form': form})
