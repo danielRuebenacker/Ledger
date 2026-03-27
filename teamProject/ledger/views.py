@@ -1,5 +1,4 @@
 # ----------- django specific ---------------
-from datetime import date, datetime
 from django.views.decorators.http import require_POST
 from django.contrib import messages
 
@@ -39,9 +38,9 @@ def log_habits_view(request):
             log_date = form.cleaned_data['date']
             journal_text = form.cleaned_data['journal_text']
             selected_habits = form.cleaned_data['habits']
-            tracker = habit_utils.get_current_month_habit_tracker(user_profile)
+            habit_tracker = habit_utils.get_current_month_habit_tracker(user_profile)
 
-            existing_day = Day.objects.filter(habit_tracker=tracker, date=log_date).first()
+            existing_day = Day.objects.filter(habit_tracker=habit_tracker, date=log_date).first()
             if existing_day and existing_day.completed_on_day:
                 messages.add_message(request, messages.ERROR, "Cannot log habit for day already logged")
                 return redirect(reverse('ledger:myhabits'))
@@ -55,15 +54,21 @@ def log_habits_view(request):
                 JournalEntry.objects.update_or_create( day=day_obj, defaults={'journal_text': journal_text})
 
             # First, get all habits associated with this tracker
-            all_tracker_habits = tracker.habits.all()
+            all_tracker_habits = habit_tracker.habits.all()
 
+            points = 0
             for habit in all_tracker_habits:
                 # If the habit was checked in the form, done=True, otherwise False
                 is_done = habit in selected_habits
                 
                 BoolHabitEntry.objects.update_or_create( day=day_obj, habit=habit, defaults={'done': is_done})
+                if is_done:
+                    points += habit.points
             
-            tracker.refresh_streak()
+            # update points & streaks
+            habit_tracker.refresh_streak()
+            habit_tracker.points = points
+            
     return redirect(reverse('ledger:myhabits'))
 
 def create_habit_view(request):
@@ -178,7 +183,7 @@ def social(request):
         if query:
             users_qs = User.objects.filter(username__icontains=query).exclude(id=request.user.id)
         else:
-            users_qs = User.objects.exclude(id=request.user.id).order_by('?')[:10]
+            users_qs = User.objects.exclude(id=request.user.id).order_by('username')[:10]
 
         sent_requests = FriendRequest.objects.filter(requester=user_profile).values_list('requested_id', flat=True)
         current_friends = Friendship.objects.filter(user=user_profile).values_list('friend_id', flat=True)
@@ -360,11 +365,6 @@ def mark_notifications_read(request):
     Nudge.objects.filter(nudged=user_profile, notified=False).update(notified=True)
     # return okay response
     return JsonResponse({"status": "ok"})
-
-def myhabits_api(request):
-    user_profile, _ = UserProfile.objects.get_or_create(user=request.user)
-    months = habit_utils.get_all_months_data(user_profile)
-    return JsonResponse({'months': months})
 
 @login_required
 def nudge(request, username):
