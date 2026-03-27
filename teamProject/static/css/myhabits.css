@@ -138,12 +138,14 @@
     margin-bottom: 4px;
 }
 
-.grid-section-icon {
-    font-size: 1rem;
-}
+/* .grid-section-icon { */
+/*     font-size: 1rem; */
+/* } */
 
 .habit-grid {
     width: 100%;
+	table-layout: fixed;
+	border-collapse: collapse;
 }
 
 /* Faint vertical separator between habits within a category */
@@ -212,13 +214,15 @@
     padding: 0;
     height: 17px;
     border: 1px solid #e0d5c0;
+	overflow: hidden;
 }
 
 .grid-x {
+	display: block;
     color: #3a2e1f;
     font-size: 0.7rem;
     font-weight: 700;
-    line-height: 14px;
+    line-height: 16px;
 }
 
 .habit-details {
