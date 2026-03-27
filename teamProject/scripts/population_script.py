@@ -19,6 +19,7 @@ import random
 from datetime import datetime
 from datetime import timedelta
 from ledger.utils.date_utils import get_first_of_this_month
+from ledger.utils import date_utils
 
 from django.contrib.auth.hashers import make_password
 
@@ -137,7 +138,6 @@ def populate_trackers():
     journal_entries = []
     m2m_relations = []
 
-    # 1. Create Trackers with dummy leaderboard data
     for user in users:
         # Generate random dummy data for leaderboards
         random_streak = random.randint(0, 30) #
@@ -152,19 +152,16 @@ def populate_trackers():
             )
         )
     
-    # Bulk create trackers first so they get IDs
     HabitTracker.objects.bulk_create(trackers_to_create, ignore_conflicts=True)
     
-    # Re-fetch trackers to associate them with days/habits
     trackers = HabitTracker.objects.filter(month=first_of_month)
 
-    # 2. Build Days and Entries in memory
     for tracker in trackers:
         # Assign a random but deterministic subset of habits to this tracker
         p_threshold = random.randint(20, 50)
         selected_habits = [h for h in all_habits if random.randint(0, 100) < p_threshold]
         
-        # Prepare ManyToMany links (HabitTracker <-> Habit)
+        # ManyToMany links 
         for h in selected_habits:
             m2m_relations.append(HabitTracker.habits.through(habittracker_id=tracker.id, habit_id=h.id))
 
@@ -175,10 +172,8 @@ def populate_trackers():
             day_obj = Day(habit_tracker=tracker, date=date, completed_on_day=True)
             days_to_create.append(day_obj)
 
-    # Bulk create Days
     Day.objects.bulk_create(days_to_create, ignore_conflicts=True)
     
-    # 3. Create Habit and Journal Entries
     # Fetch days back with their tracker/habit info to link entries
     all_days = Day.objects.filter(habit_tracker__month=first_of_month).select_related('habit_tracker')
     
@@ -202,6 +197,94 @@ def populate_trackers():
     BoolHabitEntry.objects.bulk_create(habit_entries)
 
     print(f"Populated {len(trackers_to_create)} trackers with random leaderboard data, days, and entries.")
+
+def make_habit_tracking_freak():
+    username = "JohnDoesHabitz"
+    password = "demo"
+
+    user, _ = User.objects.get_or_create(username=username)
+    user.set_password(password)
+    user.save()
+    print(f"Created user {username} with password {password}")
+
+
+    profile, _ = UserProfile.objects.get_or_create(user=user)
+    profile.theme = UserProfile.DARK;
+    profile.save()
+
+    # 2. Get/Create Trackers for 3 months
+    habit_tracker_this, _ = HabitTracker.objects.get_or_create(user=profile, month=date_utils.get_first_of_this_month())
+    habit_tracker_last, _ = HabitTracker.objects.get_or_create(user=profile, month=date_utils.get_first_of_n_months_ago(1))
+    habit_tracker_older, _ = HabitTracker.objects.get_or_create(user=profile, month=date_utils.get_first_of_n_months_ago(2))
+
+    # 3. Handle Friendships/Requests
+    friendships = []
+    friend_requests = []
+    
+    for other_profile in UserProfile.objects.exclude(user=user): 
+        if random.randint(0, 1) == 1:
+            friend_requests.append(FriendRequest(requester=profile, requested=other_profile, status=FriendRequest.ACCEPTED))
+            friendships.append(Friendship(user=profile, friend=other_profile))
+            friendships.append(Friendship(user=other_profile, friend=profile))
+        else: 
+            friend_requests.append(FriendRequest(requester=other_profile, requested=profile, status=FriendRequest.PENDING))
+
+    FriendRequest.objects.bulk_create(friend_requests, ignore_conflicts=True)
+    Friendship.objects.bulk_create(friendships, ignore_conflicts=True)
+
+    # 4. Assign Habits to Trackers
+    all_habits = list(Habit.objects.all())
+    trackers = [habit_tracker_this, habit_tracker_last, habit_tracker_older]
+    
+    for tracker in trackers:
+        # Randomly assign about 70% of available habits to each tracker
+        tracker_habits = [h for h in all_habits if random.random() < 0.7]
+        tracker.habits.set(tracker_habits) 
+        tracker.save()
+
+    # 5. Generate Day, Habit, and Journal Entries
+    habit_entries = []
+    journal_entries = []
+    
+    # Let's populate the last 60 days
+    today = date_utils.today()
+    
+    for tracker in trackers:
+        assigned_habits = tracker.habits.all()
+        start_date = tracker.month
+        
+        for d in range(28): # Fill first 28 days of each month
+            current_date = start_date + timedelta(days=d)
+            if current_date > today:
+                continue
+
+            # Create the Day object
+            day_obj, _ = Day.objects.get_or_create(habit_tracker=tracker, date=current_date)
+            
+            # Randomly mark day as "completed"
+            day_obj.completed_on_day = random.random() > 0.2
+            day_obj.save()
+
+            # Create entries for every habit assigned to this tracker
+            for habit in assigned_habits:
+                is_done = random.random() > 0.3 # 70% chance they did the habit
+                habit_entries.append(BoolHabitEntry(day=day_obj, habit=habit, done=is_done))
+
+            # Add a Journal Entry occasionally
+            if random.random() > 0.6:
+                msg = f"Feeling great about my {assigned_habits.first()} progress on {current_date}!"
+                journal_entries.append(JournalEntry(day=day_obj, journal_text=msg))
+
+    BoolHabitEntry.objects.bulk_create(habit_entries)
+    JournalEntry.objects.bulk_create(journal_entries)
+    
+    for tracker in trackers:
+        tracker.refresh_streak()
+
+    print(f"Population complete for {user.username}!")
+
+    
+    
 
 def create_admin():
     username = "admin"
@@ -232,6 +315,9 @@ def run():
 
     populate_trackers()
     print("POPULATE TRACKERS")
+
+    make_habit_tracking_freak()
+    print("POPULATE DEMO USER")
 
     create_admin()
     print("CREATE ADMIN")
