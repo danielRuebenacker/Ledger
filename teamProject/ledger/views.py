@@ -380,54 +380,6 @@ def myhabits_api(request):
     return JsonResponse({'months': months})
 
 @login_required
-@require_POST
-def create_habit_api(request):
-    user_profile, _ = UserProfile.objects.get_or_create(user=request.user)
-    name = request.POST.get('name', '').strip()
-    habit_type = request.POST.get('habit_type', '')
-
-    habit, error = habit_utils.create_habit(name, habit_type, user_profile)
-    if error:
-        return JsonResponse({'error': error}, status=400)
-    return JsonResponse({'success': True, 'name': habit.name})
-
-@login_required
-def log_habits_api(request):
-    user_profile, _ = UserProfile.objects.get_or_create(user=request.user)
-    today = date.today()
-
-    if request.method == 'GET':
-        log_date_str = request.GET.get('date', today.isoformat())
-        try:
-            log_date = datetime.strptime(log_date_str, '%Y-%m-%d').date()
-        except ValueError:
-            log_date = today
-
-        groups, journal_text, log_date = habit_utils.get_log_data(user_profile, log_date)
-        return JsonResponse({
-            'groups': groups,
-            'journal': journal_text,
-            'date': log_date.isoformat(),
-        })
-
-    # POST — save the log
-    log_date_str = request.POST.get('date', today.isoformat())
-    try:
-        log_date = datetime.strptime(log_date_str, '%Y-%m-%d').date()
-    except ValueError:
-        return JsonResponse({'error': 'Invalid date.'}, status=400)
-
-    checked_ids = request.POST.getlist('habits')
-    journal_text = request.POST.get('journal', '').strip()
-
-    error = habit_utils.save_log(user_profile, log_date, checked_ids, journal_text)
-    if error:
-        return JsonResponse({'error': error}, status=400)
-    return JsonResponse({'success': True})
-
-
-
-@login_required
 def nudge(request, username):
     if request.method == 'POST':
         try:
