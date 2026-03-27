@@ -138,12 +138,18 @@
     margin-bottom: 4px;
 }
 
-.grid-section-icon {
-    font-size: 1rem;
-}
+/* .grid-section-icon { */
+/*     font-size: 1rem; */
+/* } */
 
 .habit-grid {
     width: 100%;
+	table-layout: fixed;
+	border-collapse: collapse;
+}
+
+.habit-grid th:first-child {
+    width: 25px;
 }
 
 /* Faint vertical separator between habits within a category */
@@ -204,7 +210,12 @@
     color: #8a7a65;
     font-size: 0.6rem;
     padding: 0 3px 0 0;
-    width: 18px;
+    width: 10px;
+	max-width: 10px;
+	padding: 0 6px 0 0; /* Space between number and the first vertical line */
+    width: 10px;       /* Fixed width for the date column */
+    max-width: 10px;   /* Prevents shrinking */
+    flex-shrink: 0;
 }
 
 .grid-cell {
@@ -212,13 +223,15 @@
     padding: 0;
     height: 17px;
     border: 1px solid #e0d5c0;
+	overflow: hidden;
 }
 
 .grid-x {
+	display: block;
     color: #3a2e1f;
     font-size: 0.7rem;
     font-weight: 700;
-    line-height: 14px;
+    line-height: 16px;
 }
 
 .habit-details {
