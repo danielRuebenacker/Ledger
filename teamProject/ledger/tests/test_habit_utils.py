@@ -125,7 +125,7 @@ class TestHabitTrackerForm(TestCase):
         self.client.login(username="test", password="test")
 
     def test_full_habit_tracker_creation(self):
-        url = reverse('ledger:myhabits')
+        url = reverse('ledger:create_habit_tracker_view')
 
         habits_dict = {
             'dos': 'read, bed before 12',
