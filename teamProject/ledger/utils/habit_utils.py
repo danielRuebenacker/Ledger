@@ -39,8 +39,6 @@ def get_or_create_habits_from_list(habit_strings, habit_type):
     from ledger.models import Habit
     habits = []
     for habit_string in habit_strings:
-        # by default: not community + zero points 
-        # exactly what we want if habit not already created
         habit, created = Habit.objects.get_or_create(name=habit_string, habit_type=habit_type)
         habits.append(habit)
     return habits
