@@ -35,23 +35,18 @@ def log_habits_view(request):
         form = LogHabitForm(request.POST, user_profile=user_profile)
 
         if form.is_valid():
-            # Extract cleaned data
+            # extract cleaned data
             log_date = form.cleaned_data['date']
             journal_text = form.cleaned_data['journal_text']
-            selected_habits = form.cleaned_data['habits'] # This is a QuerySet of Habit objects
-
-            first_of_month = date_utils.get_first_of_this_month()
-            tracker = HabitTracker.objects.filter(user=user_profile, month=first_of_month).first()
+            selected_habits = form.cleaned_data['habits']
+            tracker = habit_utils.get_current_month_habit_tracker(user_profile)
 
             existing_day = Day.objects.filter(habit_tracker=tracker, date=log_date).first()
             if existing_day and existing_day.completed_on_day:
-                # TODO display message to say invalid
+                messages.add_message(request, messages.ERROR, "Cannot log habit for day already logged")
                 return redirect(reverse('ledger:myhabits'))
 
-
-            day_obj, created = Day.objects.get_or_create(habit_tracker=tracker, date=log_date)
-            if not created:
-                return
+            day_obj = habit_utils.get_day(habit_tracker=tracker, date=log_date)
             if log_date == date_utils.today():
                 day_obj.completed_on_day = True
                 day_obj.save()
@@ -59,7 +54,6 @@ def log_habits_view(request):
             if journal_text:
                 JournalEntry.objects.update_or_create( day=day_obj, defaults={'journal_text': journal_text})
 
-            # 4. Sync BoolHabitEntries
             # First, get all habits associated with this tracker
             all_tracker_habits = tracker.habits.all()
 
@@ -67,17 +61,9 @@ def log_habits_view(request):
                 # If the habit was checked in the form, done=True, otherwise False
                 is_done = habit in selected_habits
                 
-                BoolHabitEntry.objects.update_or_create(
-                    day=day_obj,
-                    habit=habit,
-                    defaults={'done': is_done}
-                )
+                BoolHabitEntry.objects.update_or_create( day=day_obj, habit=habit, defaults={'done': is_done})
             
             tracker.refresh_streak()
-
-            messages.success(request, f"Progress logged for {log_date.strftime('%B %d')}!")
-            return redirect(reverse('ledger:myhabits'))
-
     return redirect(reverse('ledger:myhabits'))
 
 def create_habit_view(request):
@@ -98,22 +84,10 @@ def create_habit_view(request):
 
     return redirect(reverse('ledger:myhabits'))
 
-@login_required
-def myhabits(request):
-    context_dict = {}
+def create_habit_tracker_view(request):
     user_profile = request.user.userprofile
-    # if habit tracker is not created present form view
-    habit_tracker, _ = HabitTracker.objects.get_or_create(user=user_profile, month=date_utils.get_first_of_this_month())
+    habit_tracker = habit_utils.get_current_month_habit_tracker(user=user_profile)
 
-
-    months_data = habit_utils.get_all_months_data(user_profile)
-    context_dict = {
-            'months': months_data,
-            'log_form': LogHabitForm(user_profile=user_profile),
-            'create_form': CreateHabitForm(),
-    }
-    context_dict['show_empty_state'] = len(months_data) == 0
-    
     if request.method == 'POST':
         form = HabitTrackerForm(request.POST)
 
@@ -129,15 +103,28 @@ def myhabits(request):
 
             # makes into habits/gets habit then adds to habit tracker
             habit_utils.get_or_create_habits_then_register(*habit_string_lists, habit_tracker)
-            months_data = habit_utils.get_all_months_data(user_profile)
-            context_dict['months'] = months_data
-    else:
-        if not habit_utils.check_if_any_habits_added(habit_tracker): 
-            form = HabitTrackerForm()
+    return redirect(reverse('ledger:myhabits'))
 
-            context_dict['form'] = form
-            # the create habit tracker partial will be displayed
-            context_dict['display_create_tracker'] = True
+@login_required
+def myhabits(request):
+    context_dict = {}
+    user_profile = request.user.userprofile
+    habit_tracker = habit_utils.get_current_month_habit_tracker(user=user_profile)
+
+    months_data = habit_utils.get_all_months_data(user_profile)
+    context_dict = {
+            'months': months_data,
+            'log_form': LogHabitForm(user_profile=user_profile),
+            'create_form': CreateHabitForm(),
+    }
+    context_dict['show_empty_state'] = len(months_data) == 0
+
+    if not habit_utils.check_if_any_habits_added(habit_tracker): 
+        form = HabitTrackerForm()
+
+        context_dict['form'] = form
+        # the create habit tracker partial will be displayed
+        context_dict['display_create_tracker'] = True
             
     return render(request, 'ledger/myhabits.html', context=context_dict)
 

@@ -7,7 +7,7 @@
             </div>
 
 			<!-- need page to reload for update -->
-			<form action="{% url 'ledger:myhabits' %}" method="POST">
+			<form action="{% url 'ledger:create_habit_tracker_view' %}" method="POST">
                 {% csrf_token %}
                 
                 <div class="modal-body"> {% for field in form %}

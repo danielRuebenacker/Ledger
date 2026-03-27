@@ -24,6 +24,7 @@ urlpatterns = [
         # habit apis
         path('log_habits_view/', views.log_habits_view, name='log_habits_view'),
         path('create-habit-view/', views.create_habit_view, name='create_habit_view'),
+        path('create-habit-tracker-view/', views.create_habit_tracker_view, name='create_habit_tracker_view'),
 
         # friend apis
         path('api/friends/request/', views.add_friend_request, name='add_friend_request'),
