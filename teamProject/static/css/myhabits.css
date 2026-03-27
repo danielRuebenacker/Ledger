@@ -432,3 +432,19 @@ button:disabled {
     display: none;
     margin: 10px 0;
 }
+
+#setup-tracker-btn {
+    width: 50%;
+    position: absolute;
+    /* Move the left edge to the middle of the page */
+    left: 50%; 
+    /* Move the button up from the bottom or down from the top */
+    top: 20%; 
+    /* Offset the button by 50% of its own width/height to truly center it */
+    transform: translate(-50%, -50%); 
+    
+    /* Optional: Ensure it looks like a ledger button */
+    text-align: center;
+    padding: 10px;
+    z-index: 100; /* Keeps it above the grid lines */
+}

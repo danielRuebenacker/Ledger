@@ -1,5 +1,6 @@
 {% extends 'ledger/base.html' %}
 {% load staticfiles %}
+{% load habit_extras %}
 
 {% block header %}
 	{{ form.media }}
@@ -14,22 +15,104 @@
 <link rel="stylesheet" href="{% static 'css/myhabits.css' %}">
 
 <div class="desk">
-	<div id="flipbook">
-		<div class="page page-right">
-			<div class="page page-right">
-				<div class="page-inner">
-					<h2 class="cover-title">My Habit Ledger</h2>
-					<p class="habit-details">Your personal record of progress.<br>Turn the page to begin.</p>
-					
-					<div class="setup-cta-container" style="margin-top: 20px; text-align: center;">
-						<button id="setup-tracker-btn" class="btn-save-habits" style="width: auto; padding: 10px 20px; font-size: 0.9rem;">
-							Not tracking habits yet?
-						</button>
-					</div>
-				</div>
-			</div>
-		</div>
-	</div>
+<div id="flipbook">
+    {% if not months %}
+		<div class="page cover">
+            <div class="page-inner">
+                <h1 class="ledger-title">My Habit Ledger</h1>
+                <p class="ledger-subtitle">Get Started Below</p>
+            </div>
+        </div>
+        <div class="page">
+            <div class="page-inner ledger-right">
+                <div class="empty-state-container">
+                    <p class="habit-details">You haven't set up a tracker yet.</p>
+                    <button id="setup-tracker-btn" class="btn-ledger">Create Your First Tracker</button>
+                </div>
+            </div>
+        </div>
+    {% else %}
+		<div class="page cover">
+            <div class="page-inner">
+                <h1 class="ledger-title">My Habit Ledger</h1>
+                <p class="ledger-subtitle">2026 Edition</p>
+            </div>
+        </div>
+        {% for month in months %}
+            <div class="page">
+                <div class="page-inner ledger-left">
+                    <div class="ledger-header">
+                        <span class="ledger-month">{{ month.month }}</span>
+                    </div>
+                    <div class="journal-list">
+                        {% for entry in month.journals %}
+                            <div class="journal-row{% if not entry.text %} empty{% endif %}">
+                                <span class="journal-day">{{ entry.day }}.</span>
+                                <span class="journal-text">{{ entry.text|default:"" }}</span>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="page">
+                <div class="page-inner ledger-right">
+                    {% if not month.sections %}
+							<p class="habit-details">You haven't set up a tracker yet.</p>
+							<button id="setup-tracker-btn" class="btn-ledger">Create Tracker For {{ month.month }} </button>
+                    {% else %}
+                        <table class="habit-grid">
+                            <thead>
+                                <tr style="height:50px;">
+                                    <th></th>
+                                    {% for section in month.sections %}
+                                        <th colspan="{{ section.habits|length }}">{{ section.emoji }}</th>
+                                    {% endfor %}
+                                </tr>
+                                <tr style="height:50px;">
+                                    <th></th>
+                                    {% for section in month.sections %}
+                                        {% for habit in section.habits %}
+                                            <th class="grid-habit-name">{{ habit.name }}</th>
+                                        {% endfor %}
+                                    {% endfor %}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% with ''|center:month.num_days as range %}
+                                {% for _ in range %}
+                                    {% with day_index=forloop.counter0 %}
+                                    <tr>
+                                        <td class="grid-day-num">{{ forloop.counter }}</td>
+                                        {% for section in month.sections %}
+                                            {% for habit in section.habits %}
+                                                <td class="grid-cell {% if forloop.first %}grid-category-start{% endif %}">
+                                                    {% if habit.grid|reg_index:day_index %}
+                                                        <span class="grid-x">✖</span>
+                                                    {% endif %}
+                                                </td>
+                                            {% endfor %}
+                                        {% endfor %}
+                                    </tr>
+                                    {% endwith %}
+                                {% endfor %}
+                                {% endwith %}
+                            </tbody>
+                        </table>
+                    {% endif %}
+                </div>
+            </div>
+        {% endfor %}
+
+        {# TURN.JS REQUIREMENT: Ensure even page count #}
+        {# Each month adds 2 pages, so we only need this if you add a single 'cover' elsewhere #}
+        {% if months|length|add:months|length|divisibleby:2 %}
+            {# Already even, no action needed #}
+        {% else %}
+             <div class="page"><div class="page-inner"><p class="habit-details">End of entries.</p></div></div>
+        {% endif %}
+    {% endif %}
+</div>
 
 	<div class="book-controls">
 		<button id="prev-btn" disabled>Previous</button>
@@ -49,12 +132,7 @@
 
 {% include 'ledger/partials/_log_modal.html' %}
 {% include 'ledger/partials/_create_habit_modal.html' %}
-
-{# 2. NEW BOOTSTRAP MODAL (PARTIAL) #}
-{% if display_create_tracker %}
-    {% include 'ledger/partials/_create_tracker_modal.html' %}
-{% endif %}
-
+{% include 'ledger/partials/_create_tracker_modal.html' %}
 
 {% endblock %}
 
@@ -62,8 +140,6 @@
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/turn.js/3/turn.min.js"></script>
 	<script>
 		var MYHABITS_API_URL  = "{% url 'ledger:myhabits_api' %}";
-		var CREATE_HABIT_URL  = "{% url 'ledger:create_habit_api' %}";
-		var LOG_HABITS_URL    = "{% url 'ledger:log_habits_api' %}";
 		var SHOW_TRACKER_FORM = {{ display_create_tracker|yesno:"true,false" }};
 	</script>
 	<script src="{% static 'js/myhabits.js' %}"></script>
