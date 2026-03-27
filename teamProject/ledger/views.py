@@ -10,6 +10,7 @@ from django.utils import timezone
 
 # ----------- utils ---------------------------
 from ledger.utils import habit_utils, date_utils, friend_utils
+from ledger.utils.friend_utils import get_streak_and_points
 
 # ------------ forms/models --------------------
 from ledger.forms import HabitTrackerForm, CustomRegistrationForm, LogHabitForm, CreateHabitForm
@@ -21,8 +22,6 @@ from django.contrib.auth.models import User
 from django.http import JsonResponse
 import json
 import os
-from ledger.utils import date_utils as _date_utils
-from ledger.utils.friend_utils import get_streak_and_points
 
 
 # Create your views here.
