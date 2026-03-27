@@ -14,7 +14,7 @@ def get_user_habit_trackers(user):
 def get_current_month_habit_tracker(user):
     from ledger.models import HabitTracker
     # get this months habit tracker
-    habit_tracker, _ = HabitTracker.objects.get_or_create(user=user)
+    habit_tracker, _ = HabitTracker.objects.get_or_create(user=user, month=date_utils.get_first_of_this_month())
     return habit_tracker
 
 def get_habit_tracker_habit_entries(habit_tracker):
