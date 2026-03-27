@@ -77,7 +77,7 @@ class LogHabitForm(forms.Form):
         if user_profile:
             tracker = habit_utils.get_current_month_habit_tracker(user_profile)
             if tracker:
-                self.fields['habits'].queryset = tracker.habits.all()
+                self.fields['habits'].queryset = tracker.habits.all().order_by('habit_type', 'name')
 
 class CreateHabitForm(forms.ModelForm):
     class Meta:

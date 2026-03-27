@@ -139,7 +139,6 @@
 {% block scripts %}
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/turn.js/3/turn.min.js"></script>
 	<script>
-		var MYHABITS_API_URL  = "{% url 'ledger:myhabits_api' %}";
 		var SHOW_TRACKER_FORM = {{ display_create_tracker|yesno:"true,false" }};
 	</script>
 	<script src="{% static 'js/myhabits.js' %}"></script>

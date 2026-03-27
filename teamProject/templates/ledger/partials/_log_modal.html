@@ -8,35 +8,56 @@
             
 			<form id="log-habit-form" method="POST" action="{% url 'ledger:log_habits_view' %}">
 				{% csrf_token %}
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label class="fw-bold">Date</label>
-                        {{ log_form.date }}
-                    </div>
+				<div class="modal-body">
+					<div class="mb-3">
+						<label class="fw-bold">Date</label>
+						{{ log_form.date }}
+					</div>
 
-                    <div class="mb-3">
-                        <label class="fw-bold">Habits Completed</label>
-                        <div class="habit-checkbox-grid">
-                            {% for checkbox in log_form.habits %}
-                                <div class="form-check">
-                                    {{ checkbox.tag }}
-                                    <label class="form-check-label" for="{{ checkbox.id_for_label }}">
-                                        {{ checkbox.choice_label }}
-                                    </label>
-                                </div>
-                            {% endfor %}
-                        </div>
-                    </div>
+					<div class="mb-4">
+						<label class="fw-bold d-block mb-3">Habits Completed</label>
+						
+						{# Change 'type' to 'habit_type' here #}
+						{% regroup log_form.habits.field.queryset by get_habit_type_display as habit_groups %}
 
-                    <div class="mb-3">
-                        <label class="fw-bold">Journal Entry</label>
-                        {{ log_form.journal_text }}
-                    </div>
-                </div>
-                <div class="modal-footer border-0">
-                    <button type="submit" class="btn-save-habits">Save Entry</button>
-                </div>
-            </form>
+						{% for group in habit_groups %}
+							<div class="habit-category-section mb-4">
+								<div class="habit-type-tag">
+									{# Accessing the first habit in the group to get the emoji #}
+									<span class="me-1">{{ group.list.0.get_type_emoji }}</span>
+									{{ group.grouper }}
+								</div>
+
+								<div class="habit-checkbox-grid mt-2">
+									{% for habit in group.list %}
+										{% for checkbox in log_form.habits %}
+											{# Compare the habit ID to the checkbox value #}
+											{% if checkbox.data.value|slugify == habit.id|slugify %}
+												<div class="form-check custom-habit-entry">
+													{{ checkbox.tag }}
+													<label class="form-check-label" for="{{ checkbox.id_for_label }}">
+														{{ habit.name }}
+													</label>
+												</div>
+											{% endif %}
+										{% endfor %}
+									{% endfor %}
+								</div>
+							</div>
+						{% empty %}
+							<p class="text-muted">No habits found for this period.</p>
+						{% endfor %}
+					</div>
+
+					<div class="mb-3">
+						<label class="fw-bold">Journal Entry</label>
+						{{ log_form.journal_text }}
+					</div>
+				</div>
+				<div class="modal-footer border-0">
+					<button type="submit" class="btn-save-habits">Save Entry</button>
+				</div>
+			</form>
         </div>
     </div>
 </div>
