@@ -1,5 +1,4 @@
 $(document).ready(function () {
-    // 1. MODAL INITIALIZATION
     const getModal = (id) => {
         const el = document.getElementById(id);
         return el ? new bootstrap.Modal(el) : null;
@@ -10,7 +9,6 @@ $(document).ready(function () {
     const logHabitModal = getModal('logHabitModal');
     const $book = $('#flipbook');
 
-    // 2. BOOK INITIALIZATION (Django-rendered)
     if ($book.length > 0 && $book.children().length > 0) {
         $book.turn({
             width: 960,
@@ -24,16 +22,15 @@ $(document).ready(function () {
                 turned: function () { updateControls(); }
             }
         });
-        // Jump to the end of the ledger by default
+		// jump to last page
         $book.turn('page', $book.turn('pages'));
     }
 
-    // 3. CONTROLS & INDICATORS
     function updateControls() {
         const current = $book.turn('page');
         const total = $book.turn('pages');
         
-        // Logical page math: Cover is 1, then Spreads are (2,3), (4,5)
+        // logical page math: Cover is 1, then Spreads are (2,3), (4,5)
         const displayPage = Math.floor(current / 2);
         const displayTotal = Math.floor(total / 2);
 
@@ -52,16 +49,16 @@ $(document).ready(function () {
     $('#prev-btn').on('click', () => $book.turn('previous'));
     $('#next-btn').on('click', () => $book.turn('next'));
 
-    // 4. BUTTON CLICK EVENTS
-    // Check your HTML: ensure the buttons have these EXACT IDs
+	// create tracker button (on rhs page)
     $(document).on('click', '#setup-tracker-btn', (e) => {
         e.preventDefault();
         trackerModal?.show();
     });
 
+	// create/add habits button
     $(document).on('click', '#add-habit-btn', () => createHabitModal?.show());
 
-    // Matches the "Log Habits" button in your UI
+	// log habits button
     $(document).on('click', '#log-habit-btn', function() {
         if (logHabitModal) {
             const today = new Date().toISOString().split('T')[0];
@@ -70,13 +67,13 @@ $(document).ready(function () {
         }
     });
 
-    // 6. CLEANUP FIX (Ghost Backdrops)
+	// bug fix: issue with not exiting when pressing x
     $(document).on('hidden.bs.modal', '.modal', function () {
         $('.modal-backdrop').remove();
         $('body').removeClass('modal-open').css('padding-right', '');
     });
 
-    // Auto-show tracker if flag is set
+    // auto show tracker creation form if flag is set
     if (typeof SHOW_TRACKER_FORM !== 'undefined' && SHOW_TRACKER_FORM) {
         trackerModal?.show();
     }
