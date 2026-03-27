@@ -45,7 +45,7 @@ def log_habits_view(request):
                 messages.add_message(request, messages.ERROR, "Cannot log habit for day already logged")
                 return redirect(reverse('ledger:myhabits'))
 
-            day_obj = habit_utils.get_day(habit_tracker=tracker, date=log_date)
+            day_obj = habit_utils.get_day(habit_tracker=habit_tracker, date=log_date)
             if log_date == date_utils.today():
                 day_obj.completed_on_day = True
                 day_obj.save()
@@ -78,7 +78,7 @@ def create_habit_view(request):
 
         if form.is_valid():
             # can't just form.save() as need get_or_create
-            name = form.cleaned_data['name']
+            name = form.cleaned_data['name'].strip().title()
             habit_type = form.cleaned_data['habit_type']
 
             habit, _ = Habit.objects.get_or_create(name=name, habit_type=habit_type)
@@ -98,7 +98,7 @@ def create_habit_tracker_view(request):
 
         if form.is_valid():
             # ignore empty strings
-            clean = lambda x: x.strip().lower()
+            clean = lambda x: x.strip().title()
 
             # get all cleaned data, and clean according to our clean
             habit_string_lists = [

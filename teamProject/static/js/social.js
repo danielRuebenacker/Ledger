@@ -23,7 +23,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const userId = this.dataset.userId;
             const token = getCsrfToken();
 
-            fetch('/api/friends/request', {
+            fetch('/api/friends/request/', {
                 method: 'POST',
                 headers: { 
                     'Content-Type': 'application/json', 
@@ -48,7 +48,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const action = this.dataset.action;
             const token = getCsrfToken();
 
-            fetch('/api/friends/handle', {
+            fetch('/api/friends/handle/', {
                 method: 'POST',
                 headers: { 
                     'Content-Type': 'application/json', 

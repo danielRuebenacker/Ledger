@@ -66,19 +66,15 @@ def populate_habits():
         {"name": "Journal", "is_community": True, "habit_type": Habit.TYPE_DO, "points": p2},
 
         # donts
-        {"name": "Phone before bed", "is_community": True, "habit_type": Habit.TYPE_DONT, "points": p2},
+        {"name": "Phone Before Bed", "is_community": True, "habit_type": Habit.TYPE_DONT, "points": p2},
         {"name": "Doomscroll", "is_community": True, "habit_type": Habit.TYPE_DONT, "points": p3},
         {"name": "Caffeine", "is_community": True, "habit_type": Habit.TYPE_DONT, "points": p3},
 
         # easy Ws
-        {"name": "Go outside", "is_community": True, "habit_type": Habit.TYPE_EASY_WIN, "points": p1},
-        {"name": "Listen to music", "is_community": True, "habit_type": Habit.TYPE_EASY_WIN, "points": p1},
+        {"name": "Go Outside", "is_community": True, "habit_type": Habit.TYPE_EASY_WIN, "points": p1},
+        {"name": "Listen To Music", "is_community": True, "habit_type": Habit.TYPE_EASY_WIN, "points": p1},
         {"name": "Coffee", "is_community": True, "habit_type": Habit.TYPE_EASY_WIN, "points": p1},
-        {"name": "Phone someone", "is_community": True, "habit_type": Habit.TYPE_EASY_WIN, "points": p1},
-
-        # numeric
-        {"name": "Screentime", "is_community": True, "habit_type": Habit.TYPE_EASY_WIN, "points": p3},
-        {"name": "Hours of Sleep", "is_community": True, "habit_type": Habit.TYPE_EASY_WIN, "points": p1},
+        {"name": "Phone Someone", "is_community": True, "habit_type": Habit.TYPE_EASY_WIN, "points": p1},
     ]
 
     # Create habits directly in the database
