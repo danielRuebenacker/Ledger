@@ -84,6 +84,9 @@ def create_habit_view(request):
             habit, _ = Habit.objects.get_or_create(name=name, habit_type=habit_type)
 
             tracker = habit_utils.get_current_month_habit_tracker(user_profile)
+            if habit in tracker.habits.all():
+                messages.add_message(request, messages.ERROR, "Can't add the same habit twice!")
+                return redirect(reverse('ledger:myhabits'))
             tracker.habits.add(habit)
             tracker.save()
 
