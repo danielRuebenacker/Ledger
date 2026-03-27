@@ -34,6 +34,7 @@
                     <div class="user-card">
                         <span class="user-card-name">
                             <a href="{% url 'ledger:profile_user' user_item.username %}">{{ user_item.username }}</a>
+                            <span class="online-dot">&#9711;</span>
                         </span>
                         <div class="user-card-right">
                             <span class="user-card-stats">{{ user_item.streak }}🔥 &nbsp; {{ user_item.points }}⭐</span>
@@ -58,6 +59,7 @@
                     <div class="user-card">
                         <span class="user-card-name">
                             <a href="{% url 'ledger:profile_user' user_item.username %}">{{ user_item.username }}</a>
+                            <span class="online-dot">&#9711;</span>
                         </span>
                         <span class="user-card-stats">{{ user_item.streak }}🔥 &nbsp; {{ user_item.points }}⭐</span>
                     </div>
