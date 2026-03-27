@@ -1,6 +1,6 @@
 from ledger.models import UserProfile, Friendship, FriendRequest
 from ledger.utils import date_utils
-
+from ledger.models import HabitTracker
 
 def get_friends_for_user(user):
     friendships = Friendship.objects.filter(user=user)
@@ -44,4 +44,10 @@ def get_user_friend_requests(user):
     friend_requests = FriendRequest.objects.filter(requested=user)
     return friend_requests
 
-
+def get_streak_and_points(user_profile):
+    ht = HabitTracker.objects.filter(
+        user=user_profile,
+        month=date_utils.get_first_of_this_month()
+    ).first()
+    if ht:
+        return ht.streak, ht.points
