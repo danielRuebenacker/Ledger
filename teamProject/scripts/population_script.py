@@ -33,12 +33,10 @@ def populate_users():
     for fname in first_names:
         for lname in last_names:
             username = f"{fname}_{lname}"
-            # Check if user already exists to make script re-runnable
-            if not User.objects.filter(username=username).exists():
-                users_to_create.append(User(
-                    username=username,
-                    password=make_password("insecure")
-                ))
+            users_to_create.append(User(
+                username=username,
+                password=make_password("insecure")
+            ))
     
     # 2. Bulk Create Users
     User.objects.bulk_create(users_to_create)
@@ -220,21 +218,24 @@ def create_admin():
     admin.save()
 
     profile, _ = UserProfile.objects.get_or_create(user=admin)
+    # trust 
+    profile.theme = UserProfile.DARK
+    profile.save()
 
     print(f"Created admin user: {username} and password: {password} (insecure). Only for testing purposes.")
 
 def run():
     populate_users()
-    print("POP USERS")
+    print("POPULATE USERS")
 
     populate_habits()
-    print("POP HABITS")
+    print("POPULATE HABITS")
 
     populate_friendship()
-    print("POP FRIENDS")
+    print("POPULATE FRIENDS")
 
     populate_trackers()
-    print("POP TRACKERS")
+    print("POPULATE TRACKERS")
 
     create_admin()
     print("CREATE ADMIN")

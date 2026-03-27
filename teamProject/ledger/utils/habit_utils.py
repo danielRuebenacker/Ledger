@@ -46,13 +46,12 @@ def get_or_create_habits_from_list(habit_strings, habit_type):
 def register_habits_with_habit_tracker(habits, habit_tracker):
     habit_tracker.habits.add(*habits)
 
-def get_or_create_habits_then_register(dos_strings, donts_strings, easy_wins_strings, numeric_strings, habit_tracker):
+def get_or_create_habits_then_register(dos_strings, donts_strings, easy_wins_strings, habit_tracker):
     from ledger.models import Habit
     dos = get_or_create_habits_from_list(dos_strings, Habit.TYPE_DO)
     donts = get_or_create_habits_from_list(donts_strings, Habit.TYPE_DONT)
     easy_wins = get_or_create_habits_from_list(easy_wins_strings, Habit.TYPE_EASY_WIN)
-    numeric = get_or_create_habits_from_list(numeric_strings, Habit.TYPE_NUMERIC)
-    habits = [dos, donts, easy_wins, numeric]
+    habits = [dos, donts, easy_wins]
     
     for habit_type in habits:
          register_habits_with_habit_tracker(habit_type, habit_tracker)

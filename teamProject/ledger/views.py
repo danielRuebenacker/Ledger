@@ -124,7 +124,7 @@ def myhabits(request):
             # get all cleaned data, and clean according to our clean
             habit_string_lists = [
                     [clean(h) for h in form.cleaned_data.get(f, []) if h] 
-                    for f in ('dos', 'donts', 'easy_wins', 'numeric')
+                    for f in ('dos', 'donts', 'easy_wins')
             ]
 
             # makes into habits/gets habit then adds to habit tracker

@@ -15,7 +15,6 @@ class HabitTrackerForm(forms.Form):
     dos = TagField( label='Must DOs', place_holder='Habits you want to DO every day...', delimiters=',',)
     donts = TagField( label='Must NOT DOs', place_holder='Habits you want to NOT DO every day...', delimiters=',',)
     easy_wins = TagField( label='Easy Wins', place_holder='Habits that motivate you...', delimiters=',',)
-    numeric = TagField( label='Numeric Habits', place_holder='E.g., Screentime, Liters of water', delimiters=',',)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -24,7 +23,6 @@ class HabitTrackerForm(forms.Form):
             'dos': Habit.TYPE_DO,
             'donts': Habit.TYPE_DONT,
             'easy_wins': Habit.TYPE_EASY_WIN,
-            'numeric': Habit.TYPE_NUMERIC,
         }
 
         for field_name, habit_type in type_map.items():
