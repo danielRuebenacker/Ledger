@@ -29,21 +29,22 @@ $(document).ready(function () {
     function updateControls() {
         const current = $book.turn('page');
         const total = $book.turn('pages');
+		// Returns leftPage, rightPage
+		const view = $book.turn('view'); 
         
-        // logical page math: Cover is 1, then Spreads are (2,3), (4,5)
         const displayPage = Math.floor(current / 2);
         const displayTotal = Math.floor(total / 2);
 
         if (current === 1) {
             $('#page-indicator').text('Cover');
-        } else if (current >= total - 1 && total > 2) {
+        } else if (view[1] === total || view[1] === 0) {
             $('#page-indicator').text('End');
         } else {
             $('#page-indicator').text('Month ' + displayPage + ' of ' + displayTotal);
         }
 
         $('#prev-btn').prop('disabled', current <= 1);
-        $('#next-btn').prop('disabled', current >= total);
+        $('#next-btn').prop('disabled', view[1] >= total || view[0] >= total);
     }
 
     $('#prev-btn').on('click', () => $book.turn('previous'));
