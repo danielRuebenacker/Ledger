@@ -36,12 +36,14 @@ class Habit(models.Model):
     TYPE_DONT = "dont"
     TYPE_EASY_WIN = "easy_win"
     TYPE_NUMERIC = "numeric"
+
     HABIT_TYPE_CHOICES = (
-            (TYPE_DO , "DO"),
-            (TYPE_DONT , "DONT"),
-            (TYPE_EASY_WIN , "EASY_WIN"),
-            (TYPE_NUMERIC , "NUMERIC"),
+            (TYPE_DO , "Dos"),
+            (TYPE_DONT , "Don'ts"),
+            (TYPE_EASY_WIN , "Easy Wins"),
+            (TYPE_NUMERIC , "Numeric"),
     )
+
     habit_type = models.CharField(max_length=10, choices=HABIT_TYPE_CHOICES)
     # allows for easy habit creation with Habit.objects.create(..., type=Habit.TYPE_DO, ...)
 
@@ -49,6 +51,15 @@ class Habit(models.Model):
 
     def __str__(self):
         return self.name
+
+    def get_type_emoji(self):
+        emojis = {
+                Habit.TYPE_DO: '\u2705',
+                Habit.TYPE_DONT: '\u274c',
+                Habit.TYPE_EASY_WIN: '\U0001F3C6',
+                Habit.TYPE_EASY_WIN: '\U0001F5A9',
+        }
+        return emojis.get(self.habit_type, '')
 
     class Meta:
         unique_together = ('name', 'habit_type')

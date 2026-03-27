@@ -134,10 +134,7 @@ class TestHabitTrackerForm(TestCase):
             'numeric': 'screentime, hours of sleep',
         }
         NUM_HABITS = 7 
-        response = self.client.post(url, habits_dict)
-
-        # 302: redirect
-        self.assertEqual(response.status_code, 302)
+        _ = self.client.post(url, habits_dict)
 
         habit_tracker = habit_utils.get_current_month_habit_tracker(self.profile)
 

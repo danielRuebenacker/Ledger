@@ -13,7 +13,7 @@ from ledger.utils import habit_utils, date_utils, friend_utils
 
 # ------------ forms/models --------------------
 from ledger.forms import HabitTrackerForm, CustomRegistrationForm, LogHabitForm, CreateHabitForm
-from ledger.models import HabitTracker, UserProfile, Nudge, Friendship, FriendRequest, Day, JournalEntry, BoolHabitEntry
+from ledger.models import HabitTracker, UserProfile, Nudge, Friendship, FriendRequest, Day, JournalEntry, BoolHabitEntry, Habit
 from django.db.models import Q
 from django.contrib.auth.models import User
 
@@ -40,27 +40,24 @@ def log_habits_view(request):
             journal_text = form.cleaned_data['journal_text']
             selected_habits = form.cleaned_data['habits'] # This is a QuerySet of Habit objects
 
-            # 1. Get the correct HabitTracker for this month
-            # We assume the user has a tracker for the month of the log_date
-            first_of_month = log_date.replace(day=1)
+            first_of_month = date_utils.get_first_of_this_month()
             tracker = HabitTracker.objects.filter(user=user_profile, month=first_of_month).first()
 
-            if not tracker:
-                messages.error(request, "No habit tracker found for this month. Please create one first!")
+            existing_day = Day.objects.filter(habit_tracker=tracker, date=log_date).first()
+            if existing_day and existing_day.completed_on_day:
+                # TODO display message to say invalid
                 return redirect(reverse('ledger:myhabits'))
 
-            # 2. Get or Create the Day object
-            day_obj, created = Day.objects.get_or_create(
-                habit_tracker=tracker, 
-                date=log_date
-            )
 
-            # 3. Update/Create Journal Entry
+            day_obj, created = Day.objects.get_or_create(habit_tracker=tracker, date=log_date)
+            if not created:
+                return
+            if log_date == date_utils.today():
+                day_obj.completed_on_day = True
+                day_obj.save()
+
             if journal_text:
-                JournalEntry.objects.update_or_create(
-                    day=day_obj, 
-                    defaults={'journal_text': journal_text}
-                )
+                JournalEntry.objects.update_or_create( day=day_obj, defaults={'journal_text': journal_text})
 
             # 4. Sync BoolHabitEntries
             # First, get all habits associated with this tracker
@@ -76,7 +73,6 @@ def log_habits_view(request):
                     defaults={'done': is_done}
                 )
             
-            # 5. Optional: Trigger a streak refresh
             tracker.refresh_streak()
 
             messages.success(request, f"Progress logged for {log_date.strftime('%B %d')}!")
@@ -90,17 +86,15 @@ def create_habit_view(request):
         form = CreateHabitForm(request.POST)
 
         if form.is_valid():
-            # 1. Create the Habit (or get it if it already exists as community)
-            habit = form.save()
+            # can't just form.save() as need get_or_create
+            name = form.cleaned_data['name']
+            habit_type = form.cleaned_data['habit_type']
 
-            # 2. Add this habit to the user's current month tracker
-            import datetime
-            first_of_month = datetime.date.today().replace(day=1)
-            tracker = HabitTracker.objects.filter(user=user_profile, month=first_of_month).first()
-            
-            if tracker:
-                tracker.habits.add(habit)
-                tracker.save()
+            habit, _ = Habit.objects.get_or_create(name=name, habit_type=habit_type)
+
+            tracker = habit_utils.get_current_month_habit_tracker(user_profile)
+            tracker.habits.add(habit)
+            tracker.save()
 
     return redirect(reverse('ledger:myhabits'))
 
@@ -110,12 +104,15 @@ def myhabits(request):
     user_profile = request.user.userprofile
     # if habit tracker is not created present form view
     habit_tracker, _ = HabitTracker.objects.get_or_create(user=user_profile, month=date_utils.get_first_of_this_month())
-    log_form = LogHabitForm(user_profile=user_profile)
-    create_habit_form = CreateHabitForm()
-    context_dict['log_form'] = log_form
-    context_dict['create_form'] = create_habit_form
 
 
+    months_data = habit_utils.get_all_months_data(user_profile)
+    context_dict = {
+            'months': months_data,
+            'log_form': LogHabitForm(user_profile=user_profile),
+            'create_form': CreateHabitForm(),
+    }
+    context_dict['show_empty_state'] = len(months_data) == 0
     
     if request.method == 'POST':
         form = HabitTrackerForm(request.POST)
@@ -132,6 +129,8 @@ def myhabits(request):
 
             # makes into habits/gets habit then adds to habit tracker
             habit_utils.get_or_create_habits_then_register(*habit_string_lists, habit_tracker)
+            months_data = habit_utils.get_all_months_data(user_profile)
+            context_dict['months'] = months_data
     else:
         if not habit_utils.check_if_any_habits_added(habit_tracker): 
             form = HabitTrackerForm()
