@@ -16,13 +16,15 @@
     box-shadow:
         0 4px 16px rgba(0,0,0,0.3),
         0 0 40px rgba(0,0,0,0.1);
-    border-radius: 4px;
+    border-radius: 20px;
 }
 
 /* All pages share a paper look */
 #flipbook .page {
     background: #fdf6e3;
     overflow: hidden;
+	border-radius: 20px;
+	border-right: 1px solid black;
 }
 
 /* Spine shadow — left pages get shadow on right edge, right pages on left */
@@ -42,14 +44,14 @@
     display: flex;
     flex-direction: column;
     text-align: left;
-    overflow-y: auto;
+    overflow-y: hidden;
     box-sizing: border-box;
 }
 
 /* ── Left page: journal ── */
 .ledger-left {
     background-image: repeating-linear-gradient(
-        transparent, transparent 23px, #d6c9a8 23px, #d6c9a8 24px
+        transparent, transparent 16px, #d6c9a8 16px, #d6c9a8 18px
     );
     background-position: 0 8px;
 }
@@ -58,7 +60,6 @@
     display: flex;
     align-items: center;
     gap: 16px;
-    margin-bottom: 12px;
     padding-bottom: 8px;
     border-bottom: 2px solid #c4a97d;
 }
@@ -77,16 +78,20 @@
 
 .journal-list {
     flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
 }
 
 .journal-row {
     display: flex;
     align-items: baseline;
     gap: 8px;
-    min-height: 24px;
-    line-height: 24px;
-    font-size: 0.82rem;
+    min-height: 18px; /* Matches the background-image step */
+    line-height: 18px;
+    font-size: 0.75rem; /* Slightly smaller font to keep it readable while cramped */
 }
+
 
 .journal-row.empty .journal-text {
     color: transparent;
@@ -159,6 +164,21 @@
     border-left: 2px solid #c4a97d;
 }
 
+.section-label-th {
+    border-bottom: 2px solid #c4a97d !important;
+}
+
+.habit-name-table-row {
+    border-right: 2px solid #c4a97d !important;
+    border-top: 2px solid #c4a97d !important;
+    border-bottom: 2px solid #c4a97d !important;
+	height: 10px;
+}
+
+.habit-section-table-row {
+	height: 20px;
+}
+
 .habit-grid thead th {
     font-weight: 700;
     color: #5c3d2e;
@@ -173,11 +193,8 @@
 }
 
 .habit-grid th.grid-habit-name {
-    writing-mode: vertical-lr;
-    text-orientation: mixed;
-    transform: rotate(180deg);
-    height: 60px;
-    vertical-align: bottom;
+    height: 40px;
+    vertical-align: middle;
     font-size: 0.6rem;
     padding: 4px 2px;
 }
@@ -193,7 +210,7 @@
 .grid-cell {
     text-align: center;
     padding: 0;
-    height: 14px;
+    height: 17px;
     border: 1px solid #e0d5c0;
 }
 

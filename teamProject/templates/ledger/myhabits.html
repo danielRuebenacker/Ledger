@@ -63,7 +63,7 @@
                     {% else %}
                         <table class="habit-grid">
                             <thead>
-                                <tr style="height:50px;">
+                                <tr class="habit-section-table-row">
                                     <th></th>
                                     {% for section in month.sections %}
 										<th colspan="{{ section.habits|length }}" class="section-label-th">
@@ -72,11 +72,12 @@
 										</th>
                                     {% endfor %}
                                 </tr>
-                                <tr style="height:50px;">
+                                <tr class="habit-name-table-row">
                                     <th></th>
                                     {% for section in month.sections %}
 										{% for habit in section.habits %}
-											<th class="grid-habit-name {% if forloop.first %}grid-category-start{% endif %}">
+											<th class="grid-habit-name {% if forloop.first %}grid-category-start{% endif %}"
+												title="{{ habit.name }}">
 												{{ habit.name }}
 											</th>
 										{% endfor %}
