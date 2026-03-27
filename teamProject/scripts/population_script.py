@@ -222,11 +222,8 @@ def create_admin():
     profile, _ = UserProfile.objects.get_or_create(user=admin)
 
     print(f"Created admin user: {username} and password: {password} (insecure). Only for testing purposes.")
-        
-if __name__ == '__main__':
-    User.objects.all().delete()
-    Habit.objects.all().delete()
 
+def run():
     populate_users()
     print("POP USERS")
 
@@ -241,3 +238,7 @@ if __name__ == '__main__':
 
     create_admin()
     print("CREATE ADMIN")
+
+        
+if __name__ == '__main__':
+    run()
