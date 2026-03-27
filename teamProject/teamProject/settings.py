@@ -49,7 +49,7 @@ SECRET_KEY = 'i68#)6x_*w^)+mw1ojhs%$cx-y%uk=1avd9qr6yolwzt%hd(um'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['williamo.pythonanywhere.com', '127.0.0.1', 'localhost']
 
 
 # Application definition
