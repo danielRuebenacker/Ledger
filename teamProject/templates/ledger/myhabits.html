@@ -66,15 +66,20 @@
                                 <tr style="height:50px;">
                                     <th></th>
                                     {% for section in month.sections %}
-                                        <th colspan="{{ section.habits|length }}">{{ section.emoji }}</th>
+										<th colspan="{{ section.habits|length }}" class="section-label-th">
+											<span class="section-emoji">{{ section.emoji }}</span>
+											<span class="section-label">{{ section.label }}</span>
+										</th>
                                     {% endfor %}
                                 </tr>
                                 <tr style="height:50px;">
                                     <th></th>
                                     {% for section in month.sections %}
-                                        {% for habit in section.habits %}
-                                            <th class="grid-habit-name">{{ habit.name }}</th>
-                                        {% endfor %}
+										{% for habit in section.habits %}
+											<th class="grid-habit-name {% if forloop.first %}grid-category-start{% endif %}">
+												{{ habit.name }}
+											</th>
+										{% endfor %}
                                     {% endfor %}
                                 </tr>
                             </thead>

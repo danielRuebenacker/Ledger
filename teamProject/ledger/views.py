@@ -13,7 +13,7 @@ from ledger.utils import habit_utils, date_utils, friend_utils
 
 # ------------ forms/models --------------------
 from ledger.forms import HabitTrackerForm, CustomRegistrationForm, LogHabitForm, CreateHabitForm
-from ledger.models import HabitTracker, UserProfile, Nudge, Friendship, FriendRequest, Day, JournalEntry, BoolHabitEntry
+from ledger.models import HabitTracker, UserProfile, Nudge, Friendship, FriendRequest, Day, JournalEntry, BoolHabitEntry, Habit
 from django.db.models import Q
 from django.contrib.auth.models import User
 
@@ -86,17 +86,15 @@ def create_habit_view(request):
         form = CreateHabitForm(request.POST)
 
         if form.is_valid():
-            # 1. Create the Habit (or get it if it already exists as community)
-            habit = form.save()
+            # can't just form.save() as need get_or_create
+            name = form.cleaned_data['name']
+            habit_type = form.cleaned_data['habit_type']
 
-            # 2. Add this habit to the user's current month tracker
-            import datetime
-            first_of_month = datetime.date.today().replace(day=1)
-            tracker = HabitTracker.objects.filter(user=user_profile, month=first_of_month).first()
-            
-            if tracker:
-                tracker.habits.add(habit)
-                tracker.save()
+            habit, _ = Habit.objects.get_or_create(name=name, habit_type=habit_type)
+
+            tracker = habit_utils.get_current_month_habit_tracker(user_profile)
+            tracker.habits.add(habit)
+            tracker.save()
 
     return redirect(reverse('ledger:myhabits'))
 

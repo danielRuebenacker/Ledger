@@ -152,6 +152,13 @@
     border-left: 1px solid #c4a97d;
 }
 
+.grid-habit-name.grid-category-start {
+    border-left: 2px solid #c4a97d;
+}
+.grid-cell.grid-category-start {
+    border-left: 2px solid #c4a97d;
+}
+
 .habit-grid thead th {
     font-weight: 700;
     color: #5c3d2e;
@@ -448,3 +455,15 @@ button:disabled {
     padding: 10px;
     z-index: 100; /* Keeps it above the grid lines */
 }
+
+
+/* 2. Thicken the vertical lines for the individual habit columns that start a category */
+/**/
+/* /* 3. Ensure the table doesn't have double-borders which can make lines look blurry */ */
+/* .habit-grid { */
+/*     border-collapse: collapse; */
+/* } */
+
+/* .section-wrapper { */
+/* 	border-left: 1px solid #c4a97d; */
+/* } */

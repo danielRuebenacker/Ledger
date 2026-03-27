@@ -6,10 +6,13 @@ from ledger.forms import CustomRegistrationForm
 app_name = 'ledger'
 
 urlpatterns = [
+        # registration/accounts
         path('accounts/register/', RegistrationView.as_view(
             form_class=CustomRegistrationForm,success_url=reverse_lazy('ledger:index')), 
             name='registration_register',),
         path('accounts/', include('registration.backends.simple.urls')),
+
+        # basic
         path('', views.index, name='index'),
         path('myhabits/', views.myhabits, name='myhabits'),
         path('leaderboards/', views.leaderboards, name='leaderboards'),
@@ -18,13 +21,15 @@ urlpatterns = [
         path('profile/', views.profile, name='profile'),
         path('profile/<str:username>/', views.profile, name='profile_user'),
 
-        # apis
+        # habit apis
         path('log_habits_view/', views.log_habits_view, name='log_habits_view'),
-        path('create-habit/', views.create_habit_view, name='create_habit_view'),
+        path('create-habit-view/', views.create_habit_view, name='create_habit_view'),
 
+        # friend apis
         path('api/friends/request/', views.add_friend_request, name='add_friend_request'),
         path('api/friends/handle/', views.handle_friend_request, name='handle_friend_request'),
 
+        # nudge apis
         path('api/notifications/get_notifs/', views.get_notifications, name='notifications'),
         path('api/notifications/mark_read/', views.mark_notifications_read, name='mark_notifications_read'),
         path('profile/<str:username>/nudge/', views.nudge, name='nudge'),
