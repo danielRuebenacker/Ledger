@@ -148,6 +148,10 @@
 	border-collapse: collapse;
 }
 
+.habit-grid th:first-child {
+    width: 25px;
+}
+
 /* Faint vertical separator between habits within a category */
 .grid-cell + .grid-cell,
 .grid-habit-name + .grid-habit-name {
@@ -206,7 +210,12 @@
     color: #8a7a65;
     font-size: 0.6rem;
     padding: 0 3px 0 0;
-    width: 18px;
+    width: 10px;
+	max-width: 10px;
+	padding: 0 6px 0 0; /* Space between number and the first vertical line */
+    width: 10px;       /* Fixed width for the date column */
+    max-width: 10px;   /* Prevents shrinking */
+    flex-shrink: 0;
 }
 
 .grid-cell {
