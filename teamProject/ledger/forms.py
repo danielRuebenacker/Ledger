@@ -1,10 +1,10 @@
 from django import forms
 from django.contrib.auth.models import User
-from ledger.models import UserProfile,  Habit
+from ledger.models import UserProfile,  Habit, Day
 from tagify.fields import TagField
 from registration.forms import RegistrationForm
 from ledger.utils.habit_utils import supply_form_with_popular_habits
-from ledger.utils import date_utils
+from ledger.utils import date_utils, habit_utils
 
 class UserProfileForm(forms.ModelForm):
     class Meta:
@@ -67,19 +67,15 @@ class LogHabitForm(forms.Form):
         widget=forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'How was your day?'}),
         required=False
     )
-    # We will define 'habits' in __init__ to make it dynamic per user
-    habits = forms.ModelMultipleChoiceField(
-        queryset=Habit.objects.none(),
-        widget=forms.CheckboxSelectMultiple,
-        required=False
-    )
+    # dynamic habits -- add in init
+    habits = forms.ModelMultipleChoiceField( queryset=Habit.objects.none(), widget=forms.CheckboxSelectMultiple, required=False)
 
     def __init__(self, *args, **kwargs):
         user_profile = kwargs.pop('user_profile', None)
         super().__init__(*args, **kwargs)
+        
         if user_profile:
-            # Get the habits from the user's current tracker
-            tracker = user_profile.habit_trackers.order_by('-month').first()
+            tracker = habit_utils.get_current_month_habit_tracker(user_profile)
             if tracker:
                 self.fields['habits'].queryset = tracker.habits.all()
 
