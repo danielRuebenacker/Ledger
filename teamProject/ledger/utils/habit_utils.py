@@ -61,16 +61,6 @@ def log_bool_habit(habit, done, day):
     bool_habit_entry, _ = BoolHabitEntry.objects.get_or_create(day=day, habit=habit, defaults={'done': done})
     return bool_habit_entry
 
-def calculate_streak(user):
-    habit_tracker = get_current_month_habit_tracker(user)
-    if habit_tracker is None: return
-    days = habit_tracker.days.order_by("-date")
-    streak = 0
-    for day in days:
-        if not day.completed_on_the_day:
-            return streak
-        streak += 1
-
 
 # Data builders used by API views
 
@@ -261,7 +251,7 @@ def calculate_streak(tracker):
 
 
 
-def calculate_points_for_one(day):
+def calculate_points_for_one_day(day):
     from ledger.models import Habit
     if day.completed_on_day == False:
         return 0
