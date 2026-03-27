@@ -21,6 +21,9 @@ from django.contrib.auth.models import User
 from django.http import JsonResponse
 import json
 import os
+from ledger.utils import date_utils as _date_utils
+from ledger.utils.friend_utils import get_streak_and_points
+
 
 # Create your views here.
 
@@ -179,53 +182,74 @@ def leaderboards(request):
  
     return render(request, 'ledger/leaderboards.html', context=context_dict)
 
+@login_required
 def social(request):
+    from ledger.models import FriendRequest
+    tab = request.GET.get('tab', 'search').strip()
     query = request.GET.get('q', '').strip()
-    active_tab = request.GET.get('tab', 'search')
-    user_profile = request.user.userprofile
+    current_profile, _ = UserProfile.objects.get_or_create(user=request.user)
+    user_list = []
 
-    users_with_status = []
-    friends = []
-    friend_requests = []
-
-    if active_tab == 'search':
+    if tab == 'friends':
+        friendships = Friendship.objects.filter(user=current_profile).select_related('friend__user')
         if query:
-            users_qs = User.objects.filter(username__icontains=query).exclude(id=request.user.id)
-        else:
-            users_qs = User.objects.exclude(id=request.user.id).order_by('?')[:10]
+            friendships = friendships.filter(friend__user__username__icontains=query)
+        for friendship in friendships:
+            friend_profile = friendship.friend
+            streak, points = get_streak_and_points(friend_profile)
+            user_list.append({
+                'id': friend_profile.id,
+                'username': friend_profile.user.username,
+                'streak': streak,
+                'points': points,
+                'show_add_button': False,
+            })
 
-        sent_requests = FriendRequest.objects.filter(requester=user_profile).values_list('requested_id', flat=True)
-        current_friends = Friendship.objects.filter(user=user_profile).values_list('friend_id', flat=True)
+    elif tab == 'requests':
+        pending = FriendRequest.objects.filter(
+            requested=current_profile,
+            status=FriendRequest.PENDING
+        ).select_related('requester__user')
+        for req in pending:
+            user_list.append({
+                'id': req.requester.id,
+                'request_id': req.id,
+                'username': req.requester.user.username,
+            })
 
-        for u in users_qs:
+    else:
+        tab = 'search'
+        friend_ids = Friendship.objects.filter(user=current_profile).values_list('friend_id', flat=True)
+        pending_sent_ids = FriendRequest.objects.filter(
+            requester=current_profile,
+            status=FriendRequest.PENDING
+        ).values_list('requested_id', flat=True)
+        users = User.objects.exclude(id=request.user.id)
+        if query:
+            users = users.filter(username__icontains=query)
+        for user in users:
             try:
-                target_p = u.userprofile
-                status = 'none'
-                if target_p.id in current_friends:
-                    status = 'friend'
-                elif target_p.id in sent_requests:
-                    status = 'pending'
-                users_with_status.append({'user': u, 'status': status})
+                profile = user.userprofile
             except UserProfile.DoesNotExist:
                 continue
+            streak, points = get_streak_and_points(profile)
+            already_friend = profile.id in friend_ids
+            request_pending = profile.id in pending_sent_ids
+            user_list.append({
+                'id': profile.id,
+                'username': user.username,
+                'streak': streak,
+                'points': points,
+                'show_add_button': not already_friend and not request_pending,
+                'request_pending': request_pending,
+                'already_friend': already_friend,
+            })
 
-    elif active_tab == 'friends':
-        friendships = Friendship.objects.filter(user=user_profile)
-        friends = [f.friend for f in friendships]
-        if query:
-            friends = [f for f in friends if query.lower() in f.user.username.lower()]
-
-    elif active_tab == 'requests':
-        friend_requests = FriendRequest.objects.filter(requested=user_profile)
-
-    context_dict = {
-        'active_tab': active_tab,
+    return render(request, 'ledger/social.html', {
+        'user_list': user_list,
         'query': query,
-        'users_with_status': users_with_status,
-        'friends': friends,
-        'friend_requests': friend_requests,
-    }
-    return render(request, 'ledger/social.html', context=context_dict)
+        'active_tab': tab,
+    })
 
 @require_POST
 def add_friend_request(request):
