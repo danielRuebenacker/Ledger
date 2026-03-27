@@ -35,13 +35,11 @@ class Habit(models.Model):
     TYPE_DO = "do"
     TYPE_DONT = "dont"
     TYPE_EASY_WIN = "easy_win"
-    TYPE_NUMERIC = "numeric"
 
     HABIT_TYPE_CHOICES = (
             (TYPE_DO , "Dos"),
             (TYPE_DONT , "Don'ts"),
             (TYPE_EASY_WIN , "Easy Wins"),
-            (TYPE_NUMERIC , "Numeric"),
     )
 
     habit_type = models.CharField(max_length=10, choices=HABIT_TYPE_CHOICES)
@@ -57,7 +55,6 @@ class Habit(models.Model):
                 Habit.TYPE_DO: '\u2705',
                 Habit.TYPE_DONT: '\u274c',
                 Habit.TYPE_EASY_WIN: '\U0001F3C6',
-                Habit.TYPE_EASY_WIN: '\U0001F5A9',
         }
         return emojis.get(self.habit_type, '')
 

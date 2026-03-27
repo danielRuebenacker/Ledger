@@ -131,9 +131,8 @@ class TestHabitTrackerForm(TestCase):
             'dos': 'read, bed before 12',
             'donts': 'caffeine', 
             'easy_wins': 'go outside, drink water',
-            'numeric': 'screentime, hours of sleep',
         }
-        NUM_HABITS = 7 
+        NUM_HABITS = 5 
         _ = self.client.post(url, habits_dict)
 
         habit_tracker = habit_utils.get_current_month_habit_tracker(self.profile)
@@ -144,15 +143,12 @@ class TestHabitTrackerForm(TestCase):
         # check exist
         read = Habit.objects.filter(name='read')
         caffeine = Habit.objects.filter(name='caffeine')
-        hours_of_sleep = Habit.objects.filter(name='hours of sleep')
         self.assertTrue(read.exists())
         self.assertTrue(caffeine.exists())
-        self.assertTrue(hours_of_sleep.exists())
 
         # check correct type
         self.assertEquals(read.first().habit_type, Habit.TYPE_DO)
         self.assertEquals(caffeine.first().habit_type, Habit.TYPE_DONT)
-        self.assertEquals(hours_of_sleep.first().habit_type, Habit.TYPE_NUMERIC)
 
 
         # many to many habit count
