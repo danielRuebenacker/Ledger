@@ -1,5 +1,4 @@
 # ----------- django specific ---------------
-from datetime import date, datetime
 from django.views.decorators.http import require_POST
 from django.contrib import messages
 
@@ -14,7 +13,7 @@ from ledger.utils.friend_utils import get_streak_and_points
 
 # ------------ forms/models --------------------
 from ledger.forms import HabitTrackerForm, CustomRegistrationForm, LogHabitForm, CreateHabitForm
-from ledger.models import HabitTracker, UserProfile, Nudge, Friendship, FriendRequest, Day, JournalEntry, BoolHabitEntry
+from ledger.models import HabitTracker, UserProfile, Nudge, Friendship, FriendRequest, Day, JournalEntry, BoolHabitEntry, Habit
 from django.db.models import Q
 from django.contrib.auth.models import User
 
@@ -37,53 +36,41 @@ def log_habits_view(request):
         form = LogHabitForm(request.POST, user_profile=user_profile)
 
         if form.is_valid():
-            # Extract cleaned data
+            # extract cleaned data
             log_date = form.cleaned_data['date']
             journal_text = form.cleaned_data['journal_text']
-            selected_habits = form.cleaned_data['habits'] # This is a QuerySet of Habit objects
+            selected_habits = form.cleaned_data['habits']
+            habit_tracker = habit_utils.get_current_month_habit_tracker(user_profile)
 
-            # 1. Get the correct HabitTracker for this month
-            # We assume the user has a tracker for the month of the log_date
-            first_of_month = log_date.replace(day=1)
-            tracker = HabitTracker.objects.filter(user=user_profile, month=first_of_month).first()
-
-            if not tracker:
-                messages.error(request, "No habit tracker found for this month. Please create one first!")
+            existing_day = Day.objects.filter(habit_tracker=habit_tracker, date=log_date).first()
+            if existing_day and existing_day.completed_on_day:
+                messages.add_message(request, messages.ERROR, "Cannot log habit for day already logged")
                 return redirect(reverse('ledger:myhabits'))
 
-            # 2. Get or Create the Day object
-            day_obj, created = Day.objects.get_or_create(
-                habit_tracker=tracker, 
-                date=log_date
-            )
+            day_obj = habit_utils.get_day(habit_tracker=tracker, date=log_date)
+            if log_date == date_utils.today():
+                day_obj.completed_on_day = True
+                day_obj.save()
 
-            # 3. Update/Create Journal Entry
             if journal_text:
-                JournalEntry.objects.update_or_create(
-                    day=day_obj, 
-                    defaults={'journal_text': journal_text}
-                )
+                JournalEntry.objects.update_or_create( day=day_obj, defaults={'journal_text': journal_text})
 
-            # 4. Sync BoolHabitEntries
             # First, get all habits associated with this tracker
-            all_tracker_habits = tracker.habits.all()
+            all_tracker_habits = habit_tracker.habits.all()
 
+            points = 0
             for habit in all_tracker_habits:
                 # If the habit was checked in the form, done=True, otherwise False
                 is_done = habit in selected_habits
                 
-                BoolHabitEntry.objects.update_or_create(
-                    day=day_obj,
-                    habit=habit,
-                    defaults={'done': is_done}
-                )
+                BoolHabitEntry.objects.update_or_create( day=day_obj, habit=habit, defaults={'done': is_done})
+                if is_done:
+                    points += habit.points
             
-            # 5. Optional: Trigger a streak refresh
-            tracker.refresh_streak()
-
-            messages.success(request, f"Progress logged for {log_date.strftime('%B %d')}!")
-            return redirect(reverse('ledger:myhabits'))
-
+            # update points & streaks
+            habit_tracker.refresh_streak()
+            habit_tracker.points = points
+            
     return redirect(reverse('ledger:myhabits'))
 
 def create_habit_view(request):
@@ -92,33 +79,22 @@ def create_habit_view(request):
         form = CreateHabitForm(request.POST)
 
         if form.is_valid():
-            # 1. Create the Habit (or get it if it already exists as community)
-            habit = form.save()
+            # can't just form.save() as need get_or_create
+            name = form.cleaned_data['name']
+            habit_type = form.cleaned_data['habit_type']
 
-            # 2. Add this habit to the user's current month tracker
-            import datetime
-            first_of_month = datetime.date.today().replace(day=1)
-            tracker = HabitTracker.objects.filter(user=user_profile, month=first_of_month).first()
-            
-            if tracker:
-                tracker.habits.add(habit)
-                tracker.save()
+            habit, _ = Habit.objects.get_or_create(name=name, habit_type=habit_type)
+
+            tracker = habit_utils.get_current_month_habit_tracker(user_profile)
+            tracker.habits.add(habit)
+            tracker.save()
 
     return redirect(reverse('ledger:myhabits'))
 
-@login_required
-def myhabits(request):
-    context_dict = {}
+def create_habit_tracker_view(request):
     user_profile = request.user.userprofile
-    # if habit tracker is not created present form view
-    habit_tracker, _ = HabitTracker.objects.get_or_create(user=user_profile, month=date_utils.get_first_of_this_month())
-    log_form = LogHabitForm(user_profile=user_profile)
-    create_habit_form = CreateHabitForm()
-    context_dict['log_form'] = log_form
-    context_dict['create_form'] = create_habit_form
+    habit_tracker = habit_utils.get_current_month_habit_tracker(user=user_profile)
 
-
-    
     if request.method == 'POST':
         form = HabitTrackerForm(request.POST)
 
@@ -129,18 +105,33 @@ def myhabits(request):
             # get all cleaned data, and clean according to our clean
             habit_string_lists = [
                     [clean(h) for h in form.cleaned_data.get(f, []) if h] 
-                    for f in ('dos', 'donts', 'easy_wins', 'numeric')
+                    for f in ('dos', 'donts', 'easy_wins')
             ]
 
             # makes into habits/gets habit then adds to habit tracker
             habit_utils.get_or_create_habits_then_register(*habit_string_lists, habit_tracker)
-    else:
-        if not habit_utils.check_if_any_habits_added(habit_tracker): 
-            form = HabitTrackerForm()
+    return redirect(reverse('ledger:myhabits'))
 
-            context_dict['form'] = form
-            # the create habit tracker partial will be displayed
-            context_dict['display_create_tracker'] = True
+@login_required
+def myhabits(request):
+    context_dict = {}
+    user_profile = request.user.userprofile
+    habit_tracker = habit_utils.get_current_month_habit_tracker(user=user_profile)
+
+    months_data = habit_utils.get_all_months_data(user_profile)
+    context_dict = {
+            'months': months_data,
+            'log_form': LogHabitForm(user_profile=user_profile),
+            'create_form': CreateHabitForm(),
+    }
+    context_dict['show_empty_state'] = len(months_data) == 0
+
+    if not habit_utils.check_if_any_habits_added(habit_tracker): 
+        form = HabitTrackerForm()
+
+        context_dict['form'] = form
+        # the create habit tracker partial will be displayed
+        context_dict['display_create_tracker'] = True
             
     return render(request, 'ledger/myhabits.html', context=context_dict)
 
@@ -192,29 +183,12 @@ def social(request):
     if tab == 'friends':
         friendships = Friendship.objects.filter(user=current_profile).select_related('friend__user')
         if query:
-            friendships = friendships.filter(friend__user__username__icontains=query)
-        for friendship in friendships:
-            friend_profile = friendship.friend
-            streak, points = get_streak_and_points(friend_profile)
-            user_list.append({
-                'id': friend_profile.id,
-                'username': friend_profile.user.username,
-                'streak': streak,
-                'points': points,
-                'show_add_button': False,
-            })
+            users_qs = User.objects.filter(username__icontains=query).exclude(id=request.user.id)
+        else:
+            users_qs = User.objects.exclude(id=request.user.id).order_by('username')[:10]
 
-    elif tab == 'requests':
-        pending = FriendRequest.objects.filter(
-            requested=current_profile,
-            status=FriendRequest.PENDING
-        ).select_related('requester__user')
-        for req in pending:
-            user_list.append({
-                'id': req.requester.id,
-                'request_id': req.id,
-                'username': req.requester.user.username,
-            })
+        sent_requests = FriendRequest.objects.filter(requester=user_profile).values_list('requested_id', flat=True)
+        current_friends = Friendship.objects.filter(user=user_profile).values_list('friend_id', flat=True)
 
     else:
         tab = 'search'
@@ -397,59 +371,6 @@ def mark_notifications_read(request):
     Nudge.objects.filter(nudged=user_profile, notified=False).update(notified=True)
     # return okay response
     return JsonResponse({"status": "ok"})
-
-def myhabits_api(request):
-    user_profile, _ = UserProfile.objects.get_or_create(user=request.user)
-    months = habit_utils.get_all_months_data(user_profile)
-    return JsonResponse({'months': months})
-
-@login_required
-@require_POST
-def create_habit_api(request):
-    user_profile, _ = UserProfile.objects.get_or_create(user=request.user)
-    name = request.POST.get('name', '').strip()
-    habit_type = request.POST.get('habit_type', '')
-
-    habit, error = habit_utils.create_habit(name, habit_type, user_profile)
-    if error:
-        return JsonResponse({'error': error}, status=400)
-    return JsonResponse({'success': True, 'name': habit.name})
-
-@login_required
-def log_habits_api(request):
-    user_profile, _ = UserProfile.objects.get_or_create(user=request.user)
-    today = date.today()
-
-    if request.method == 'GET':
-        log_date_str = request.GET.get('date', today.isoformat())
-        try:
-            log_date = datetime.strptime(log_date_str, '%Y-%m-%d').date()
-        except ValueError:
-            log_date = today
-
-        groups, journal_text, log_date = habit_utils.get_log_data(user_profile, log_date)
-        return JsonResponse({
-            'groups': groups,
-            'journal': journal_text,
-            'date': log_date.isoformat(),
-        })
-
-    # POST — save the log
-    log_date_str = request.POST.get('date', today.isoformat())
-    try:
-        log_date = datetime.strptime(log_date_str, '%Y-%m-%d').date()
-    except ValueError:
-        return JsonResponse({'error': 'Invalid date.'}, status=400)
-
-    checked_ids = request.POST.getlist('habits')
-    journal_text = request.POST.get('journal', '').strip()
-
-    error = habit_utils.save_log(user_profile, log_date, checked_ids, journal_text)
-    if error:
-        return JsonResponse({'error': error}, status=400)
-    return JsonResponse({'success': True})
-
-
 
 @login_required
 def nudge(request, username):

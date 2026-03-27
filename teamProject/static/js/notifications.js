@@ -97,8 +97,23 @@ $(document).ready(function() {
 				}
 			}
 		}
-    return cookieValue;
-}
+		return cookieValue;
+	}
 
+	function showDjangoMessages() {
+		const toastElList = [].slice.call(document.querySelectorAll('.toast'));
+		toastElList.map(function (toastEl) {
+			// Option: if it's an error, maybe don't autohide? 
+			// const autohide = !toastEl.innerHTML.includes('bg-danger');
+			
+			const toast = new bootstrap.Toast(toastEl, {
+				autohide: true,
+				delay: 5000
+			});
+			toast.show();
+		});
+	}
+
+	showDjangoMessages();
 
 });
